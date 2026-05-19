@@ -1,0 +1,7 @@
+<resources>
+    <!-- Base application theme. RN's DayNight base theme is required so the framework's
+         dialog / picker components render correctly on both light and dark devices. -->
+    <style name="AppTheme" parent="Theme.AppCompat.DayNight.NoActionBar">
+        <item name="android:textColor">@android:color/black</item>
+    </style>
+</resources>

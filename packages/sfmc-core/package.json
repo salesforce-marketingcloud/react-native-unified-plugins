@@ -1,0 +1,22 @@
+{
+  "name": "@salesforce-mc/react-native-sfmc-core",
+  "version": "1.0.0",
+  "main": "src/index.ts",
+  "codegenConfig": {
+    "name": "RNSFMCSdkCoreSpec",
+    "type": "modules",
+    "jsSrcsDir": "src",
+    "android": {
+      "javaPackageName": "com.salesforce.mc.sfmccore"
+    }
+  },
+  "peerDependencies": {
+    "react": "^19.0.0",
+    "react-native": ">=0.85.1"
+  },
+  "devDependencies": {
+    "@types/react": "^19.0.0",
+    "react-native": "0.85.1",
+    "typescript": "^5.0.0"
+  }
+}

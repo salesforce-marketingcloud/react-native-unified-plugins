@@ -1,0 +1,18 @@
+apply plugin: 'com.android.library'
+apply plugin: 'kotlin-android'
+
+if (project.hasProperty("newArchEnabled") && project.newArchEnabled == "true") {
+    apply plugin: "com.facebook.react"
+}
+
+android {
+    namespace "com.salesforce.mc.sfmccore"
+    compileSdk 36
+    defaultConfig { minSdk 26 }
+    sourceSets { main { java.srcDirs += 'src/main/java' } }
+}
+
+dependencies {
+    implementation "com.salesforce.marketingcloud:sfmcsdk:3.1.0"
+    implementation "com.facebook.react:react-android"
+}

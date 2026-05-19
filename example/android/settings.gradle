@@ -1,0 +1,12 @@
+pluginManagement { includeBuild("../../node_modules/@react-native/gradle-plugin") }
+plugins { id("com.facebook.react.settings") }
+extensions.configure(com.facebook.react.ReactSettingsExtension) { ex ->
+    // CRITICAL: Pass the File explicitly — the no-arg version may not find the file in monorepo setups.
+    ex.autolinkLibrariesFromConfigFile(new File(rootDir, "autolinking.json"))
+}
+
+rootProject.name = 'SFMCExample'
+include ':app'
+includeBuild('../../node_modules/@react-native/gradle-plugin')
+
+// DO NOT manually include package projects - autolinking handles this.
