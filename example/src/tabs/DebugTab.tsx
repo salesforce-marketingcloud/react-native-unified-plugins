@@ -25,8 +25,7 @@ export default function DebugTab({ sfmc }: Props) {
         setLoading(true);
         try {
             const raw = await sfmc.getSdkState();
-            // getSdkState returns a structured object on both platforms — pretty-print directly.
-            setState(JSON.stringify(raw, null, 2));
+            setState(typeof raw === 'string' ? raw : JSON.stringify(raw, null, 2));
         } catch (e: any) {
             setState('Error: ' + e.message);
         } finally {
@@ -70,14 +69,8 @@ export default function DebugTab({ sfmc }: Props) {
                 </View>
             )}
             {!loading && state && (
-                <ScrollView
-                    style={s.scroll}
-                    contentContainerStyle={s.scrollContent}
-                    horizontal={false}
-                >
-                    <ScrollView horizontal showsHorizontalScrollIndicator>
-                        <Text style={s.stateText} selectable>{state}</Text>
-                    </ScrollView>
+                <ScrollView style={s.scroll} contentContainerStyle={s.scrollContent}>
+                    <Text style={s.stateText} selectable>{state}</Text>
                 </ScrollView>
             )}
         </View>
