@@ -156,11 +156,6 @@ RCT_EXPORT_METHOD(getSdkState:(RCTPromiseResolveBlock)resolve
     resolve(parsed ?: stateJson);
 }
 
-RCT_EXPORT_METHOD(getVersion:(RCTPromiseResolveBlock)resolve
-                  rejecter:(RCTPromiseRejectBlock)reject) {
-    resolve([SFMCSdk sdkVersion] ?: @"");
-}
-
 // ── Logging ───────────────────────────────────────────────────────────────────
 // Selector `setLoggerWithLogLevel:logOutputter:` is from ios discovery.
 

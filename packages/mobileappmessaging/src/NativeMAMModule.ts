@@ -7,7 +7,6 @@ export interface Spec extends TurboModule {
   enableAnalytics(): void;
   disableAnalytics(): void;
   isAnalyticsEnabled(): Promise<boolean>;
-  getVersion(): Promise<string>;
   addListener(eventName: string): void;
   removeListeners(count: number): void;
 }

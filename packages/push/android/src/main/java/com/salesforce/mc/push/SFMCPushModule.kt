@@ -64,11 +64,6 @@ class SFMCPushModule(reactContext: ReactApplicationContext) :
     }
 
     @ReactMethod
-    override fun areNotificationsEnabled(promise: Promise) {
-        PushFeature.requestSdk { promise.resolve(it.getNotificationManager().areNotificationsEnabled()) }
-    }
-
-    @ReactMethod
     override fun addListener(eventName: String) {}
 
     @ReactMethod

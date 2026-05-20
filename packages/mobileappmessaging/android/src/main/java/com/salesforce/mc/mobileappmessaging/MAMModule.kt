@@ -42,11 +42,6 @@ class MAMModule(reactContext: ReactApplicationContext) :
     }
 
     @ReactMethod
-    override fun getVersion(promise: Promise) {
-        MobileAppMessaging.requestSdk { promise.resolve(it.getVersionName()) }
-    }
-
-    @ReactMethod
     override fun addListener(eventName: String) {
         // Required for RN event emitter
     }

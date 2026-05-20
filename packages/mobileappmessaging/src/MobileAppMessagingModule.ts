@@ -12,7 +12,6 @@ export const MobileAppMessagingModule = {
       enableAnalytics: () => NativeModule.enableAnalytics(),
       disableAnalytics: () => NativeModule.disableAnalytics(),
       isAnalyticsEnabled: () => NativeModule.isAnalyticsEnabled(),
-      getVersion: () => NativeModule.getVersion()
     };
     return _api;
   },

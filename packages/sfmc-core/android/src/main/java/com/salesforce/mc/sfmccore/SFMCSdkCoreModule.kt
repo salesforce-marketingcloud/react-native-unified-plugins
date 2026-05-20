@@ -172,11 +172,6 @@ class SFMCSdkCoreModule(reactContext: ReactApplicationContext) :
     }
 
     @ReactMethod
-    override fun getVersion(promise: Promise) {
-        promise.resolve(SFMCSdk.SDK_VERSION_NAME)
-    }
-
-    @ReactMethod
     override fun addListener(eventName: String) {
         // Required for RN event emitter
     }

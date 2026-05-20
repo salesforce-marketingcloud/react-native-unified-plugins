@@ -311,15 +311,16 @@ RCT_EXPORT_METHOD(getContactKey:(RCTPromiseResolveBlock)resolve
     }];
 }
 
-// ── SDK version (platform-asymmetric stub) ──────────────────────────────────────
-// iOS discovery has NO `moduleVersion` / version selector on SFMarketingCloudSdk and no
-// public version selector on SFMCSdk. Emitted as a stub returning empty string per the
-// platform-asymmetry rule. See sdk-patterns.md "MarketingCloudSdkInterface flat protocol".
+RCT_EXPORT_METHOD(enableLogging) {
+    [SFMarketingCloudSdk requestSdk:^(id<MarketingCloudSdkInterface> _Nullable mc) {
+        [mc setDebugLoggingEnabled:YES];
+    }];
+}
 
-RCT_EXPORT_METHOD(getSdkVersionName:(RCTPromiseResolveBlock)resolve
-                  rejecter:(RCTPromiseRejectBlock)reject) {
-    NSLog(@"[MCModule] getSdkVersionName: not available in iOS SDK 11.0 discovery — returning empty string");
-    resolve(@"");
+RCT_EXPORT_METHOD(disableLogging) {
+    [SFMarketingCloudSdk requestSdk:^(id<MarketingCloudSdkInterface> _Nullable mc) {
+        [mc setDebugLoggingEnabled:NO];
+    }];
 }
 
 @end

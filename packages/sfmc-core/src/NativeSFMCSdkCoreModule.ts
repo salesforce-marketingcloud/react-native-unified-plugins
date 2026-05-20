@@ -21,7 +21,6 @@ export interface Spec extends TurboModule {
   getSdkState(): Promise<Object>;
   sendImmediate(event: Object): void;
   flush(): void;
-  getVersion(): Promise<string>;
   addListener(eventName: string): void;
   removeListeners(count: number): void;
 }

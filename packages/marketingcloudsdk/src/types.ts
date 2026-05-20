@@ -27,30 +27,31 @@ export interface MarketingCloudSdkApi {
   isAnalyticsEnabled(): Promise<boolean>;
   getDeviceId(): Promise<string | null>;
   getContactKey(): Promise<string | null>;
-  getSdkVersionName(): Promise<string>;
+  enableLogging(): void;
+  disableLogging(): void;
 }
 
 // Inbox messaging model — generated from Android SDK InboxMessage discovery.
 export interface InboxMessage {
   id: string;
   subject?: string;
+  title?: string;
   alert?: string;
   sound?: string;
-  soundEnabled?: boolean;
-  vibrationEnabled?: boolean;
-  sender?: string;
+  subtitle?: string;
   startDateUtc?: string;
   endDateUtc?: string;
   sendDateUtc?: string;
   read: boolean;
   deleted: boolean;
   url?: string;
-  media?: { url?: string; alt?: string };
+  media?: { url?: string; altText?: string };
   custom?: string;
   customKeys?: { [key: string]: string };
-  messageType?: string;
-  title?: string;
-  body?: string;
+  messageType?: number;
+  inboxMessage?: string;
+  inboxSubtitle?: string;
+  notificationMessage?: { [key: string]: any };
 }
 
 // Personalization Insights cart wrapper for analytics. Plain object passed through to native.

@@ -55,6 +55,12 @@ RCT_EXPORT_METHOD(requestIamSdk:(RCTPromiseResolveBlock)resolve
     }];
 }
 
+RCT_EXPORT_METHOD(showInAppMessage:(NSString *)messageId) {
+    [SFInAppMessagingFeature requestSdk:^(id<SFInAppMessagingFeatureApi> _Nullable iam) {
+        [iam showInAppMessageWithMessageId:messageId];
+    }];
+}
+
 #pragma mark - SFMCSdkInAppMessageEventDelegate
 
 // Discovery: shouldShow(inAppMessage:) → shouldShowInAppMessage: returns Bool.

@@ -99,10 +99,8 @@ export default function HomeTab({ sfmc, push, mc, mam, iam }: Props) {
             setIamLog('Enter a message ID first.');
             return;
         }
-        // IamApi exposes lifecycle events only; programmatic show/dismiss is not bridged.
-        // Surface the message id and a hint instead of crashing.
-        setIamLog(`Message ID noted: "${iamMessageId.trim()}". Trigger via send-event delivery.`);
-        void iam;
+        iam.showInAppMessage(iamMessageId.trim());
+        setIamLog(`Showing in-app message: "${iamMessageId.trim()}"`);
     }
 
     return (

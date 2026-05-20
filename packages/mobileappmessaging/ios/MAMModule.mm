@@ -70,15 +70,4 @@ RCT_EXPORT_METHOD(isAnalyticsEnabled:(RCTPromiseResolveBlock)resolve
     }];
 }
 
-// ── Version ───────────────────────────────────────────────────────────────────
-// STUB: SFMobileAppMessagingApi (v2.0) does not expose a version selector in iOS discovery.
-// Android exposes mam.getVersionName(); the iOS protocol/class has no equivalent class method
-// or instance method documented. Emitted as a stub per platform-asymmetry decision —
-// returns an empty string so JS consumers receive a defined value.
-RCT_EXPORT_METHOD(getVersion:(RCTPromiseResolveBlock)resolve
-                  rejecter:(RCTPromiseRejectBlock)reject) {
-    NSLog(@"[MAMModule] getVersion not available in iOS MobileAppMessagingSDK 2.0 — returning empty string");
-    resolve(@"");
-}
-
 @end

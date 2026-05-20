@@ -28,7 +28,6 @@ export const SFMCSdkModule = {
       getSdkState: () => NativeModule.getSdkState() as Promise<{ [key: string]: any }>,
       sendImmediate: (event: SFMCEvent) => NativeModule.sendImmediate(event as unknown as Object),
       flush: () => NativeModule.flush(),
-      getVersion: () => NativeModule.getVersion()
     };
     return _api;
   },

@@ -3,7 +3,7 @@ import { TurboModuleRegistry } from 'react-native';
 
 export interface Spec extends TurboModule {
   requestIamSdk(): Promise<void>;
-  // (no callable methods — module is event-only)
+  showInAppMessage(messageId: string): void;
   addListener(eventName: string): void;
   removeListeners(count: number): void;
 }

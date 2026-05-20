@@ -8,7 +8,6 @@ export interface Spec extends TurboModule {
   setPushEnabled(enabled: boolean): void;
   getSystemToken(): Promise<string | null>;
   isPushEnabled(): Promise<boolean>;
-  areNotificationsEnabled(): Promise<boolean>;
   addListener(eventName: string): void;
   removeListeners(count: number): void;
 }

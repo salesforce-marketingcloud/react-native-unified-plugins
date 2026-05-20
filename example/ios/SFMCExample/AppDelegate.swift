@@ -8,32 +8,26 @@ import InAppMessagingFeatureSDK
 import MarketingCloudSDK
 import MobileAppMessagingSDK
 
-// SDK integration follows the LearningApp pattern:
-// https://github.com/salesforce-marketingcloud/MarketingCloudSDK-iOS/blob/master/examples/LearningApp/LearningApp/AppDelegate.swift
 
 @main
 class AppDelegate: RCTAppDelegate {
 
     // MARK: - SDK Credentials
-    // Values are substituted at generation time from env vars:
-    //   MC:  MC_APP_ID, MC_ACCESS_TOKEN, MC_SERVER_URL, MC_MID
-    //   MAM: MAM_APP_ID, MAM_TENANT_ID, MAM_ACCESS_TOKEN, MAM_ENDPOINT_URL
-    // Set these in ~/.zshrc and re-run the generator to refresh.
 
-    let appID = "{MC_APP_ID}"
-    let accessToken = "{MC_ACCESS_TOKEN}"
-    let appEndpointURL = "{MC_SERVER_URL}"
-    let mid = "{MC_MID}"
+    let appID = "995b5b1a-162c-4e5d-a4cf-ac5ddeb14e47"
+    let accessToken = "cyg6ftcd8sbqetq7wy5v7ez3"
+    let appEndpointURL = "https://mcgrjfgk81ckrt0h4rwlnbhmbvf4.device.marketingcloudapis.com/"
+    let mid = "NDA0NjoxMTQ6MA"
 
     let inbox = true
     let location = true
     let pushAnalytics = true
     let markMessageReadOnInboxNotificationOpen = true
 
-    let mamAppID = "{MAM_APP_ID}"
-    let mamAccessToken = "{MAM_ACCESS_TOKEN}"
-    let mamServerURL = "{MAM_ENDPOINT_URL}"
-    let mamTenantId = "{MAM_TENANT_ID}"
+    let mamAppID = "91a18bfa-6fe6-482a-a20b-a3b7d5e882a6"
+    let mamAccessToken = "RWAOoBSiAH1LYeYrNMeQ7HMj"
+    let mamServerURL = "https://api.salesforce.com"
+    let mamTenantId = "core/prod/00DWt00000GomjNMAR"
     let mamAnalyticsEnabled = true
 
     // MARK: - UIApplicationDelegate

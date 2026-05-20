@@ -1,5 +1,5 @@
 export interface IamApi {
-    // (no callable methods — module is event-only)
+  showInAppMessage(messageId: string): void;
 }
 
 export interface InAppMessage {

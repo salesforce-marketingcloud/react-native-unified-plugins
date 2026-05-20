@@ -73,17 +73,4 @@ RCT_EXPORT_METHOD(getSystemToken:(RCTPromiseResolveBlock)resolve
     }];
 }
 
-// ── Notification permission ───────────────────────────────────────────────────
-// areNotificationsEnabled is NOT an SFMC SDK method — the SDK has no such selector.
-// Implemented via UNUserNotificationCenter for cross-platform parity with Android.
-// Do NOT call any SFPushFeatureApi method here.
-
-RCT_EXPORT_METHOD(areNotificationsEnabled:(RCTPromiseResolveBlock)resolve
-                  rejecter:(RCTPromiseRejectBlock)reject) {
-    [[UNUserNotificationCenter currentNotificationCenter]
-        getNotificationSettingsWithCompletionHandler:^(UNNotificationSettings *settings) {
-            resolve(@(settings.authorizationStatus == UNAuthorizationStatusAuthorized));
-        }];
-}
-
 @end

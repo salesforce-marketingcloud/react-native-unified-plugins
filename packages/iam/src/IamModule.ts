@@ -9,6 +9,7 @@ export const IamModule = {
     if (_api) return _api;
     await NativeModule.requestIamSdk();
     _api = {
+      showInAppMessage: (messageId: string) => NativeModule.showInAppMessage(messageId),
     };
     return _api;
   },

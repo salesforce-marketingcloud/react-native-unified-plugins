@@ -36,7 +36,8 @@ export const MarketingCloudSdkModule = {
       isAnalyticsEnabled: () => NativeModule.isAnalyticsEnabled(),
       getDeviceId: () => NativeModule.getDeviceId(),
       getContactKey: () => NativeModule.getContactKey(),
-      getSdkVersionName: () => NativeModule.getSdkVersionName()
+      enableLogging: () => NativeModule.enableLogging(),
+      disableLogging: () => NativeModule.disableLogging(),
     };
     return _api;
   },

@@ -9,6 +9,7 @@ import com.facebook.react.bridge.ReadableArray
 import com.facebook.react.bridge.WritableArray
 import com.facebook.react.bridge.WritableMap
 import com.facebook.react.module.annotations.ReactModule
+import com.salesforce.marketingcloud.MCLogListener
 import com.salesforce.marketingcloud.MarketingCloudSdk
 import com.salesforce.marketingcloud.messages.inbox.InboxMessage
 import com.salesforce.marketingcloud.messages.inbox.InboxMessageManager
@@ -224,10 +225,15 @@ class MCModule(reactContext: ReactApplicationContext) :
         }
     }
 
-    // STATIC method — no requestSdk required.
     @ReactMethod
-    override fun getSdkVersionName(promise: Promise) {
-        promise.resolve(MarketingCloudSdk.getSdkVersionName())
+    override fun enableLogging() {
+        MarketingCloudSdk.setLogLevel(MCLogListener.VERBOSE)
+        MarketingCloudSdk.setLogListener(MCLogListener.AndroidLogListener())
+    }
+
+    @ReactMethod
+    override fun disableLogging() {
+        MarketingCloudSdk.setLogListener(null)
     }
 
     @ReactMethod

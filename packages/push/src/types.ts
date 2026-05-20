@@ -4,7 +4,6 @@ export interface PushApi {
   setPushEnabled(enabled: boolean): void;
   getSystemToken(): Promise<string | null>;
   isPushEnabled(): Promise<boolean>;
-  areNotificationsEnabled(): Promise<boolean>;
 }
 
 // Push notification model. Field set may grow with SDK updates.

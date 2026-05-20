@@ -31,7 +31,8 @@ export interface Spec extends TurboModule {
   isAnalyticsEnabled(): Promise<boolean>;
   getDeviceId(): Promise<string | null>;
   getContactKey(): Promise<string | null>;
-  getSdkVersionName(): Promise<string>;
+  enableLogging(): void;
+  disableLogging(): void;
   addListener(eventName: string): void;
   removeListeners(count: number): void;
 }

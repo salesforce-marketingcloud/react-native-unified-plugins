@@ -65,6 +65,13 @@ class SFMCIamModule(reactContext: ReactApplicationContext) :
     }
 
     @ReactMethod
+    override fun showInAppMessage(messageId: String) {
+        InAppMessagingFeature.requestSdk { iam ->
+            iam.getInAppMessageManager().showMessage(messageId)
+        }
+    }
+
+    @ReactMethod
     override fun addListener(eventName: String) {
         // Required for RN event emitter
     }

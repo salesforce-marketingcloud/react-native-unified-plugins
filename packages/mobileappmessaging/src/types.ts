@@ -3,7 +3,6 @@ export interface MobileAppMessagingApi {
   enableAnalytics(): void;
   disableAnalytics(): void;
   isAnalyticsEnabled(): Promise<boolean>;
-  getVersion(): Promise<string>;
 }
 
 export interface Registration {

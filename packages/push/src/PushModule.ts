@@ -14,7 +14,6 @@ export const PushModule = {
       setPushEnabled: (enabled: boolean) => NativeModule.setPushEnabled(enabled),
       getSystemToken: () => NativeModule.getSystemToken(),
       isPushEnabled: () => NativeModule.isPushEnabled(),
-      areNotificationsEnabled: () => NativeModule.areNotificationsEnabled()
     };
     return _api;
   },

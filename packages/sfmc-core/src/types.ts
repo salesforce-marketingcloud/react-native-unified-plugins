@@ -19,5 +19,4 @@ export interface SFMCSdkApi {
   getSdkState(): Promise<{ [key: string]: any }>;
   sendImmediate(event: SFMCEvent): void;
   flush(): void;
-  getVersion(): Promise<string>;
 }
