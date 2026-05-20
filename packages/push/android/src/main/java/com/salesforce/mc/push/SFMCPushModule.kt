@@ -46,14 +46,6 @@ class SFMCPushModule(reactContext: ReactApplicationContext) :
     }
 
     @ReactMethod
-    override fun setPushEnabled(enabled: Boolean) {
-        PushFeature.requestSdk {
-            if (enabled) it.getPushMessageManager().enablePush()
-            else it.getPushMessageManager().disablePush()
-        }
-    }
-
-    @ReactMethod
     override fun getSystemToken(promise: Promise) {
         PushFeature.requestSdk { promise.resolve(it.getPushMessageManager().getPushToken()) }
     }

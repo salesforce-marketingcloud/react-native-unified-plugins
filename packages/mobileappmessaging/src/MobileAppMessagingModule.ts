@@ -12,7 +12,13 @@ export const MobileAppMessagingModule = {
       enableAnalytics: () => NativeModule.enableAnalytics(),
       disableAnalytics: () => NativeModule.disableAnalytics(),
       isAnalyticsEnabled: () => NativeModule.isAnalyticsEnabled(),
+      setRegistrationCallback: () => NativeModule.setRegistrationCallback(),
+      unsetRegistrationCallback: () => NativeModule.unsetRegistrationCallback(),
     };
     return _api;
+  },
+
+  getEmitter() {
+    return new (require('react-native').NativeEventEmitter)(NativeModule);
   },
 };

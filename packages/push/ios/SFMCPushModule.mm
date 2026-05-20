@@ -50,12 +50,6 @@ RCT_EXPORT_METHOD(disablePush) {
     }];
 }
 
-RCT_EXPORT_METHOD(setPushEnabled:(BOOL)enabled) {
-    [SFPushFeature requestSdk:^(id<SFPushFeatureApi> _Nullable push) {
-        [push setPushEnabledWithPushEnabled:enabled];
-    }];
-}
-
 RCT_EXPORT_METHOD(isPushEnabled:(RCTPromiseResolveBlock)resolve
                   rejecter:(RCTPromiseRejectBlock)reject) {
     [SFPushFeature requestSdk:^(id<SFPushFeatureApi> _Nullable push) {

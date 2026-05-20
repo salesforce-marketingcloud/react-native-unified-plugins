@@ -100,8 +100,12 @@ const InboxTab = forwardRef<InboxActions, Props>(({ mc, onActionsReady }, _ref) 
     function onLongPress(item: InboxMessage) {
         Alert.alert(item.subject ?? 'Message', undefined, [
             {
+                text: 'View Details',
+                onPress: () => { Alert.alert('Message Details', JSON.stringify(item, null, 2)); },
+            },
+            {
                 text: item.read ? 'Already Read' : 'Mark Read',
-                onPress: () => { mc.markMessageRead(item.id); fetchAll(); },
+                onPress: () => { mc.markMessageRead(item.id); mc.trackInboxMessageOpened(item.id); fetchAll(); },
                 style: item.read ? 'default' : 'default',
             },
             {

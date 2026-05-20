@@ -1,7 +1,6 @@
 export interface PushApi {
     enablePush(): void;
   disablePush(): void;
-  setPushEnabled(enabled: boolean): void;
   getSystemToken(): Promise<string | null>;
   isPushEnabled(): Promise<boolean>;
 }

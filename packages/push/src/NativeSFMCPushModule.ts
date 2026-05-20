@@ -5,7 +5,6 @@ export interface Spec extends TurboModule {
   requestPushSdk(): Promise<void>;
   enablePush(): void;
   disablePush(): void;
-  setPushEnabled(enabled: boolean): void;
   getSystemToken(): Promise<string | null>;
   isPushEnabled(): Promise<boolean>;
   addListener(eventName: string): void;

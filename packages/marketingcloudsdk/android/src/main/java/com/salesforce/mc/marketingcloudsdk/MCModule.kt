@@ -9,11 +9,13 @@ import com.facebook.react.bridge.ReadableArray
 import com.facebook.react.bridge.WritableArray
 import com.facebook.react.bridge.WritableMap
 import com.facebook.react.module.annotations.ReactModule
+import com.facebook.react.modules.core.DeviceEventManagerModule
 import com.salesforce.marketingcloud.MCLogListener
 import com.salesforce.marketingcloud.MarketingCloudSdk
 import com.salesforce.marketingcloud.messages.inbox.InboxMessage
 import com.salesforce.marketingcloud.messages.inbox.InboxMessageManager
 import com.salesforce.marketingcloud.notifications.NotificationMessage
+import com.salesforce.marketingcloud.registration.RegistrationManager
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -24,6 +26,16 @@ class MCModule(reactContext: ReactApplicationContext) :
     NativeMCModuleSpec(reactContext) {
 
     companion object { const val NAME = "MCModule" }
+
+    private var registrationListener: RegistrationManager.RegistrationEventListener? = null
+
+    private fun sendEvent(name: String, params: com.facebook.react.bridge.WritableMap) {
+        if (reactApplicationContext.hasActiveReactInstance()) {
+            reactApplicationContext
+                .getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter::class.java)
+                .emit(name, params)
+        }
+    }
 
     @ReactMethod
     override fun requestMcSdk(promise: Promise) {
@@ -237,9 +249,28 @@ class MCModule(reactContext: ReactApplicationContext) :
     }
 
     @ReactMethod
-    override fun addListener(eventName: String) {
-        // Required for RN event emitter parity; module emits no events.
+    override fun setRegistrationCallback() {
+        MarketingCloudSdk.requestSdk { sdk ->
+            val listener = RegistrationManager.RegistrationEventListener { registration ->
+                sendEvent("sfmc_mc_registration", Arguments.makeNativeMap(registration.toMap()))
+            }
+            registrationListener = listener
+            sdk.getRegistrationManager().registerForRegistrationEvents(listener)
+        }
     }
+
+    @ReactMethod
+    override fun unsetRegistrationCallback() {
+        MarketingCloudSdk.requestSdk { sdk ->
+            registrationListener?.let {
+                sdk.getRegistrationManager().unregisterForRegistrationEvents(it)
+            }
+            registrationListener = null
+        }
+    }
+
+    @ReactMethod
+    override fun addListener(eventName: String) {}
 
     @ReactMethod
     override fun removeListeners(count: Double) {

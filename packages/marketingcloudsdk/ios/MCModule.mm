@@ -81,7 +81,7 @@ static NSDictionary * MCFindMessage(NSArray *messages, NSString *messageId) {
 RCT_EXPORT_MODULE(MCModule);
 
 - (NSArray<NSString *> *)supportedEvents {
-    return @[];
+    return @[@"sfmc_mc_registration"];
 }
 
 - (std::shared_ptr<facebook::react::TurboModule>)getTurboModule:
@@ -308,6 +308,23 @@ RCT_EXPORT_METHOD(getContactKey:(RCTPromiseResolveBlock)resolve
                   rejecter:(RCTPromiseRejectBlock)reject) {
     [SFMarketingCloudSdk requestSdk:^(id<MarketingCloudSdkInterface> _Nullable mc) {
         resolve([mc contactKey]);
+    }];
+}
+
+// ── Registration callback ──────────────────────────────────────────────────────
+// iOS: setRegistrationCallback: / unsetRegistrationCallback on MarketingCloudSdk
+
+RCT_EXPORT_METHOD(setRegistrationCallback) {
+    [SFMarketingCloudSdk requestSdk:^(id<MarketingCloudSdkInterface> _Nullable mc) {
+        [mc setRegistrationCallback:^(NSDictionary * _Nonnull registration) {
+            [self sendEventWithName:@"sfmc_mc_registration" body:registration];
+        }];
+    }];
+}
+
+RCT_EXPORT_METHOD(unsetRegistrationCallback) {
+    [SFMarketingCloudSdk requestSdk:^(id<MarketingCloudSdkInterface> _Nullable mc) {
+        [mc unsetRegistrationCallback];
     }];
 }
 

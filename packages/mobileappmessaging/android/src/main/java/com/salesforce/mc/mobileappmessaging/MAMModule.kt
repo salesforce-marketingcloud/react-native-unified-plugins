@@ -1,17 +1,29 @@
 package com.salesforce.mc.mobileappmessaging
 
+import com.facebook.react.bridge.Arguments
 import com.facebook.react.bridge.Promise
 import com.facebook.react.bridge.ReactApplicationContext
 import com.facebook.react.bridge.ReactMethod
 import com.facebook.react.module.annotations.ReactModule
-// CORRECT import — Kotlin package is mobileappmessaging, NOT mobileappmessagingsdk
+import com.facebook.react.modules.core.DeviceEventManagerModule
 import com.salesforce.marketingcloud.mobileappmessaging.MobileAppMessaging
+import com.salesforce.marketingcloud.mobileappmessaging.registration.RegistrationManager
 
 @ReactModule(name = MAMModule.NAME)
 class MAMModule(reactContext: ReactApplicationContext) :
     NativeMAMModuleSpec(reactContext) {
 
     companion object { const val NAME = "MAMModule" }
+
+    private var registrationListener: RegistrationManager.RegistrationEventListener? = null
+
+    private fun sendEvent(name: String, params: com.facebook.react.bridge.WritableMap) {
+        if (reactApplicationContext.hasActiveReactInstance()) {
+            reactApplicationContext
+                .getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter::class.java)
+                .emit(name, params)
+        }
+    }
 
     @ReactMethod
     override fun requestMamSdk(promise: Promise) {
@@ -39,6 +51,27 @@ class MAMModule(reactContext: ReactApplicationContext) :
     override fun isAnalyticsEnabled(promise: Promise) {
         // CORRECT: MAM analytics manager exposes areAnalyticsEnabled(), NOT isAnalyticsEnabled().
         MobileAppMessaging.requestSdk { promise.resolve(it.getAnalyticsManager().areAnalyticsEnabled()) }
+    }
+
+    @ReactMethod
+    override fun setRegistrationCallback() {
+        MobileAppMessaging.requestSdk { mam ->
+            val listener = RegistrationManager.RegistrationEventListener { registration ->
+                sendEvent("sfmc_mam_registration", Arguments.makeNativeMap(registration.toMap()))
+            }
+            registrationListener = listener
+            mam.getRegistrationManager().registerForRegistrationEvents(listener)
+        }
+    }
+
+    @ReactMethod
+    override fun unsetRegistrationCallback() {
+        MobileAppMessaging.requestSdk { mam ->
+            registrationListener?.let {
+                mam.getRegistrationManager().unregisterForRegistrationEvents(it)
+            }
+            registrationListener = null
+        }
     }
 
     @ReactMethod

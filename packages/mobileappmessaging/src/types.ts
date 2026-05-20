@@ -3,6 +3,8 @@ export interface MobileAppMessagingApi {
   enableAnalytics(): void;
   disableAnalytics(): void;
   isAnalyticsEnabled(): Promise<boolean>;
+  setRegistrationCallback(): void;
+  unsetRegistrationCallback(): void;
 }
 
 export interface Registration {

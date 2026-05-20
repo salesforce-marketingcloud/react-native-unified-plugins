@@ -13,7 +13,7 @@
 RCT_EXPORT_MODULE(MAMModule);
 
 - (NSArray<NSString *> *)supportedEvents {
-    return @[];
+    return @[@"sfmc_mam_registration"];
 }
 
 - (std::shared_ptr<facebook::react::TurboModule>)getTurboModule:
@@ -67,6 +67,22 @@ RCT_EXPORT_METHOD(isAnalyticsEnabled:(RCTPromiseResolveBlock)resolve
                   rejecter:(RCTPromiseRejectBlock)reject) {
     [SFMobileAppMessaging requestSdk:^(id<SFMobileAppMessagingApi> _Nullable mam) {
         resolve(@([mam isAnalyticsEnabled]));
+    }];
+}
+
+// ── Registration callback ──────────────────────────────────────────────────────
+
+RCT_EXPORT_METHOD(setRegistrationCallback) {
+    [SFMobileAppMessaging requestSdk:^(id<SFMobileAppMessagingApi> _Nullable mam) {
+        [mam setRegistrationCallback:^(NSDictionary * _Nonnull registration) {
+            [self sendEventWithName:@"sfmc_mam_registration" body:registration];
+        }];
+    }];
+}
+
+RCT_EXPORT_METHOD(unsetRegistrationCallback) {
+    [SFMobileAppMessaging requestSdk:^(id<SFMobileAppMessagingApi> _Nullable mam) {
+        [mam unsetRegistrationCallback];
     }];
 }
 

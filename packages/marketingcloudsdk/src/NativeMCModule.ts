@@ -33,6 +33,8 @@ export interface Spec extends TurboModule {
   getContactKey(): Promise<string | null>;
   enableLogging(): void;
   disableLogging(): void;
+  setRegistrationCallback(): void;
+  unsetRegistrationCallback(): void;
   addListener(eventName: string): void;
   removeListeners(count: number): void;
 }

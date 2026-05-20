@@ -29,6 +29,8 @@ export interface MarketingCloudSdkApi {
   getContactKey(): Promise<string | null>;
   enableLogging(): void;
   disableLogging(): void;
+  setRegistrationCallback(): void;
+  unsetRegistrationCallback(): void;
 }
 
 // Inbox messaging model — generated from Android SDK InboxMessage discovery.

@@ -38,7 +38,13 @@ export const MarketingCloudSdkModule = {
       getContactKey: () => NativeModule.getContactKey(),
       enableLogging: () => NativeModule.enableLogging(),
       disableLogging: () => NativeModule.disableLogging(),
+      setRegistrationCallback: () => NativeModule.setRegistrationCallback(),
+      unsetRegistrationCallback: () => NativeModule.unsetRegistrationCallback(),
     };
     return _api;
+  },
+
+  getEmitter() {
+    return new (require('react-native').NativeEventEmitter)(NativeModule);
   },
 };

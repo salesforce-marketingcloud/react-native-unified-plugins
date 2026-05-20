@@ -105,9 +105,7 @@ RCT_EXPORT_METHOD(clearAttribute:(NSString *)key) {
 
 RCT_EXPORT_METHOD(setAttributes:(NSDictionary *)attributes) {
     [SFMCSdk.identity editWithIdentity:^id<SFIdentityModifier>(id<SFIdentityModifier> _Nonnull editor) {
-        [attributes enumerateKeysAndObjectsUsingBlock:^(NSString *key, NSString *value, BOOL *stop) {
-            [editor addAttributeWithKey:key value:value];
-        }];
+        [editor addAttributesWithAttributes:attributes];
         return editor;
     }];
 }
