@@ -15,6 +15,7 @@ import com.salesforce.marketingcloud.MarketingCloudSdk
 import com.salesforce.marketingcloud.messages.inbox.InboxMessage
 import com.salesforce.marketingcloud.messages.inbox.InboxMessageManager
 import com.salesforce.marketingcloud.notifications.NotificationMessage
+import com.salesforce.marketingcloud.registration.Registration
 import com.salesforce.marketingcloud.registration.RegistrationManager
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -252,11 +253,36 @@ class MCModule(reactContext: ReactApplicationContext) :
     override fun setRegistrationCallback() {
         MarketingCloudSdk.requestSdk { sdk ->
             val listener = RegistrationManager.RegistrationEventListener { registration ->
-                sendEvent("sfmc_mc_registration", Arguments.makeNativeMap(registration.toMap()))
+                sendEvent("sfmc_mc_registration", registrationToWritableMap(registration))
             }
             registrationListener = listener
             sdk.getRegistrationManager().registerForRegistrationEvents(listener)
         }
+    }
+
+    private fun registrationToWritableMap(registration: Registration): WritableMap {
+        val map = Arguments.createMap()
+        map.putString("signedString", registration.signedString)
+        map.putString("deviceId", registration.deviceId)
+        map.putString("systemToken", registration.systemToken)
+        map.putString("sdkVersion", registration.sdkVersion)
+        map.putString("appVersion", registration.appVersion)
+        map.putBoolean("dst", registration.dst)
+        map.putBoolean("locationEnabled", registration.locationEnabled)
+        map.putBoolean("proximityEnabled", registration.proximityEnabled)
+        map.putString("platformVersion", registration.platformVersion)
+        map.putBoolean("pushEnabled", registration.pushEnabled)
+        map.putInt("timeZone", registration.timeZone)
+        map.putString("contactKey", registration.contactKey)
+        map.putString("platform", registration.platform)
+        map.putString("hwid", registration.hwid)
+        map.putString("appId", registration.appId)
+        map.putString("locale", registration.locale)
+        val tagsArray = Arguments.createArray()
+        registration.tags.forEach { tagsArray.pushString(it) }
+        map.putArray("tags", tagsArray)
+        map.putMap("attributes", stringMapToWritableMap(registration.attributes))
+        return map
     }
 
     @ReactMethod
