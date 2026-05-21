@@ -21,7 +21,6 @@ Android: no additional steps — Gradle autolinking discovers the module automat
 
 - **Android** — initialize in your `MainApplication.kt` via `SFMCSdk.configure(...)`. See `example/android/app/src/main/java/com/sfmcexample/MainApplication.kt` in the bundled example app.
 - **iOS** — initialize in your `AppDelegate.swift` via `SFMCSdk.initializeSdk(...)`. See `example/ios/SFMCExample/AppDelegate.swift`.
-- Configure Firebase (Android) and APNs (iOS) credentials before push will deliver.
 
 ## Usage
 
@@ -30,7 +29,7 @@ import { SFMCSdkModule } from '@salesforce-mc/react-native-sfmc-core';
 import type { SFMCSdkApi, SFMCEvent } from '@salesforce-mc/react-native-sfmc-core';
 
 const sfmc: SFMCSdkApi = await SFMCSdkModule.requestSdk();
-await sfmc.setProfileId('user-1234');
+sfmc.setProfileId('user-1234');
 sfmc.setAttribute('email', 'sample@example.com');
 const profileId = await sfmc.getProfileId();
 
@@ -41,9 +40,32 @@ sfmc.track({ objType: 'CustomEvent', name: 'app_open' });
 sfmc.track({
   objType: 'CartEvent',
   subtype: 'add',
-  lineItem: { catalogObjectType: 'Product', catalogObjectId: 'sku-1', quantity: 2, price: 9.99, currency: 'USD' },
+  lineItems: [{ catalogObjectType: 'Product', catalogObjectId: 'sku-1', quantity: 2, price: 9.99, currency: 'USD' }],
 });
 ```
+
+## API
+
+| Method | Return | Description |
+|--------|--------|-------------|
+| `setProfileId(id)` | `void` | Set profile/contact key |
+| `getProfileId()` | `Promise<string \| null>` | Get current profile ID |
+| `setAttribute(key, value)` | `void` | Set a single attribute |
+| `setAttributes(attrs)` | `void` | Set multiple attributes at once |
+| `clearAttribute(key)` | `void` | Remove an attribute |
+| `clearAllAttributes()` | `void` | Remove all attributes |
+| `getAttributes()` | `Promise<object \| null>` | Get all attributes |
+| `setPartyIdentificationName(name)` | `void` | Set party identification name |
+| `setPartyIdentificationNumber(num)` | `void` | Set party identification number |
+| `setPartyIdentificationType(type)` | `void` | Set party identification type |
+| `getPartyIdentificationName()` | `Promise<string \| null>` | Get party identification name |
+| `getPartyIdentificationNumber()` | `Promise<string \| null>` | Get party identification number |
+| `getPartyIdentificationType()` | `Promise<string \| null>` | Get party identification type |
+| `track(event)` | `void` | Track a structured event |
+| `sendImmediate(event)` | `void` | Send event immediately (bypasses batching) |
+| `flush()` | `void` | Flush pending analytics |
+| `setLogging(level)` | `void` | Set log level: `'DEBUG'`, `'WARN'`, `'ERROR'`, `'NONE'` |
+| `getSdkState()` | `Promise<object>` | Get full SDK state as JSON object |
 
 ## Notes
 
@@ -52,8 +74,8 @@ sfmc.track({
 ## Versions
 
 - React Native: 0.85.1 (New Architecture mandatory)
-- Android SFMC SDK: 11.0 umbrella (sfmcsdk 3.1.0, marketingcloudsdk 11.0.0, pushfeaturemodule 2.0.0, inappmessagingfeaturemodule 1.0.0, mobileappmessagingsdk 1.1.0)
-- iOS SFMC SDK: 11.0 umbrella (MarketingCloudSDK 11.0.0, MarketingCloud-SFMCSdk 4.0.1, SFPushFeatureSDK 2.0.0, SFInAppMessagingFeatureSDK 1.0.0, SFMobileAppMessagingSDK 2.0.0)
+- Android: sfmcsdk 3.1.0
+- iOS: MarketingCloud-SFMCSdk 4.0.1
 
 ## License
 

@@ -1,12 +1,5 @@
-// React Native CLI config. Two responsibilities:
-//
-// 1. Tell `pod install` (via the cli-platform-ios native_modules.rb) where the
-//    autolinking metadata lives. We commit a static autolinking.json under
-//    android/ to bypass dynamic discovery in the monorepo, so the native_modules
-//    Ruby helpers are skipped at the project level — but the iOS side still
-//    walks dependencies.
-// 2. Force-include the workspace packages by name so that yarn-workspace
-//    symlinks don't trip up the CLI's "is this in node_modules?" check.
+// Force-include workspace packages by explicit root path so that yarn-workspace
+// symlinks don't trip up the RN CLI's autolinking discovery.
 
 module.exports = {
     project: {

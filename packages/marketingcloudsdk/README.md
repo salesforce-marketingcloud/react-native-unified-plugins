@@ -26,11 +26,10 @@ Android: no additional steps — Gradle autolinking discovers the module automat
 ## Usage
 
 ```ts
-import { MarketingCloudSdkModule, MCModule } from '@salesforce-mc/react-native-marketingcloudsdk';
-import type { InboxMessage } from '@salesforce-mc/react-native-marketingcloudsdk';
+import { MarketingCloudSdkModule } from '@salesforce-mc/react-native-marketingcloudsdk';
+import type { MCApi, InboxMessage } from '@salesforce-mc/react-native-marketingcloudsdk';
 
-// Either form resolves to the same module
-const mc = await MCModule.requestSdk();
+const mc: MCApi = await MarketingCloudSdkModule.requestSdk();
 
 // Inbox
 await mc.refreshInbox();
@@ -44,17 +43,73 @@ const tags = await mc.getTags();
 
 // Device id
 const deviceId = await mc.getDeviceId();
+
+// Registration callback
+mc.setRegistrationCallback();
+const emitter = MarketingCloudSdkModule.getEmitter();
+const sub = emitter.addListener('sfmc_mc_registration', (registration) => {
+  console.log('MC registration changed:', registration);
+});
+
+// Cleanup
+sub.remove();
+mc.unsetRegistrationCallback();
 ```
+
+## API
+
+| Method | Return | Description |
+|--------|--------|-------------|
+| `refreshInbox()` | `Promise<boolean>` | Trigger server inbox refresh |
+| `getAllMessages()` | `Promise<InboxMessage[]>` | Get all inbox messages |
+| `getUnreadMessages()` | `Promise<InboxMessage[]>` | Get unread messages |
+| `getReadMessages()` | `Promise<InboxMessage[]>` | Get read messages |
+| `getDeletedMessages()` | `Promise<InboxMessage[]>` | Get deleted messages |
+| `getMessageCount()` | `Promise<number>` | Total message count |
+| `getUnreadMessageCount()` | `Promise<number>` | Unread message count |
+| `getReadMessageCount()` | `Promise<number>` | Read message count |
+| `getDeletedMessageCount()` | `Promise<number>` | Deleted message count |
+| `markMessageRead(id)` | `void` | Mark a message as read |
+| `markMessageDeleted(id)` | `void` | Mark a message as deleted |
+| `markAllMessagesRead()` | `void` | Mark all messages as read |
+| `markAllMessagesDeleted()` | `void` | Mark all messages as deleted |
+| `trackInboxMessageOpened(message)` | `void` | Track message open analytics (pass the full InboxMessage object) |
+| `addTag(tag)` | `void` | Add a tag |
+| `addTags(tags)` | `void` | Add multiple tags |
+| `removeTag(tag)` | `void` | Remove a tag |
+| `removeTags(tags)` | `void` | Remove multiple tags |
+| `getTags()` | `Promise<string[]>` | Get all tags |
+| `getAttributes()` | `Promise<object>` | Get all attributes |
+| `enablePiAnalytics()` | `void` | Enable PI analytics |
+| `disablePiAnalytics()` | `void` | Disable PI analytics |
+| `isPiAnalyticsEnabled()` | `Promise<boolean>` | Check PI analytics state |
+| `enableAnalytics()` | `void` | Enable analytics |
+| `disableAnalytics()` | `void` | Disable analytics |
+| `isAnalyticsEnabled()` | `Promise<boolean>` | Check analytics state |
+| `getDeviceId()` | `Promise<string \| null>` | Get device identifier |
+| `getContactKey()` | `Promise<string \| null>` | Get contact key |
+| `enableLogging()` | `void` | Enable debug logging |
+| `disableLogging()` | `void` | Disable debug logging |
+| `setRegistrationCallback()` | `void` | Start receiving registration change events |
+| `unsetRegistrationCallback()` | `void` | Stop receiving registration change events |
+
+### Events
+
+| Event Name | Payload | Description |
+|------------|---------|-------------|
+| `sfmc_mc_registration` | Registration dictionary | Emitted when registration state changes |
 
 ## Notes
 
 Installing this package auto-resolves the shared `sfmc-core`, `push`, and `iam` packages — install once, get all of them.
 
+`MCModule` is exported as an alias for `MarketingCloudSdkModule`. Both reference the same module.
+
 ## Versions
 
 - React Native: 0.85.1 (New Architecture mandatory)
-- Android SFMC SDK: 11.0 umbrella (sfmcsdk 3.1.0, marketingcloudsdk 11.0.0, pushfeaturemodule 2.0.0, inappmessagingfeaturemodule 1.0.0, mobileappmessagingsdk 1.1.0)
-- iOS SFMC SDK: 11.0 umbrella (MarketingCloudSDK 11.0.0, MarketingCloud-SFMCSdk 4.0.1, SFPushFeatureSDK 2.0.0, SFInAppMessagingFeatureSDK 1.0.0, SFMobileAppMessagingSDK 2.0.0)
+- Android: sfmcsdk 3.1.0, marketingcloudsdk 11.0.0
+- iOS: MarketingCloudSDK 11.0.0, MarketingCloud-SFMCSdk 4.0.1
 
 ## License
 

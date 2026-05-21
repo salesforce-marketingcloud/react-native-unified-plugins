@@ -12,7 +12,7 @@ export interface MarketingCloudSdkApi {
   markMessageDeleted(messageId: string): void;
   markAllMessagesRead(): void;
   markAllMessagesDeleted(): void;
-  trackInboxMessageOpened(messageId: string): void;
+  trackInboxMessageOpened(message: InboxMessage): void;
   addTag(tag: string): void;
   addTags(tags: string[]): void;
   removeTag(tag: string): void;

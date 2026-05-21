@@ -158,12 +158,13 @@ RCT_EXPORT_METHOD(getSdkState:(RCTPromiseResolveBlock)resolve
 // Selector `setLoggerWithLogLevel:logOutputter:` is from ios discovery.
 
 RCT_EXPORT_METHOD(setLogging:(NSString *)level) {
+    NSString *lower = [level lowercaseString];
     SFMCSdkLogLevel logLevel;
-    if ([level isEqualToString:@"debug"]) {
+    if ([lower isEqualToString:@"debug"]) {
         logLevel = SFMCSdkLogLevelDebug;
-    } else if ([level isEqualToString:@"warn"]) {
+    } else if ([lower isEqualToString:@"warn"]) {
         logLevel = SFMCSdkLogLevelWarn;
-    } else if ([level isEqualToString:@"error"]) {
+    } else if ([lower isEqualToString:@"error"]) {
         logLevel = SFMCSdkLogLevelError;
     } else {
         logLevel = SFMCSdkLogLevelNone;

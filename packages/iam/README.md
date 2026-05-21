@@ -1,6 +1,6 @@
 # SFMC In-App Messaging
 
-> SFMC In-App Messaging Feature for React Native — lifecycle events for in-app messages.
+> SFMC In-App Messaging Feature for React Native — SDK readiness and programmatic message display.
 
 ## Installation
 
@@ -21,32 +21,34 @@ Android: no additional steps — Gradle autolinking discovers the module automat
 
 - **Android** — initialize in your `MainApplication.kt` via `SFMCSdk.configure(...)`. See `example/android/app/src/main/java/com/sfmcexample/MainApplication.kt` in the bundled example app.
 - **iOS** — initialize in your `AppDelegate.swift` via `SFMCSdk.initializeSdk(...)`. See `example/ios/SFMCExample/AppDelegate.swift`.
-- Configure Firebase (Android) and APNs (iOS) credentials before push will deliver.
 
 ## Usage
 
 ```ts
 import { IamModule } from '@salesforce-mc/react-native-iam';
-import type { IamApi, InAppMessage } from '@salesforce-mc/react-native-iam';
+import type { IamApi } from '@salesforce-mc/react-native-iam';
 
-await IamModule.requestSdk();
+const iam: IamApi = await IamModule.requestSdk();
 
-// Lifecycle events
-const emitter = IamModule.getEmitter();
-emitter.addListener('sfmc_iam_will_show', (m) => console.log('IAM will show:', m.id));
-emitter.addListener('sfmc_iam_did_show',  (m) => console.log('IAM did show:',  m.id));
-emitter.addListener('sfmc_iam_did_close', (m) => console.log('IAM did close:', m));
+// Programmatically show an in-app message by ID
+iam.showInAppMessage('message-id');
 ```
+
+## API
+
+| Method | Return | Description |
+|--------|--------|-------------|
+| `showInAppMessage(messageId)` | `void` | Programmatically display an in-app message by ID |
 
 ## Notes
 
-The IAM module is event-driven; it emits `sfmc_iam_will_show`, `sfmc_iam_did_show`, and `sfmc_iam_did_close` once `requestSdk()` resolves.
+IAM lifecycle events (will show, did show, did close) are handled on the native side via `InAppMessageEventDelegate` (iOS) and `InAppMessageManager.EventListener` (Android), configured in your AppDelegate/Application class. The bridge module provides SDK readiness and programmatic message display only.
 
 ## Versions
 
 - React Native: 0.85.1 (New Architecture mandatory)
-- Android SFMC SDK: 11.0 umbrella (sfmcsdk 3.1.0, marketingcloudsdk 11.0.0, pushfeaturemodule 2.0.0, inappmessagingfeaturemodule 1.0.0, mobileappmessagingsdk 1.1.0)
-- iOS SFMC SDK: 11.0 umbrella (MarketingCloudSDK 11.0.0, MarketingCloud-SFMCSdk 4.0.1, SFPushFeatureSDK 2.0.0, SFInAppMessagingFeatureSDK 1.0.0, SFMobileAppMessagingSDK 2.0.0)
+- Android: sfmcsdk 3.1.0, inappmessagingfeaturemodule 1.0.0
+- iOS: SFInAppMessagingFeatureSDK 1.0.0, MarketingCloud-SFMCSdk 4.0.1
 
 ## License
 

@@ -1754,10 +1754,8 @@ PODS:
     - React-utils (= 0.85.1)
     - ReactNativeDependencies
   - ReactNativeDependencies (0.85.1)
-  - SFInAppMessagingFeatureSDK (1.0.0)
-  - SFMCIam (1.0.0):
+  - RNCClipboard (1.16.3):
     - hermes-engine
-    - MarketingCloud-SFMCSdk
     - RCTRequired
     - RCTTypeSafety
     - React-Core
@@ -1777,12 +1775,36 @@ PODS:
     - ReactCommon/turbomodule/bridging
     - ReactCommon/turbomodule/core
     - ReactNativeDependencies
-    - SFInAppMessagingFeatureSDK
+    - Yoga
+  - SFInAppMessagingFeatureSDK (1.0.0)
+  - SFMCIam (1.0.0):
+    - hermes-engine
+    - MarketingCloud-SFMCSdk (~> 4.0.0)
+    - RCTRequired
+    - RCTTypeSafety
+    - React-Core
+    - React-Core-prebuilt
+    - React-debug
+    - React-Fabric
+    - React-featureflags
+    - React-graphics
+    - React-ImageManager
+    - React-jsi
+    - React-NativeModulesApple
+    - React-RCTFabric
+    - React-renderercss
+    - React-rendererdebug
+    - React-utils
+    - ReactCodegen
+    - ReactCommon/turbomodule/bridging
+    - ReactCommon/turbomodule/core
+    - ReactNativeDependencies
+    - SFInAppMessagingFeatureSDK (~> 1.0.0)
     - Yoga
   - SFMCMarketingCloudSdk (1.0.0):
     - hermes-engine
-    - MarketingCloud-SFMCSdk
-    - MarketingCloudSDK
+    - MarketingCloud-SFMCSdk (~> 4.0.0)
+    - MarketingCloudSDK (~> 11.0.0)
     - RCTRequired
     - RCTTypeSafety
     - React-Core
@@ -1805,7 +1827,7 @@ PODS:
     - Yoga
   - SFMCMobileAppMessaging (1.0.0):
     - hermes-engine
-    - MarketingCloud-SFMCSdk
+    - MarketingCloud-SFMCSdk (~> 4.0.0)
     - RCTRequired
     - RCTTypeSafety
     - React-Core
@@ -1825,11 +1847,11 @@ PODS:
     - ReactCommon/turbomodule/bridging
     - ReactCommon/turbomodule/core
     - ReactNativeDependencies
-    - SFMobileAppMessagingSDK
+    - SFMobileAppMessagingSDK (~> 2.0.0)
     - Yoga
   - SFMCPush (1.0.0):
     - hermes-engine
-    - MarketingCloud-SFMCSdk
+    - MarketingCloud-SFMCSdk (~> 4.0.0)
     - RCTRequired
     - RCTTypeSafety
     - React-Core
@@ -1849,11 +1871,11 @@ PODS:
     - ReactCommon/turbomodule/bridging
     - ReactCommon/turbomodule/core
     - ReactNativeDependencies
-    - SFPushFeatureSDK
+    - SFPushFeatureSDK (~> 2.0.0)
     - Yoga
   - SFMCSdkCore (1.0.0):
     - hermes-engine
-    - MarketingCloud-SFMCSdk
+    - MarketingCloud-SFMCSdk (~> 4.0.0)
     - RCTRequired
     - RCTTypeSafety
     - React-Core
@@ -1955,6 +1977,7 @@ DEPENDENCIES:
   - ReactCodegen (from `build/generated/ios/ReactCodegen`)
   - ReactCommon/turbomodule/core (from `../../node_modules/react-native/ReactCommon`)
   - ReactNativeDependencies (from `../../node_modules/react-native/third-party-podspecs/ReactNativeDependencies.podspec`)
+  - "RNCClipboard (from `../../node_modules/@react-native-clipboard/clipboard`)"
   - SFMCIam (from `../../packages/iam/ios`)
   - SFMCMarketingCloudSdk (from `../../packages/marketingcloudsdk/ios`)
   - SFMCMobileAppMessaging (from `../../packages/mobileappmessaging/ios`)
@@ -2118,6 +2141,8 @@ EXTERNAL SOURCES:
     :path: "../../node_modules/react-native/ReactCommon"
   ReactNativeDependencies:
     :podspec: "../../node_modules/react-native/third-party-podspecs/ReactNativeDependencies.podspec"
+  RNCClipboard:
+    :path: "../../node_modules/@react-native-clipboard/clipboard"
   SFMCIam:
     :path: "../../packages/iam/ios"
   SFMCMarketingCloudSdk:
@@ -2133,7 +2158,7 @@ EXTERNAL SOURCES:
 
 SPEC CHECKSUMS:
   FBLazyVector: ed7eadee1965b0b918ca9d0f2c2328f7eb3fd095
-  hermes-engine: 3c78157f4864b457ae3b8cb4e9641ef52d4a2556
+  hermes-engine: 4393fdce91e7cba474ebe4327b31d17bad93c441
   MarketingCloud-AppGroupSDK: 362a2607ff43d283dbd91bfb153a725b15900797
   MarketingCloud-ExtensionSDK: fe1c8418b4514098b212a23fa72f51133715e6f0
   MarketingCloud-SFMCSdk: 3851a01d044208483e6cad9008bdd4d23e7d31fa
@@ -2146,7 +2171,7 @@ SPEC CHECKSUMS:
   React: 6dbd7825a18782848e8c62f1feb16b344cb17ac6
   React-callinvoker: 90c70d14c7ca646fdae3e25e8d9fbb0fbb20459c
   React-Core: 9dce76263f670de254e896f317676e7e95369ac2
-  React-Core-prebuilt: d9130e937d6dd48b59ba5a40c3010829cc4dbc89
+  React-Core-prebuilt: e8979934d7173168fbaaf1ea605848b3a644bb8e
   React-CoreModules: b9fadb43261b88cb0d3a2d59808603567e995095
   React-cxxreact: 6b36616248fea28ce6dfbffcf09322321eb96186
   React-debug: 8f85c5da52e386c83482e45744f6e61b39b9493d
@@ -2207,13 +2232,14 @@ SPEC CHECKSUMS:
   ReactAppDependencyProvider: 52da2413bc956c40a4de19ad32a92b87248f7ce8
   ReactCodegen: 649b7a893102244c7807d4bb5b25960e3adb3001
   ReactCommon: 66763e5bd1b778828ff6cb82d771b7162a5215c2
-  ReactNativeDependencies: 1c6394f003da642b3dca5018f325bcdb1666b2ce
+  ReactNativeDependencies: 32538f9a81ab0273b8eb5f2429046a53cf9b7e4a
+  RNCClipboard: 715fa7c6c8366f17d00f05a439ee7488f390fa5f
   SFInAppMessagingFeatureSDK: 602a31c47341b0d031e8df69c35327dc877a9591
-  SFMCIam: 37c0a87918cac09b4cbed09a6c25f7bf91a02280
-  SFMCMarketingCloudSdk: 620f9ccae150c56507007b1d91ef46158e99c3dd
-  SFMCMobileAppMessaging: fd294eda4f5ac3acc275953486432247c5e93dd0
-  SFMCPush: 5e201feb4c0d18fd7c7e0e6b605eebeee30e2877
-  SFMCSdkCore: c043b807513d137b3237efd997fdd95b5c3b7dc5
+  SFMCIam: cf27e51dba92676fcf291ac1fbf44e339d913ce8
+  SFMCMarketingCloudSdk: 1a1d4d5f5130ba0b1185119ecb7fcc9f2299023f
+  SFMCMobileAppMessaging: 3b0f9724227dc94be7b6d5ff1b4fcb294815c09a
+  SFMCPush: ca16a6896e6c906ff4e6c45be8bbd1748ad463b7
+  SFMCSdkCore: c31d4eed076ce921605f34d1f80cd457addf6964
   SFMobileAppMessagingSDK: 7d9d24582a13aa451c02d98702c1f05debeef2c1
   SFPushFeatureSDK: 894482aa7b09516b893973310a59a0bda5363221
   Yoga: b1085f68c014785350a2afdc95eaef0d49f23ccb

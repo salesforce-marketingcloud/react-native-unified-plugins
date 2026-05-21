@@ -9,13 +9,14 @@
     "test": "echo \"Error: no test specified\" && exit 0"
   },
   "dependencies": {
-    "react": "19.2.3",
-    "react-native": "0.85.1",
-    "@salesforce-mc/react-native-sfmc-core": "*",
-    "@salesforce-mc/react-native-push": "*",
+    "@react-native-clipboard/clipboard": "^1.16.3",
     "@salesforce-mc/react-native-iam": "*",
     "@salesforce-mc/react-native-marketingcloudsdk": "*",
-    "@salesforce-mc/react-native-mobileappmessaging": "*"
+    "@salesforce-mc/react-native-mobileappmessaging": "*",
+    "@salesforce-mc/react-native-push": "*",
+    "@salesforce-mc/react-native-sfmc-core": "*",
+    "react": "19.2.3",
+    "react-native": "0.85.1"
   },
   "devDependencies": {
     "@babel/core": "^7.20.0",
@@ -25,7 +26,6 @@
     "@react-native/metro-config": "0.85.1",
     "@react-native/typescript-config": "0.85.1",
     "@types/react": "^19.0.0",
-    "@types/react-native": "^0.73.0",
     "metro-react-native-babel-preset": "^0.77.0",
     "typescript": "^5.0.0"
   }

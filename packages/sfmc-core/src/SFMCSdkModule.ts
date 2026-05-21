@@ -4,6 +4,7 @@ import type { SFMCSdkApi } from './types';
 import type { SFMCEvent } from './events';
 
 let _api: SFMCSdkApi | null = null;
+let _emitter: NativeEventEmitter | null = null;
 
 export const SFMCSdkModule = {
   async requestSdk(): Promise<SFMCSdkApi> {
@@ -33,6 +34,7 @@ export const SFMCSdkModule = {
   },
 
   getEmitter(): NativeEventEmitter {
-    return new NativeEventEmitter(NativeModule);
+    if (!_emitter) _emitter = new NativeEventEmitter(NativeModule);
+    return _emitter;
   },
 };

@@ -6,6 +6,7 @@ import com.facebook.react.bridge.Promise
 import com.facebook.react.bridge.ReactApplicationContext
 import com.facebook.react.bridge.ReactMethod
 import com.facebook.react.bridge.ReadableArray
+import com.facebook.react.bridge.ReadableMap
 import com.facebook.react.bridge.WritableArray
 import com.facebook.react.bridge.WritableMap
 import com.facebook.react.module.annotations.ReactModule
@@ -29,6 +30,7 @@ class MCModule(reactContext: ReactApplicationContext) :
     companion object { const val NAME = "MCModule" }
 
     private var registrationListener: RegistrationManager.RegistrationEventListener? = null
+    private val messageCache = mutableMapOf<String, InboxMessage>()
 
     private fun sendEvent(name: String, params: com.facebook.react.bridge.WritableMap) {
         if (reactApplicationContext.hasActiveReactInstance()) {
@@ -57,7 +59,10 @@ class MCModule(reactContext: ReactApplicationContext) :
     @ReactMethod
     override fun getAllMessages(promise: Promise) {
         MarketingCloudSdk.requestSdk { sdk ->
-            promise.resolve(messagesToArray(sdk.getInboxMessageManager().getMessages()))
+            val messages = sdk.getInboxMessageManager().getMessages()
+            messageCache.clear()
+            messages.forEach { messageCache[it.id] = it }
+            promise.resolve(messagesToArray(messages))
         }
     }
 
@@ -138,11 +143,15 @@ class MCModule(reactContext: ReactApplicationContext) :
         }
     }
 
-    // trackInboxMessageOpened — InboxMessageManager has no `trackMessageOpened` method in v11
-    // discovery. Emitting as no-op stub to satisfy the TS spec; logs a warning at runtime.
     @ReactMethod
-    override fun trackInboxMessageOpened(messageId: String) {
-        android.util.Log.w(NAME, "trackInboxMessageOpened: not implemented — no SDK method available in v11")
+    override fun trackInboxMessageOpened(message: ReadableMap) {
+        val messageId = message.getString("id") ?: return
+        MarketingCloudSdk.requestSdk { sdk ->
+            val inboxMessage = messageCache[messageId]
+            if (inboxMessage != null) {
+                sdk.getAnalyticsManager().trackInboxOpenEvent(inboxMessage)
+            }
+        }
     }
 
     @ReactMethod

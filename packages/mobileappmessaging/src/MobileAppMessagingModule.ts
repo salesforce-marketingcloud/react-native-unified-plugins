@@ -1,7 +1,9 @@
+import { NativeEventEmitter } from 'react-native';
 import NativeModule from './NativeMAMModule';
 import type { MobileAppMessagingApi } from './types';
 
 let _api: MobileAppMessagingApi | null = null;
+let _emitter: NativeEventEmitter | null = null;
 
 export const MobileAppMessagingModule = {
   async requestSdk(): Promise<MobileAppMessagingApi> {
@@ -18,7 +20,8 @@ export const MobileAppMessagingModule = {
     return _api;
   },
 
-  getEmitter() {
-    return new (require('react-native').NativeEventEmitter)(NativeModule);
+  getEmitter(): NativeEventEmitter {
+    if (!_emitter) _emitter = new NativeEventEmitter(NativeModule);
+    return _emitter;
   },
 };

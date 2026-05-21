@@ -124,7 +124,7 @@
     NSString *catalogObjectType = dict[@"catalogObjectType"] ?: @"";
     NSString *catalogObjectId = dict[@"catalogObjectId"] ?: @"";
     NSInteger quantity = [dict[@"quantity"] integerValue];
-    NSDecimalNumber *price = [NSDecimalNumber decimalNumberWithString:[dict[@"price"] stringValue] ?: @"0"];
+    NSDecimalNumber *price = dict[@"price"] ? [NSDecimalNumber decimalNumberWithString:[dict[@"price"] stringValue]] : nil;
     NSString *currency = dict[@"currency"] ?: @"";
     NSDictionary *attributes = dict[@"attributes"];
 
@@ -166,7 +166,7 @@
 
     NSString *orderId = dict[@"id"] ?: @"";
     NSArray<SFMCSdkLineItem *> *lineItems = [self lineItemsFromArray:dict[@"lineItems"]] ?: @[];
-    NSDecimalNumber *totalValue = [NSDecimalNumber decimalNumberWithString:[dict[@"totalValue"] stringValue] ?: @"0"];
+    NSDecimalNumber *totalValue = dict[@"totalValue"] ? [NSDecimalNumber decimalNumberWithString:[dict[@"totalValue"] stringValue]] : nil;
     NSString *currency = dict[@"currency"] ?: @"";
     NSDictionary *attributes = dict[@"attributes"];
 

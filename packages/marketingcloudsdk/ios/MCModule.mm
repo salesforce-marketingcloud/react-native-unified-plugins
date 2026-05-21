@@ -8,17 +8,11 @@
 @interface MCModule : RCTEventEmitter <RCTBridgeModule, RCTTurboModule>
 @end
 
-// MCNormaliseMessages — maps NSDictionary inbox messages to the cross-platform InboxMessage shape.
-//
-// iOS-specific transformation rules:
-//   - Boolean fields (`read`, `deleted`) → extract via `@([m[@"x"] boolValue])`.
-//   - Date fields (`startDateUtc`, `endDateUtc`, `sendDateUtc`) → if NSDate, format to
-//     "yyyy-MM-dd HH:mm:ss" UTC; if NSString, pass through.
-//   - `keys` (iOS) → SDK returns array of [{key, value}] dicts. Flatten into `customKeys` map
-//     for parity with Android's native Map<String, String>.
-//   - `media`, `notificationMessage` → NSDictionary on iOS, pass through as objects.
-//   - `subject` and `title` are independent — do NOT coalesce.
-//   - Do NOT fall back to internal push-payload keys (`_m_`, `_r_`, `messageId`).
+// MCNormaliseMessages — passes through the full SDK dictionary, only transforming:
+//   - Date fields (NSDate → "yyyy-MM-dd HH:mm:ss" UTC string)
+//   - `keys` array → flattened `customKeys` map (for parity with Android)
+//   - `media.url` / `media.altText` dot-notation keys → nested `media` dict
+//   - Boolean coercion for `read` and `deleted`/`messageDeleted`
 static NSArray * MCNormaliseMessages(NSArray *messages) {
     NSDateFormatter *df = [[NSDateFormatter alloc] init];
     [df setDateFormat:@"yyyy-MM-dd HH:mm:ss"];
@@ -27,30 +21,22 @@ static NSArray * MCNormaliseMessages(NSArray *messages) {
 
     NSMutableArray *result = [NSMutableArray arrayWithCapacity:messages.count];
     for (NSDictionary *m in messages) {
-        NSMutableDictionary *item = [NSMutableDictionary dictionary];
+        NSMutableDictionary *item = [m mutableCopy];
 
-        // Public InboxMessage string / object fields — pass through if present.
-        for (NSString *key in @[@"id", @"subject", @"title", @"alert", @"sound", @"url",
-                                @"custom", @"subtitle", @"inboxMessage", @"inboxSubtitle",
-                                @"messageType", @"media", @"notificationMessage"]) {
-            if (m[key]) item[key] = m[key];
-        }
-
-        // Boolean fields — always emit, extracting via boolValue
-        item[@"read"] = @([m[@"read"] boolValue]);
-        item[@"deleted"] = @([m[@"deleted"] boolValue]);
-
-        // Date fields — format NSDate to UTC string, pass through NSString
-        for (NSString *dateKey in @[@"startDateUtc", @"endDateUtc", @"sendDateUtc"]) {
-            id v = m[dateKey];
+        // Date fields — convert NSDate to UTC string
+        for (NSString *dateKey in @[@"startDateUtc", @"endDateUtc", @"sendDateUtc",
+                                    @"lastShownDateUtc", @"nextAllowedShowDateUtc"]) {
+            id v = item[dateKey];
             if ([v isKindOfClass:[NSDate class]]) {
                 item[dateKey] = [df stringFromDate:v];
-            } else if ([v isKindOfClass:[NSString class]]) {
-                item[dateKey] = v;
             }
         }
 
-        // keys → customKeys: flatten [{key, value}] array to flat map (iOS-specific)
+        // Boolean coercion
+        item[@"read"] = @([m[@"read"] boolValue]);
+        item[@"deleted"] = @([m[@"messageDeleted"] boolValue] || [m[@"deleted"] boolValue]);
+
+        // keys → customKeys: flatten [{key, value}] array to flat map
         NSArray *keys = m[@"keys"];
         if ([keys isKindOfClass:[NSArray class]] && keys.count > 0) {
             NSMutableDictionary *customKeys = [NSMutableDictionary dictionaryWithCapacity:keys.count];
@@ -61,19 +47,23 @@ static NSArray * MCNormaliseMessages(NSArray *messages) {
             }
             if (customKeys.count > 0) item[@"customKeys"] = customKeys;
         }
+        [item removeObjectForKey:@"keys"];
+
+        // media dot-notation keys → nested media dict
+        NSString *mediaUrl = m[@"media.url"];
+        NSString *mediaAlt = m[@"media.altText"];
+        if (mediaUrl || mediaAlt) {
+            NSMutableDictionary *media = [NSMutableDictionary dictionary];
+            if (mediaUrl) media[@"url"] = mediaUrl;
+            if (mediaAlt) media[@"altText"] = mediaAlt;
+            item[@"media"] = media;
+        }
+        [item removeObjectForKey:@"media.url"];
+        [item removeObjectForKey:@"media.altText"];
 
         [result addObject:item];
     }
     return result;
-}
-
-// MCFindMessage — looks up a message NSDictionary by JS-side id string.
-// Used by trackInboxMessageOpened which requires a dict (not a by-id selector).
-static NSDictionary * MCFindMessage(NSArray *messages, NSString *messageId) {
-    for (NSDictionary *m in messages) {
-        if ([m[@"id"] isEqualToString:messageId]) return m;
-    }
-    return nil;
 }
 
 @implementation MCModule
@@ -200,11 +190,9 @@ RCT_EXPORT_METHOD(markAllMessagesDeleted) {
     }];
 }
 
-// trackMessageOpened: requires a message dict — look up by id from getAllMessages.
-RCT_EXPORT_METHOD(trackInboxMessageOpened:(NSString *)messageId) {
+RCT_EXPORT_METHOD(trackInboxMessageOpened:(NSDictionary *)message) {
     [SFMarketingCloudSdk requestSdk:^(id<MarketingCloudSdkInterface> _Nullable mc) {
-        NSDictionary *msg = MCFindMessage([mc getAllMessages] ?: @[], messageId);
-        if (msg) [mc trackMessageOpened:msg];
+        if (message) [mc trackMessageOpened:message];
     }];
 }
 

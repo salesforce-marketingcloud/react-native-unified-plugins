@@ -9,8 +9,8 @@ Pod::Spec.new do |s|
   s.platform     = :ios, "15.1"
   s.source_files = "**/*.{h,m,mm,swift}"
 
-  s.dependency "MarketingCloud-SFMCSdk"
-  s.dependency "SFPushFeatureSDK"
+  s.dependency "MarketingCloud-SFMCSdk", "~> 4.0.0"
+  s.dependency "SFPushFeatureSDK", "~> 2.0.0"
   s.pod_target_xcconfig = { 'ENABLE_BITCODE' => 'NO' }
 
   install_modules_dependencies(s)

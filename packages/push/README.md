@@ -30,7 +30,7 @@ import { PushModule } from '@salesforce-mc/react-native-push';
 import type { PushApi } from '@salesforce-mc/react-native-push';
 
 const push: PushApi = await PushModule.requestSdk();
-await push.setPushEnabled(true);
+push.enablePush();
 const token = await push.getSystemToken();
 const enabled = await push.isPushEnabled();
 
@@ -40,6 +40,23 @@ const sub = PushModule.getEmitter().addListener('sfmc_push_token_refreshed', ({ 
 });
 ```
 
+## API
+
+| Method | Return | Description |
+|--------|--------|-------------|
+| `enablePush()` | `void` | Enable push notifications |
+| `disablePush()` | `void` | Disable push notifications |
+| `isPushEnabled()` | `Promise<boolean>` | Check if push is enabled |
+| `getSystemToken()` | `Promise<string \| null>` | Get the current device push token |
+
+### Events
+
+| Event Name | Payload | Platform | Description |
+|------------|---------|----------|-------------|
+| `sfmc_push_token_refreshed` | `{ token: string }` | Android only | Emitted when the push token is refreshed |
+
+> **iOS note:** The `sfmc_push_token_refreshed` event is not emitted on iOS. Token refresh on iOS is handled natively via `AppDelegate.application(_:didRegisterForRemoteNotificationsWithDeviceToken:)`, which passes the token directly to `PushFeature.setDeviceToken(_:)`. Use `getSystemToken()` to read the current token on demand.
+
 ## Notes
 
 Push registration requires Firebase configuration on Android (`google-services.json` in the example app). On iOS, ensure the example target has Push Notifications and Background Modes (Remote Notifications) capabilities enabled in your Apple Developer account.
@@ -47,8 +64,8 @@ Push registration requires Firebase configuration on Android (`google-services.j
 ## Versions
 
 - React Native: 0.85.1 (New Architecture mandatory)
-- Android SFMC SDK: 11.0 umbrella (sfmcsdk 3.1.0, marketingcloudsdk 11.0.0, pushfeaturemodule 2.0.0, inappmessagingfeaturemodule 1.0.0, mobileappmessagingsdk 1.1.0)
-- iOS SFMC SDK: 11.0 umbrella (MarketingCloudSDK 11.0.0, MarketingCloud-SFMCSdk 4.0.1, SFPushFeatureSDK 2.0.0, SFInAppMessagingFeatureSDK 1.0.0, SFMobileAppMessagingSDK 2.0.0)
+- Android: sfmcsdk 3.1.0, pushfeaturemodule 2.0.0
+- iOS: SFPushFeatureSDK 2.0.0, MarketingCloud-SFMCSdk 4.0.1
 
 ## License
 

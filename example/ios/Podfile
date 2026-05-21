@@ -14,6 +14,7 @@ require_relative '../../node_modules/react-native/scripts/react_native_pods'
 
 platform :ios, '15.1'  # RN 0.85 minimum
 install! 'cocoapods', :deterministic_uuids => false, :warn_for_unused_master_specs_repo => false
+use_frameworks!
 
 target 'SFMCExample' do
   config = use_native_modules!

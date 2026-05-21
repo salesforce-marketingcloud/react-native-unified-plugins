@@ -1,7 +1,9 @@
+import { NativeEventEmitter } from 'react-native';
 import NativeModule from './NativeMCModule';
 import type { MarketingCloudSdkApi, InboxMessage } from './types';
 
 let _api: MarketingCloudSdkApi | null = null;
+let _emitter: NativeEventEmitter | null = null;
 
 export const MarketingCloudSdkModule = {
   async requestSdk(): Promise<MarketingCloudSdkApi> {
@@ -21,7 +23,7 @@ export const MarketingCloudSdkModule = {
       markMessageDeleted: (messageId: string) => NativeModule.markMessageDeleted(messageId),
       markAllMessagesRead: () => NativeModule.markAllMessagesRead(),
       markAllMessagesDeleted: () => NativeModule.markAllMessagesDeleted(),
-      trackInboxMessageOpened: (messageId: string) => NativeModule.trackInboxMessageOpened(messageId),
+      trackInboxMessageOpened: (message: InboxMessage) => NativeModule.trackInboxMessageOpened(message as unknown as Object),
       addTag: (tag: string) => NativeModule.addTag(tag),
       addTags: (tags: string[]) => NativeModule.addTags(tags),
       removeTag: (tag: string) => NativeModule.removeTag(tag),
@@ -44,7 +46,8 @@ export const MarketingCloudSdkModule = {
     return _api;
   },
 
-  getEmitter() {
-    return new (require('react-native').NativeEventEmitter)(NativeModule);
+  getEmitter(): NativeEventEmitter {
+    if (!_emitter) _emitter = new NativeEventEmitter(NativeModule);
+    return _emitter;
   },
 };

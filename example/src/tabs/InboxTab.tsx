@@ -105,7 +105,7 @@ const InboxTab = forwardRef<InboxActions, Props>(({ mc, onActionsReady }, _ref) 
             },
             {
                 text: item.read ? 'Already Read' : 'Mark Read',
-                onPress: () => { mc.markMessageRead(item.id); mc.trackInboxMessageOpened(item.id); fetchAll(); },
+                onPress: () => { mc.markMessageRead(item.id); mc.trackInboxMessageOpened(item); fetchAll(); },
                 style: item.read ? 'default' : 'default',
             },
             {

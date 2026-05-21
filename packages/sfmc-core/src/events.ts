@@ -4,13 +4,13 @@ export interface LineItem {
     quantity: number;
     price: number;
     currency: string;
-    attributes?: Record<string, string>;
+    attributes?: Record<string, string | number | boolean>;
 }
 
 export interface CatalogObject {
     type: string;
     id: string;
-    attributes?: Record<string, string>;
+    attributes?: Record<string, string | number | boolean>;
     relatedCatalogObjects?: Record<string, string[]>;
 }
 
@@ -19,25 +19,25 @@ export interface Order {
     lineItems: LineItem[];
     totalValue: number;
     currency: string;
-    attributes?: Record<string, string>;
+    attributes?: Record<string, string | number | boolean>;
 }
 
 export interface CustomEvent {
     objType: 'CustomEvent';
     name: string;
-    attributes?: Record<string, string>;
+    attributes?: Record<string, string | number | boolean>;
 }
 
 export interface EngagementEvent {
     objType: 'EngagementEvent';
     name: string;
-    attributes?: Record<string, string>;
+    attributes?: Record<string, string | number | boolean>;
 }
 
 export interface SystemEvent {
     objType: 'SystemEvent';
     name: string;
-    attributes?: Record<string, string>;
+    attributes?: Record<string, string | number | boolean>;
 }
 
 export interface CartEvent {

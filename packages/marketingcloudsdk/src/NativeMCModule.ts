@@ -16,7 +16,7 @@ export interface Spec extends TurboModule {
   markMessageDeleted(messageId: string): void;
   markAllMessagesRead(): void;
   markAllMessagesDeleted(): void;
-  trackInboxMessageOpened(messageId: string): void;
+  trackInboxMessageOpened(message: Object): void;
   addTag(tag: string): void;
   addTags(tags: string[]): void;
   removeTag(tag: string): void;

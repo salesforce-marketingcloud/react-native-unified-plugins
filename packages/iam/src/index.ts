@@ -1,2 +1,2 @@
 export { IamModule } from './IamModule';
-export type { IamApi, InAppMessage, InAppMessageCloseAction } from './types';
+export type { IamApi } from './types';

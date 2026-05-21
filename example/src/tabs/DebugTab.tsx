@@ -5,11 +5,11 @@ import {
     ScrollView,
     TouchableOpacity,
     Share,
-    Clipboard,
     ActivityIndicator,
     StyleSheet,
     Alert,
 } from 'react-native';
+import Clipboard from '@react-native-clipboard/clipboard';
 import { color } from '../colors';
 import type { SFMCSdkApi } from '@salesforce-mc/react-native-sfmc-core';
 

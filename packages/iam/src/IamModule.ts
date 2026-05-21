@@ -3,6 +3,7 @@ import NativeModule from './NativeSFMCIamModule';
 import type { IamApi } from './types';
 
 let _api: IamApi | null = null;
+let _emitter: NativeEventEmitter | null = null;
 
 export const IamModule = {
   async requestSdk(): Promise<IamApi> {
@@ -15,6 +16,7 @@ export const IamModule = {
   },
 
   getEmitter(): NativeEventEmitter {
-    return new NativeEventEmitter(NativeModule);
+    if (!_emitter) _emitter = new NativeEventEmitter(NativeModule);
+    return _emitter;
   },
 };
