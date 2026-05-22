@@ -7,15 +7,15 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		5A0A1C0018A7BB9BAB7E103E /* Pods_SFMCExample.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7D26B15B169D2713551C5C83 /* Pods_SFMCExample.framework */; };
 		72B495AA16B2CDB80FC9396B /* ExampleServiceExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = BE042642CCB3653E462B1D3C /* ExampleServiceExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		765E5FFFF6DFD44CE02AA1B6 /* libPods-ExampleContentExtension.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 7D1303CB4FDAE154E40A5647 /* libPods-ExampleContentExtension.a */; };
+		7C78E4CF39818C605F79C0DF /* libPods-SFMCExample.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 19BD8F89FC41F64CD426B9A6 /* libPods-SFMCExample.a */; };
 		7DB9AB03DF2E6A60937863B0 /* ExampleContentExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 848BDA996E18442C80285C02 /* ExampleContentExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		9C35566D4F31377C49263C19 /* libPods-ExampleServiceExtension.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 323F26EA030BFCC2DE482788 /* libPods-ExampleServiceExtension.a */; };
 		A183CCCB4325FA7316728FA1 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = F38D17DB8A38B2C97FB75872 /* AppDelegate.swift */; };
 		AFF3325AE8310AE0E6071A1E /* NotificationService.m in Sources */ = {isa = PBXBuildFile; fileRef = 1ED423E0524EF9DB963096CD /* NotificationService.m */; };
-		BF575FC807475CED9310E1E3 /* Pods_ExampleServiceExtension.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E9EA1569F2210B37DA042F68 /* Pods_ExampleServiceExtension.framework */; };
 		C8C8278BE876D72B9B6C1A96 /* NotificationViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 165B7A927692223A80522D73 /* NotificationViewController.m */; };
 		E5D1E3D13988220CD556C904 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = A501D4ED718431782A1DF359 /* PrivacyInfo.xcprivacy */; };
-		F3B40932D592FBDC40223D57 /* Pods_ExampleContentExtension.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 64AB59521277311B60BC1524 /* Pods_ExampleContentExtension.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -52,14 +52,15 @@
 
 /* Begin PBXFileReference section */
 		165B7A927692223A80522D73 /* NotificationViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = NotificationViewController.m; sourceTree = "<group>"; };
+		19BD8F89FC41F64CD426B9A6 /* libPods-SFMCExample.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-SFMCExample.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		1ED423E0524EF9DB963096CD /* NotificationService.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = NotificationService.m; sourceTree = "<group>"; };
 		2929EEF8A80D29906238BB0B /* Pods-SFMCExample.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-SFMCExample.debug.xcconfig"; path = "Target Support Files/Pods-SFMCExample/Pods-SFMCExample.debug.xcconfig"; sourceTree = "<group>"; };
+		323F26EA030BFCC2DE482788 /* libPods-ExampleServiceExtension.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-ExampleServiceExtension.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		434B6226F6F3AA9D3818BA8A /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		4FED6095979BE25B3C7529A4 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
-		64AB59521277311B60BC1524 /* Pods_ExampleContentExtension.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_ExampleContentExtension.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		681AD061660B791615E8DB97 /* ExampleServiceExtension.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = ExampleServiceExtension.entitlements; sourceTree = "<group>"; };
 		77F233DD24FD72B31E3324A6 /* NotificationService.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = NotificationService.h; sourceTree = "<group>"; };
-		7D26B15B169D2713551C5C83 /* Pods_SFMCExample.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_SFMCExample.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		7D1303CB4FDAE154E40A5647 /* libPods-ExampleContentExtension.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-ExampleContentExtension.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		848BDA996E18442C80285C02 /* ExampleContentExtension.appex */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = "wrapper.app-extension"; path = ExampleContentExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		886A49DFBCC36BFB93778EAA /* SFMCExample.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = SFMCExample.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		916B1337680D2CE6DABA1A97 /* Pods-ExampleServiceExtension.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-ExampleServiceExtension.debug.xcconfig"; path = "Target Support Files/Pods-ExampleServiceExtension/Pods-ExampleServiceExtension.debug.xcconfig"; sourceTree = "<group>"; };
@@ -71,7 +72,6 @@
 		BE042642CCB3653E462B1D3C /* ExampleServiceExtension.appex */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = "wrapper.app-extension"; path = ExampleServiceExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		C0BFF0D8B6D5BCF6DCDA30EA /* NotificationViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = NotificationViewController.h; sourceTree = "<group>"; };
 		D087DF50808968C0F62EFE50 /* SFMCExample.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = SFMCExample.entitlements; sourceTree = "<group>"; };
-		E9EA1569F2210B37DA042F68 /* Pods_ExampleServiceExtension.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_ExampleServiceExtension.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		F38D17DB8A38B2C97FB75872 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		F3D685BE83C36E4C2F0C04AE /* Pods-SFMCExample.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-SFMCExample.release.xcconfig"; path = "Target Support Files/Pods-SFMCExample/Pods-SFMCExample.release.xcconfig"; sourceTree = "<group>"; };
 		F78B23C7FBEB3D64EAAA876F /* ExampleContentExtension.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = ExampleContentExtension.entitlements; sourceTree = "<group>"; };
@@ -82,7 +82,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				BF575FC807475CED9310E1E3 /* Pods_ExampleServiceExtension.framework in Frameworks */,
+				9C35566D4F31377C49263C19 /* libPods-ExampleServiceExtension.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -90,7 +90,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				5A0A1C0018A7BB9BAB7E103E /* Pods_SFMCExample.framework in Frameworks */,
+				7C78E4CF39818C605F79C0DF /* libPods-SFMCExample.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -98,7 +98,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				F3B40932D592FBDC40223D57 /* Pods_ExampleContentExtension.framework in Frameworks */,
+				765E5FFFF6DFD44CE02AA1B6 /* libPods-ExampleContentExtension.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -119,9 +119,9 @@
 		32066D10250D24BF73078AED /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
-				64AB59521277311B60BC1524 /* Pods_ExampleContentExtension.framework */,
-				E9EA1569F2210B37DA042F68 /* Pods_ExampleServiceExtension.framework */,
-				7D26B15B169D2713551C5C83 /* Pods_SFMCExample.framework */,
+				7D1303CB4FDAE154E40A5647 /* libPods-ExampleContentExtension.a */,
+				323F26EA030BFCC2DE482788 /* libPods-ExampleServiceExtension.a */,
+				19BD8F89FC41F64CD426B9A6 /* libPods-SFMCExample.a */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -478,21 +478,6 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				HEADER_SEARCH_PATHS = (
-					"$(inherited)",
-					"${PODS_ROOT}/ReactCommon",
-					"${PODS_ROOT}/ReactCommon/react/nativemodule/core",
-					"${PODS_ROOT}/React-runtimeexecutor",
-					"${PODS_ROOT}/React-runtimeexecutor/platform/ios",
-					"${PODS_ROOT}/ReactCommon-Samples",
-					"${PODS_ROOT}/ReactCommon-Samples/platform/ios",
-					"${PODS_ROOT}/React-Fabric/react/renderer/components/view/platform/cxx",
-					"${PODS_ROOT}/React-NativeModulesApple",
-					"${PODS_ROOT}/React-graphics",
-					"${PODS_ROOT}/React-graphics/react/renderer/graphics/platform/ios",
-					"${PODS_ROOT}/React-featureflags",
-					"${PODS_ROOT}/React-renderercss",
-				);
 				IPHONEOS_DEPLOYMENT_TARGET = 15.1;
 				MARKETING_VERSION = 1.0;
 				MTL_ENABLE_DEBUG_INFO = NO;
@@ -609,21 +594,6 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				HEADER_SEARCH_PATHS = (
-					"$(inherited)",
-					"${PODS_ROOT}/ReactCommon",
-					"${PODS_ROOT}/ReactCommon/react/nativemodule/core",
-					"${PODS_ROOT}/React-runtimeexecutor",
-					"${PODS_ROOT}/React-runtimeexecutor/platform/ios",
-					"${PODS_ROOT}/ReactCommon-Samples",
-					"${PODS_ROOT}/ReactCommon-Samples/platform/ios",
-					"${PODS_ROOT}/React-Fabric/react/renderer/components/view/platform/cxx",
-					"${PODS_ROOT}/React-NativeModulesApple",
-					"${PODS_ROOT}/React-graphics",
-					"${PODS_ROOT}/React-graphics/react/renderer/graphics/platform/ios",
-					"${PODS_ROOT}/React-featureflags",
-					"${PODS_ROOT}/React-renderercss",
-				);
 				IPHONEOS_DEPLOYMENT_TARGET = 15.1;
 				MARKETING_VERSION = 1.0;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
