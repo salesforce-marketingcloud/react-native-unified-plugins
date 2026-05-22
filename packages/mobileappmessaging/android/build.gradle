@@ -5,17 +5,21 @@ if (project.hasProperty("newArchEnabled") && project.newArchEnabled == "true") {
     apply plugin: "com.facebook.react"
 }
 
+def safeExtGet(prop, fallback) {
+    rootProject.ext.has(prop) ? rootProject.ext.get(prop) : fallback
+}
+
 android {
     namespace "com.salesforce.mc.mobileappmessaging"
-    compileSdk 36
-    defaultConfig { minSdk 26 }
+    compileSdk safeExtGet('compileSdkVersion', 36)
+    defaultConfig { minSdk safeExtGet('minSdkVersion', 26) }
     sourceSets { main { java.srcDirs += 'src/main/java' } }
 }
 
 dependencies {
-    implementation "com.salesforce.marketingcloud:sfmcsdk:3.1.0"
-    implementation "com.salesforce.marketingcloud:mobileappmessagingsdk:1.1.0"
-    implementation platform("com.google.firebase:firebase-bom:33.0.0")
+    implementation "com.salesforce.marketingcloud:sfmcsdk:${safeExtGet('sfmcSdkVersion', '3.1.+')}"
+    implementation "com.salesforce.marketingcloud:mobileappmessagingsdk:${safeExtGet('mobileAppMessagingSdkVersion', '1.1.+')}"
+    implementation platform("com.google.firebase:firebase-bom:${safeExtGet('firebaseBomVersion', '33.0.+')}")
     implementation "com.google.firebase:firebase-messaging"
     implementation "com.facebook.react:react-android"
 }

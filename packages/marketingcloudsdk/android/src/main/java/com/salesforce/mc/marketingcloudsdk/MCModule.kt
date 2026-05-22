@@ -161,7 +161,7 @@ class MCModule(reactContext: ReactApplicationContext) :
 
     @ReactMethod
     override fun addTags(tags: ReadableArray) {
-        val tagSet = (0 until tags.size()).mapTo(mutableSetOf()) { tags.getString(it) ?: "" }
+        val tagSet = (0 until tags.size()).mapNotNullTo(mutableSetOf()) { tags.getString(it) }
         MarketingCloudSdk.requestSdk { it.getRegistrationManager().edit().addTags(tagSet).commit() }
     }
 
@@ -172,7 +172,7 @@ class MCModule(reactContext: ReactApplicationContext) :
 
     @ReactMethod
     override fun removeTags(tags: ReadableArray) {
-        val tagSet = (0 until tags.size()).mapTo(mutableSetOf()) { tags.getString(it) ?: "" }
+        val tagSet = (0 until tags.size()).mapNotNullTo(mutableSetOf()) { tags.getString(it) }
         MarketingCloudSdk.requestSdk { it.getRegistrationManager().edit().removeTags(tagSet).commit() }
     }
 
@@ -203,34 +203,44 @@ class MCModule(reactContext: ReactApplicationContext) :
     // Re-enable once a verified Android API discovery is available.
     @ReactMethod
     override fun enablePiAnalytics() {
-        Log.w("MCModule", "enablePiAnalytics: not bridged on Android v11 (AnalyticsManager API not discovered)")
+        MarketingCloudSdk.requestSdk { sdk ->
+            sdk.getAnalyticsManager().enablePiAnalytics()
+        }
     }
 
     @ReactMethod
     override fun disablePiAnalytics() {
-        Log.w("MCModule", "disablePiAnalytics: not bridged on Android v11 (AnalyticsManager API not discovered)")
+        MarketingCloudSdk.requestSdk { sdk ->
+            sdk.getAnalyticsManager().disablePiAnalytics()
+        }
     }
 
     @ReactMethod
     override fun isPiAnalyticsEnabled(promise: Promise) {
-        Log.w("MCModule", "isPiAnalyticsEnabled: not bridged on Android v11 (AnalyticsManager API not discovered)")
-        promise.resolve(false)
+        MarketingCloudSdk.requestSdk { sdk ->
+            promise.resolve(sdk.getAnalyticsManager().arePiAnalyticsEnabled())
+        }
     }
 
     @ReactMethod
     override fun enableAnalytics() {
-        Log.w("MCModule", "enableAnalytics: not bridged on Android v11 (AnalyticsManager API not discovered)")
+        MarketingCloudSdk.requestSdk { sdk ->
+            sdk.getAnalyticsManager().enableAnalytics()
+        }
     }
 
     @ReactMethod
     override fun disableAnalytics() {
-        Log.w("MCModule", "disableAnalytics: not bridged on Android v11 (AnalyticsManager API not discovered)")
+        MarketingCloudSdk.requestSdk { sdk ->
+            sdk.getAnalyticsManager().disableAnalytics()
+        }
     }
 
     @ReactMethod
     override fun isAnalyticsEnabled(promise: Promise) {
-        Log.w("MCModule", "isAnalyticsEnabled: not bridged on Android v11 (AnalyticsManager API not discovered)")
-        promise.resolve(false)
+        MarketingCloudSdk.requestSdk { sdk ->
+            promise.resolve(sdk.getAnalyticsManager().areAnalyticsEnabled())
+        }
     }
 
     @ReactMethod

@@ -1,20 +1,28 @@
 package com.salesforce.mc.sfmccore
 
+import android.util.Log
 import com.facebook.react.bridge.Arguments
 import com.facebook.react.bridge.Promise
 import com.facebook.react.bridge.ReactApplicationContext
 import com.facebook.react.bridge.ReactMethod
 import com.facebook.react.bridge.ReadableMap
+import com.facebook.react.bridge.WritableArray
+import com.facebook.react.bridge.WritableMap
 import com.facebook.react.module.annotations.ReactModule
 import com.salesforce.marketingcloud.sfmcsdk.SFMCSdk
 import com.salesforce.marketingcloud.sfmcsdk.components.logging.LogLevel
 import com.salesforce.marketingcloud.sfmcsdk.components.logging.LogListener.AndroidLogger
+import org.json.JSONArray
+import org.json.JSONObject
 
 @ReactModule(name = SFMCSdkCoreModule.NAME)
 class SFMCSdkCoreModule(reactContext: ReactApplicationContext) :
     NativeSFMCSdkCoreModuleSpec(reactContext) {
 
-    companion object { const val NAME = "SFMCSdkCoreModule" }
+    companion object {
+        const val NAME = "SFMCSdkCoreModule"
+        private const val TAG = NAME
+    }
 
     @ReactMethod
     override fun requestSfmcSdk(promise: Promise) {
@@ -144,21 +152,48 @@ class SFMCSdkCoreModule(reactContext: ReactApplicationContext) :
     @ReactMethod
     override fun getSdkState(promise: Promise) {
         SFMCSdk.requestSdk { sdk ->
-            val json = sdk.getSdkState()
-            val map = Arguments.createMap()
-            val keys = json.keys()
-            while (keys.hasNext()) {
-                val key = keys.next()
-                when (val v = json.get(key)) {
-                    is String -> map.putString(key, v)
-                    is Boolean -> map.putBoolean(key, v)
-                    is Int -> map.putInt(key, v)
-                    is Double -> map.putDouble(key, v)
-                    else -> map.putString(key, v.toString())
-                }
-            }
+            val map = jsonObjectToWritableMap(sdk.getSdkState())
+            Log.d(TAG, "SDK State: " + map.toString())
             promise.resolve(map)
         }
+    }
+
+    private fun jsonObjectToWritableMap(json: JSONObject): WritableMap {
+        val map = Arguments.createMap()
+        val keys = json.keys()
+        while (keys.hasNext()) {
+            val key = keys.next()
+            when (val v = json.get(key)) {
+                JSONObject.NULL -> map.putNull(key)
+                is JSONObject -> map.putMap(key, jsonObjectToWritableMap(v))
+                is JSONArray -> map.putArray(key, jsonArrayToWritableArray(v))
+                is String -> map.putString(key, v)
+                is Boolean -> map.putBoolean(key, v)
+                is Int -> map.putInt(key, v)
+                is Long -> map.putDouble(key, v.toDouble())
+                is Double -> map.putDouble(key, v)
+                else -> map.putString(key, v.toString())
+            }
+        }
+        return map
+    }
+
+    private fun jsonArrayToWritableArray(json: JSONArray): WritableArray {
+        val array = Arguments.createArray()
+        for (i in 0 until json.length()) {
+            when (val v = json.get(i)) {
+                JSONObject.NULL -> array.pushNull()
+                is JSONObject -> array.pushMap(jsonObjectToWritableMap(v))
+                is JSONArray -> array.pushArray(jsonArrayToWritableArray(v))
+                is String -> array.pushString(v)
+                is Boolean -> array.pushBoolean(v)
+                is Int -> array.pushInt(v)
+                is Long -> array.pushDouble(v.toDouble())
+                is Double -> array.pushDouble(v)
+                else -> array.pushString(v.toString())
+            }
+        }
+        return array
     }
 
     @ReactMethod

@@ -1,0 +1,25 @@
+// Shared Android config for the SFMC React Native monorepo.
+// Consumed by example/android/build.gradle and each package's android/build.gradle.
+// Packages also fall back to literals via safeExtGet so they remain valid when
+// consumed standalone via npm (where rootProject.ext is the consumer app's, not ours).
+//
+// Note: '+' resolves to the latest patch at build time. Pair with Gradle dependency
+// locking if reproducible builds are required.
+ext {
+    // Android SDK levels
+    compileSdkVersion = 36
+    minSdkVersion = 26
+    targetSdkVersion = 35
+
+    // Salesforce Marketing Cloud SDKs
+    sfmcSdkVersion = "3.1.+"
+    marketingCloudSdkVersion = "11.0.+"
+    mobileAppMessagingSdkVersion = "1.1.+"
+    inAppMessagingFeatureVersion = "1.0.+"
+    inAppMessagingModelsVersion = "1.0.+"
+    pushFeatureVersion = "2.0.+"
+    pushModelsVersion = "1.0.+"
+
+    // Firebase
+    firebaseBomVersion = "33.0.+"
+}
