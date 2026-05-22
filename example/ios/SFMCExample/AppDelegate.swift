@@ -197,15 +197,6 @@ class AppDelegate: RCTAppDelegate {
         completionHandler(.newData)
     }
 
-    // MARK: - TurboModule registration (New Arch / Bridgeless)
-    // Maps JS module names → ObjC classes so TurboModuleManager force-links static-library modules.
-    // {{RN_MODULE_CLASS_REGISTRATIONS}} is derived from the "RN bridge class" column in SKILL.md's
-    // iOS pod → module table — one case per generated module.
-    // RCT_EXPORT_MODULE auto-registers ObjC++ bridge modules; no manual switch needed.
-    func getModuleClassFromName(_ name: UnsafePointer<CChar>!) -> AnyClass! {
-        return nil
-    }
-
     // MARK: - RCTAppDelegate
 
     override func sourceURL(for bridge: RCTBridge) -> URL? {

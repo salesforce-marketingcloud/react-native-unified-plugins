@@ -11,7 +11,7 @@ Historically, integrating Marketing Cloud features into a React Native app requi
 | Package | Description | Key APIs |
 |---|---|---|
 | [`@salesforce-mc/react-native-sfmc-core`](./packages/sfmc-core) | Foundation: identity, custom attributes, structured events, logging | `setProfileId`, `setAttribute`, `setAttributes`, `track`, `setLogging`, `getSdkState` |
-| [`@salesforce-mc/react-native-push`](./packages/push) | Push registration & notifications | `enablePush`, `disablePush`, `isPushEnabled`, `getSystemToken` |
+| [`@salesforce-mc/react-native-push`](./packages/push) | Push registration & notifications | `enablePush`, `disablePush`, `isPushEnabled`, `getPushToken` |
 | [`@salesforce-mc/react-native-iam`](./packages/iam) | In-App Messaging SDK readiness & programmatic display | `showInAppMessage` |
 | [`@salesforce-mc/react-native-marketingcloudsdk`](./packages/marketingcloudsdk) | MarketingCloud Engagement: inbox, tags, attributes, analytics, registration | `getAllMessages`, `markMessageRead`, `addTag(s)`, `enableAnalytics`, `getContactKey`, `setRegistrationCallback` |
 | [`@salesforce-mc/react-native-mobileappmessaging`](./packages/mobileappmessaging) | MobileAppMessaging: analytics, registration | `getDeviceId`, `enableAnalytics`, `setRegistrationCallback` |
