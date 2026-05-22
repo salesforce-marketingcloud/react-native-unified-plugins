@@ -31,7 +31,7 @@ import type { PushApi } from '@salesforce-mc/react-native-push';
 
 const push: PushApi = await PushModule.requestSdk();
 push.enablePush();
-const token = await push.getSystemToken();
+const token = await push.getPushToken();
 const enabled = await push.isPushEnabled();
 
 // Subscribe to token refresh events
@@ -47,7 +47,7 @@ const sub = PushModule.getEmitter().addListener('sfmc_push_token_refreshed', ({ 
 | `enablePush()` | `void` | Enable push notifications |
 | `disablePush()` | `void` | Disable push notifications |
 | `isPushEnabled()` | `Promise<boolean>` | Check if push is enabled |
-| `getSystemToken()` | `Promise<string \| null>` | Get the current device push token |
+| `getPushToken()` | `Promise<string \| null>` | Get the current device push token |
 
 ### Events
 
@@ -55,7 +55,7 @@ const sub = PushModule.getEmitter().addListener('sfmc_push_token_refreshed', ({ 
 |------------|---------|----------|-------------|
 | `sfmc_push_token_refreshed` | `{ token: string }` | Android only | Emitted when the push token is refreshed |
 
-> **iOS note:** The `sfmc_push_token_refreshed` event is not emitted on iOS. Token refresh on iOS is handled natively via `AppDelegate.application(_:didRegisterForRemoteNotificationsWithDeviceToken:)`, which passes the token directly to `PushFeature.setDeviceToken(_:)`. Use `getSystemToken()` to read the current token on demand.
+> **iOS note:** The `sfmc_push_token_refreshed` event is not emitted on iOS. Token refresh on iOS is handled natively via `AppDelegate.application(_:didRegisterForRemoteNotificationsWithDeviceToken:)`, which passes the token directly to `PushFeature.setDeviceToken(_:)`. Use `getPushToken()` to read the current token on demand.
 
 ## Notes
 

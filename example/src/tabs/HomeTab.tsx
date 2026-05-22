@@ -49,7 +49,7 @@ export default function HomeTab({ sfmc, push, mc, mam, iam }: Props) {
 
     const loadState = useCallback(async () => {
         const [token, mceId, mamId, pushOn, mcOn, mamOn] = await Promise.allSettled([
-            push.getSystemToken(),
+            push.getPushToken(),
             mc.getDeviceId(),
             mam.getDeviceId(),
             push.isPushEnabled(),

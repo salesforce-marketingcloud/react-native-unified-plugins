@@ -46,7 +46,7 @@ class SFMCPushModule(reactContext: ReactApplicationContext) :
     }
 
     @ReactMethod
-    override fun getSystemToken(promise: Promise) {
+    override fun getPushToken(promise: Promise) {
         PushFeature.requestSdk { promise.resolve(it.getPushMessageManager().getPushToken()) }
     }
 

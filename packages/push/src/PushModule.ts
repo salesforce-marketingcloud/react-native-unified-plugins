@@ -12,7 +12,7 @@ export const PushModule = {
     _api = {
       enablePush: () => NativeModule.enablePush(),
       disablePush: () => NativeModule.disablePush(),
-      getSystemToken: () => NativeModule.getSystemToken(),
+      getPushToken: () => NativeModule.getPushToken(),
       isPushEnabled: () => NativeModule.isPushEnabled(),
     };
     return _api;

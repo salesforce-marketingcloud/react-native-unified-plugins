@@ -60,7 +60,7 @@ RCT_EXPORT_METHOD(isPushEnabled:(RCTPromiseResolveBlock)resolve
 // ── Device token ──────────────────────────────────────────────────────────────
 // Verified from discovery: deviceToken selector on SFPushFeatureApi (returns String?).
 
-RCT_EXPORT_METHOD(getSystemToken:(RCTPromiseResolveBlock)resolve
+RCT_EXPORT_METHOD(getPushToken:(RCTPromiseResolveBlock)resolve
                   rejecter:(RCTPromiseRejectBlock)reject) {
     [SFPushFeature requestSdk:^(id<SFPushFeatureApi> _Nullable push) {
         resolve([push deviceToken]);
