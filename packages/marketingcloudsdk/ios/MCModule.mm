@@ -303,9 +303,10 @@ RCT_EXPORT_METHOD(getContactKey:(RCTPromiseResolveBlock)resolve
 // iOS: setRegistrationCallback: / unsetRegistrationCallback on MarketingCloudSdk
 
 RCT_EXPORT_METHOD(setRegistrationCallback) {
+    __weak typeof(self) weakSelf = self;
     [SFMarketingCloudSdk requestSdk:^(id<MarketingCloudSdkInterface> _Nullable mc) {
         [mc setRegistrationCallback:^(NSDictionary * _Nonnull registration) {
-            [self sendEventWithName:@"sfmc_mc_registration" body:registration];
+            [weakSelf sendEventWithName:@"sfmc_mc_registration" body:registration];
         }];
     }];
 }

@@ -73,9 +73,10 @@ RCT_EXPORT_METHOD(isAnalyticsEnabled:(RCTPromiseResolveBlock)resolve
 // ── Registration callback ──────────────────────────────────────────────────────
 
 RCT_EXPORT_METHOD(setRegistrationCallback) {
+    __weak typeof(self) weakSelf = self;
     [SFMobileAppMessaging requestSdk:^(id<SFMobileAppMessagingApi> _Nullable mam) {
         [mam setRegistrationCallback:^(NSDictionary * _Nonnull registration) {
-            [self sendEventWithName:@"sfmc_mam_registration" body:registration];
+            [weakSelf sendEventWithName:@"sfmc_mam_registration" body:registration];
         }];
     }];
 }

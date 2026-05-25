@@ -61,13 +61,9 @@ export default function RegistrationTab({ sfmc, mc }: Props) {
     }
 
     async function savePartyIdentification() {
-        if (!partyName.trim() && !partyNumber.trim() && !partyType.trim()) {
-            Alert.alert('Enter at least one party identification field');
-            return;
-        }
-        if (partyName.trim()) await sfmc.setPartyIdentificationName(partyName.trim());
-        if (partyNumber.trim()) await sfmc.setPartyIdentificationNumber(partyNumber.trim());
-        if (partyType.trim()) await sfmc.setPartyIdentificationType(partyType.trim());
+        await sfmc.setPartyIdentificationName(partyName.trim());
+        await sfmc.setPartyIdentificationNumber(partyNumber.trim());
+        await sfmc.setPartyIdentificationType(partyType.trim());
         await loadIdentity();
         Alert.alert('Saved', 'Party identification updated.');
     }
