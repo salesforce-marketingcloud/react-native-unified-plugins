@@ -43,6 +43,7 @@ export default function HomeTab({ sfmc, push, mc, mam, iam }: Props) {
     const [eventName, setEventName] = useState('');
     const [attrKey, setAttrKey] = useState('');
     const [attrValue, setAttrValue] = useState('');
+    const [sendImmediate, setSendImmediate] = useState(false);
 
     // IAM state
     const [iamMessageId, setIamMessageId] = useState('');
@@ -141,12 +142,19 @@ export default function HomeTab({ sfmc, push, mc, mam, iam }: Props) {
         }
         const attrs: Record<string, string> = {};
         if (attrKey.trim() && attrValue.trim()) attrs[attrKey.trim()] = attrValue.trim();
-        sfmc.track({ objType: 'CustomEvent', name: eventName.trim(), attributes: attrs });
+        const event = { objType: 'CustomEvent' as const, name: eventName.trim(), attributes: attrs };
+        if (sendImmediate) {
+            sfmc.sendImmediate(event);
+        } else {
+            sfmc.track(event);
+        }
+        const mode = sendImmediate ? 'sent immediately' : 'queued for delivery';
         setEventModalVisible(false);
         setEventName('');
         setAttrKey('');
         setAttrValue('');
-        Alert.alert('Event tracked', `"${eventName.trim()}" queued for delivery.`);
+        setSendImmediate(false);
+        Alert.alert('Event tracked', `"${event.name}" ${mode}.`);
     }
 
     function triggerIam() {
@@ -209,6 +217,7 @@ export default function HomeTab({ sfmc, push, mc, mam, iam }: Props) {
             {/* Events */}
             <SectionHeader title="Events" />
             <PrimaryButton title="Track Custom Event…" onPress={() => setEventModalVisible(true)} />
+            <PrimaryButton title="Flush Events" onPress={() => { sfmc.flush(); Alert.alert('Flushed', 'Event queue flushed.'); }} />
 
             {/* In-App Messaging */}
             <SectionHeader title="In-App Messaging" />
@@ -266,6 +275,10 @@ export default function HomeTab({ sfmc, push, mc, mam, iam }: Props) {
                         autoCapitalize="none"
                         autoCorrect={false}
                     />
+                    <View style={s.switchRow}>
+                        <Text style={s.switchLabel}>Send Immediate</Text>
+                        <Switch value={sendImmediate} onValueChange={setSendImmediate} />
+                    </View>
                     <PrimaryButton title="Send Event" onPress={sendEvent} />
                     <PrimaryButton title="Cancel" onPress={() => setEventModalVisible(false)} destructive />
                 </View>

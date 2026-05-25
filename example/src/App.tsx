@@ -151,17 +151,17 @@ function AppInner() {
                         style={s.navLeft}
                         onPress={() => inboxActionsRef.current?.refresh()}
                     >
-                        <Text style={s.navAction}>↻</Text>
+                        <Text style={s.navIcon}>↻</Text>
                     </TouchableOpacity>
                 )}
                 <Text style={s.navTitle}>{TITLES[activeTab]}</Text>
                 {showInboxActions && (
                     <View style={s.navRight}>
                         <TouchableOpacity onPress={() => inboxActionsRef.current?.markAllRead()}>
-                            <Text style={s.navAction}>✓ All</Text>
+                            <Text style={s.navIcon}>✓</Text>
                         </TouchableOpacity>
                         <TouchableOpacity onPress={() => inboxActionsRef.current?.deleteAll()}>
-                            <Text style={[s.navAction, s.navDestructive]}>Del All</Text>
+                            <Text style={[s.navIcon, s.navDestructive]}>🗑</Text>
                         </TouchableOpacity>
                     </View>
                 )}
@@ -304,6 +304,12 @@ const s = StyleSheet.create({
         fontWeight: '500',
         paddingHorizontal: 8,
         paddingVertical: 6,
+    },
+    navIcon: {
+        fontSize: 20,
+        color: brand.onPrimary,
+        paddingHorizontal: 6,
+        paddingVertical: 4,
     },
     navDestructive: {
         color: '#FFC9CC',
