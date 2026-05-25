@@ -44,7 +44,7 @@ export default function RegistrationTab({ sfmc, mc }: Props) {
         try { setPartyNumber((await sfmc.getPartyIdentificationNumber?.()) ?? ''); } catch { setPartyNumber(''); }
         try { setPartyType((await sfmc.getPartyIdentificationType?.()) ?? ''); } catch { setPartyType(''); }
         try {
-            const attrs = await mc.getAttributes?.();
+            const attrs = await sfmc.getAttributes?.();
             setSavedAttrs(attrs ? Object.entries(attrs).map(([key, value]) => ({ key, value: String(value) })) : []);
         } catch { setSavedAttrs([]); }
         try { setSavedTags((await mc.getTags?.()) ?? []); } catch { setSavedTags([]); }
