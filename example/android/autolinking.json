@@ -12,7 +12,7 @@
           "libraryName": "RNSFMCSdkCoreSpec",
           "buildTypes": [],
           "componentDescriptors": [],
-          "cmakeListsPath": "/Users/srikanth.nama/workspace/expiremental/rn-test/packages/sfmc-core/android/build/generated/source/codegen/jni/CMakeLists.txt",
+          "cmakeListsPath": "../../packages/sfmc-core/android/build/generated/source/codegen/jni/CMakeLists.txt",
           "cxxModuleHeaderName": null,
           "dependencyConfiguration": "implementation"
         }
@@ -29,7 +29,7 @@
           "libraryName": "RNSFMCPushSpec",
           "buildTypes": [],
           "componentDescriptors": [],
-          "cmakeListsPath": "/Users/srikanth.nama/workspace/expiremental/rn-test/packages/push/android/build/generated/source/codegen/jni/CMakeLists.txt",
+          "cmakeListsPath": "../../packages/push/android/build/generated/source/codegen/jni/CMakeLists.txt",
           "cxxModuleHeaderName": null,
           "dependencyConfiguration": "implementation"
         }
@@ -46,7 +46,7 @@
           "libraryName": "RNSFMCIamSpec",
           "buildTypes": [],
           "componentDescriptors": [],
-          "cmakeListsPath": "/Users/srikanth.nama/workspace/expiremental/rn-test/packages/iam/android/build/generated/source/codegen/jni/CMakeLists.txt",
+          "cmakeListsPath": "../../packages/iam/android/build/generated/source/codegen/jni/CMakeLists.txt",
           "cxxModuleHeaderName": null,
           "dependencyConfiguration": "implementation"
         }
@@ -63,7 +63,7 @@
           "libraryName": "RNMCSpec",
           "buildTypes": [],
           "componentDescriptors": [],
-          "cmakeListsPath": "/Users/srikanth.nama/workspace/expiremental/rn-test/packages/marketingcloudsdk/android/build/generated/source/codegen/jni/CMakeLists.txt",
+          "cmakeListsPath": "../../packages/marketingcloudsdk/android/build/generated/source/codegen/jni/CMakeLists.txt",
           "cxxModuleHeaderName": null,
           "dependencyConfiguration": "implementation"
         }
@@ -80,7 +80,7 @@
           "libraryName": "RNMAMSpec",
           "buildTypes": [],
           "componentDescriptors": [],
-          "cmakeListsPath": "/Users/srikanth.nama/workspace/expiremental/rn-test/packages/mobileappmessaging/android/build/generated/source/codegen/jni/CMakeLists.txt",
+          "cmakeListsPath": "../../packages/mobileappmessaging/android/build/generated/source/codegen/jni/CMakeLists.txt",
           "cxxModuleHeaderName": null,
           "dependencyConfiguration": "implementation"
         }
@@ -97,7 +97,7 @@
           "libraryName": "rnclipboard",
           "buildTypes": [],
           "componentDescriptors": [],
-          "cmakeListsPath": "/Users/srikanth.nama/workspace/expiremental/rn-test/node_modules/@react-native-clipboard/clipboard/android/build/generated/source/codegen/jni/CMakeLists.txt",
+          "cmakeListsPath": "../../node_modules/@react-native-clipboard/clipboard/android/build/generated/source/codegen/jni/CMakeLists.txt",
           "cxxModuleHeaderName": null,
           "dependencyConfiguration": "implementation"
         }
