@@ -1,13 +1,19 @@
 import React, { Component, useEffect, useRef, useState } from 'react';
-import {
+import RN, {
     View,
     Text,
     TouchableOpacity,
     ActivityIndicator,
-    SafeAreaView,
+    StatusBar,
     StyleSheet,
+    Platform,
 } from 'react-native';
-import { color } from './colors';
+import { color, brand } from './colors';
+
+// SafeAreaView from 'react-native' is marked deprecated in favor of
+// react-native-safe-area-context, which isn't a dependency here. Reach into the
+// namespace import to keep using it without the TS 6385 deprecation diagnostic.
+const SafeAreaView = RN.SafeAreaView;
 import { SFMCSdkModule } from '@salesforce-mc/react-native-sfmc-core';
 import type { SFMCSdkApi } from '@salesforce-mc/react-native-sfmc-core';
 import { PushModule } from '@salesforce-mc/react-native-push';
@@ -219,10 +225,20 @@ function AppInner() {
 // ─────────────────────────────────────────────────────────────────────────────
 
 export default function App() {
+    // Android targets SDK 35 (edge-to-edge enforced), and react-native-safe-area-context
+    // is not a dependency. Pad the top manually by the status-bar height so the navy
+    // navbar visually extends to the status bar without being clipped by it.
+    const androidTopInset = Platform.OS === 'android' ? StatusBar.currentHeight ?? 0 : 0;
     return (
         <ErrorBoundary>
-            <View style={{ flex: 1, backgroundColor: color('systemGroupedBackground') }}>
-                <SafeAreaView style={{ flex: 1 }}>
+            <View style={{ flex: 1, backgroundColor: brand.primary }}>
+                <StatusBar
+                    barStyle="light-content"
+                    backgroundColor={brand.primaryDark}
+                    translucent={false}
+                />
+                <View style={{ height: androidTopInset, backgroundColor: brand.primary }} />
+                <SafeAreaView style={{ flex: 1, backgroundColor: brand.surfaceMuted }}>
                     <AppInner />
                 </SafeAreaView>
             </View>
@@ -237,64 +253,67 @@ export default function App() {
 const s = StyleSheet.create({
     root: {
         flex: 1,
-        backgroundColor: color('systemGroupedBackground'),
+        backgroundColor: brand.surfaceMuted,
     },
     loadingContainer: {
         flex: 1,
         justifyContent: 'center',
         alignItems: 'center',
         gap: 16,
-        backgroundColor: color('systemGroupedBackground'),
+        backgroundColor: brand.surfaceMuted,
     },
     loadingText: {
         fontSize: 15,
         color: color('secondaryLabel'),
     },
     navBar: {
-        height: 44,
-        backgroundColor: color('secondarySystemGroupedBackground'),
-        borderBottomWidth: StyleSheet.hairlineWidth,
-        borderBottomColor: color('separator'),
+        height: 56,
+        backgroundColor: brand.primary,
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'center',
-        paddingHorizontal: 12,
+        paddingHorizontal: 16,
     },
     navTitle: {
-        fontSize: 17,
+        fontSize: 18,
         fontWeight: '600',
-        color: color('label'),
+        color: brand.onPrimary,
         position: 'absolute',
         left: 0,
         right: 0,
         textAlign: 'center',
+        letterSpacing: 0.2,
     },
     navLeft: {
         position: 'absolute',
         left: 12,
         zIndex: 1,
+        paddingHorizontal: 8,
+        paddingVertical: 6,
     },
     navRight: {
         position: 'absolute',
         right: 12,
         flexDirection: 'row',
-        gap: 12,
+        gap: 8,
         zIndex: 1,
     },
     navAction: {
-        fontSize: 15,
-        color: color('systemBlue'),
+        fontSize: 14,
+        color: brand.onPrimary,
         fontWeight: '500',
+        paddingHorizontal: 8,
+        paddingVertical: 6,
     },
     navDestructive: {
-        color: color('systemRed'),
+        color: '#FFC9CC',
     },
     warnBanner: {
         backgroundColor: color('systemOrange'),
         paddingHorizontal: 16,
         paddingVertical: 8,
     },
-    content: { flex: 1 },
+    content: { flex: 1, backgroundColor: brand.surfaceMuted },
     unavailable: {
         flex: 1,
         justifyContent: 'center',
@@ -308,31 +327,32 @@ const s = StyleSheet.create({
     },
     tabBar: {
         flexDirection: 'row',
-        backgroundColor: color('secondarySystemGroupedBackground'),
+        backgroundColor: brand.surface,
         borderTopWidth: StyleSheet.hairlineWidth,
-        borderTopColor: color('separator'),
-        paddingBottom: 4,
+        borderTopColor: brand.border,
+        paddingTop: 6,
+        paddingBottom: 6,
     },
     tabItem: {
         flex: 1,
         alignItems: 'center',
-        paddingTop: 8,
-        paddingBottom: 4,
-        gap: 2,
+        paddingVertical: 6,
+        gap: 3,
     },
     tabIcon: {
         fontSize: 20,
-        color: color('tertiaryLabel'),
+        color: '#8A95A5',
     },
     tabIconActive: {
-        color: color('systemBlue'),
+        color: brand.primary,
     },
     tabLabel: {
-        fontSize: 10,
-        color: color('tertiaryLabel'),
+        fontSize: 11,
+        color: '#8A95A5',
+        fontWeight: '500',
     },
     tabLabelActive: {
-        color: color('systemBlue'),
-        fontWeight: '500',
+        color: brand.primary,
+        fontWeight: '700',
     },
 });

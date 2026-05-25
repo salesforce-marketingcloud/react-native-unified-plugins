@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import {
     View,
     Text,
@@ -32,6 +32,10 @@ export default function DebugTab({ sfmc }: Props) {
             setLoading(false);
         }
     }, [sfmc]);
+
+    useEffect(() => {
+        load();
+    }, [load]);
 
     function copyState() {
         if (!state) return;

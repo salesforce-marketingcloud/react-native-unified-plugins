@@ -49,3 +49,18 @@ export function color(token: SemanticColor): string {
     }
     return ANDROID_FALLBACKS[token];
 }
+
+// Salesforce-blue corporate theme palette. Pure hex so it renders identically on both
+// platforms — used by the chrome (top bar, tab bar). Content surfaces still use the
+// semantic tokens above for native light/dark behavior on iOS.
+export const brand = {
+    primary: '#032D60',         // Salesforce navy
+    primaryDark: '#021E40',     // status-bar tint
+    primaryAccent: '#0176D3',   // Salesforce azure
+    onPrimary: '#FFFFFF',
+    onPrimaryMuted: '#B6C8DD',
+    surface: '#FFFFFF',
+    surfaceMuted: '#F4F6F9',
+    border: '#DDE2E8',
+    danger: '#BA0517',
+};

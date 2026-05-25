@@ -8,7 +8,12 @@ import {
     Modal,
     StyleSheet,
     Alert,
+    PermissionsAndroid,
+    Platform,
+    Linking,
+    ToastAndroid,
 } from 'react-native';
+import Clipboard from '@react-native-clipboard/clipboard';
 import { color } from '../colors';
 import type { SFMCSdkApi } from '@salesforce-mc/react-native-sfmc-core';
 import type { PushApi } from '@salesforce-mc/react-native-push';
@@ -64,9 +69,59 @@ export default function HomeTab({ sfmc, push, mc, mam, iam }: Props) {
         if (mamOn.status === 'fulfilled') setMamAnalytics(mamOn.value);
     }, [mc, mam, push]);
 
-    function onPushToggle(v: boolean) {
-        setPushEnabled(v);
-        if (v) push.enablePush(); else push.disablePush();
+    function copyToClipboard(label: string, value: string | null | undefined) {
+        if (!value) return;
+        Clipboard.setString(value);
+        if (Platform.OS === 'android') {
+            ToastAndroid.show(`${label} copied`, ToastAndroid.SHORT);
+        } else {
+            Alert.alert('Copied', `${label} copied to clipboard.`);
+        }
+    }
+
+    async function ensureNotificationPermission(): Promise<boolean> {
+        if (Platform.OS !== 'android') return true;
+        if ((Platform.Version as number) < 33) return true;
+
+        const perm = PermissionsAndroid.PERMISSIONS.POST_NOTIFICATIONS;
+        const already = await PermissionsAndroid.check(perm);
+        if (already) return true;
+
+        const result = await PermissionsAndroid.request(perm, {
+            title: 'Allow notifications',
+            message: 'Enable notifications to receive push messages from Marketing Cloud.',
+            buttonPositive: 'Allow',
+            buttonNegative: 'Not now',
+        });
+
+        if (result === PermissionsAndroid.RESULTS.GRANTED) return true;
+
+        if (result === PermissionsAndroid.RESULTS.NEVER_ASK_AGAIN) {
+            Alert.alert(
+                'Notifications blocked',
+                'Notifications are blocked. Enable them in system settings to receive push.',
+                [
+                    { text: 'Cancel', style: 'cancel' },
+                    { text: 'Open Settings', onPress: () => Linking.openSettings() },
+                ],
+            );
+        }
+        return false;
+    }
+
+    async function onPushToggle(v: boolean) {
+        if (v) {
+            const granted = await ensureNotificationPermission();
+            if (!granted) {
+                setPushEnabled(false);
+                return;
+            }
+            setPushEnabled(true);
+            push.enablePush();
+        } else {
+            setPushEnabled(false);
+            push.disablePush();
+        }
     }
 
     function onMcAnalyticsToggle(v: boolean) {
@@ -115,10 +170,18 @@ export default function HomeTab({ sfmc, push, mc, mam, iam }: Props) {
                 <Row
                     label="Push Token"
                     value={pushToken ? pushToken.substring(0, 16) + '…' : 'none'}
-                    onPress={pushToken ? () => Alert.alert('Push Token', pushToken) : undefined}
+                    onPress={pushToken ? () => copyToClipboard('Push Token', pushToken) : undefined}
                 />
-                <Row label="MCE Device ID" value={mcDeviceId ?? 'none'} />
-                <Row label="MAM Device ID" value={mamDeviceId ?? 'none'} />
+                <Row
+                    label="MCE Device ID"
+                    value={mcDeviceId ?? 'none'}
+                    onPress={mcDeviceId ? () => copyToClipboard('MCE Device ID', mcDeviceId) : undefined}
+                />
+                <Row
+                    label="MAM Device ID"
+                    value={mamDeviceId ?? 'none'}
+                    onPress={mamDeviceId ? () => copyToClipboard('MAM Device ID', mamDeviceId) : undefined}
+                />
             </Card>
 
             {/* Push */}
