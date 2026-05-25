@@ -1,9 +1,8 @@
 apply plugin: 'com.android.library'
 apply plugin: 'kotlin-android'
-
-if (project.hasProperty("newArchEnabled") && project.newArchEnabled == "true") {
-    apply plugin: "com.facebook.react"
-}
+// Apply unconditionally — RN 0.85+ is new-arch only, and the consumer app's
+// `newArchEnabled` property doesn't propagate into autolinked subprojects.
+apply plugin: "com.facebook.react"
 
 def safeExtGet(prop, fallback) {
     rootProject.ext.has(prop) ? rootProject.ext.get(prop) : fallback
@@ -14,6 +13,11 @@ android {
     compileSdk safeExtGet('compileSdkVersion', 36)
     defaultConfig { minSdk safeExtGet('minSdkVersion', 26) }
     sourceSets { main { java.srcDirs += 'src/main/java' } }
+    buildFeatures { buildConfig true }
+}
+
+react {
+    libraryName = "RNSFMCSdkCoreSpec"
 }
 
 dependencies {
