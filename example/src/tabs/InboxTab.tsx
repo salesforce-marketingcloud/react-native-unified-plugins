@@ -7,6 +7,10 @@ import {
     ActivityIndicator,
     StyleSheet,
     Alert,
+    Linking,
+    Modal,
+    ScrollView,
+    SafeAreaView,
 } from 'react-native';
 import { color } from '../colors';
 import type { MCApi, InboxMessage } from '@salesforce-mc/react-native-marketingcloudsdk';
@@ -29,12 +33,13 @@ const InboxTab = forwardRef<InboxActions, Props>(({ mc, onActionsReady }, _ref) 
     const [messages, setMessages] = useState<InboxMessage[]>([]);
     const [counts, setCounts] = useState({ all: 0, unread: 0, read: 0, deleted: 0 });
     const [loading, setLoading] = useState(true);
+    const [detailMessage, setDetailMessage] = useState<InboxMessage | null>(null);
 
     const fetchAll = useCallback(async () => {
         setLoading(true);
         try {
-            const [allMsgs, [all, unread, read, deleted]] = await Promise.all([
-                fetchSegment('all'),
+            const [segMsgs, [all, unread, read, deleted]] = await Promise.all([
+                fetchSegment(segment),
                 Promise.all([
                     mc.getMessageCount(),
                     mc.getUnreadMessageCount(),
@@ -42,7 +47,7 @@ const InboxTab = forwardRef<InboxActions, Props>(({ mc, onActionsReady }, _ref) 
                     mc.getDeletedMessageCount(),
                 ]),
             ]);
-            setMessages(allMsgs);
+            setMessages(segMsgs);
             setCounts({ all, unread, read, deleted });
         } finally {
             setLoading(false);
@@ -97,11 +102,20 @@ const InboxTab = forwardRef<InboxActions, Props>(({ mc, onActionsReady }, _ref) 
         onActionsReady({ markAllRead, deleteAll, refresh });
     }, [markAllRead, deleteAll, refresh]);
 
+    function onPress(item: InboxMessage) {
+        if (item.url) {
+            mc.markMessageRead(item.id);
+            mc.trackInboxMessageOpened(item);
+            Linking.openURL(item.url);
+            fetchAll();
+        }
+    }
+
     function onLongPress(item: InboxMessage) {
         Alert.alert(item.subject ?? 'Message', undefined, [
             {
                 text: 'View Details',
-                onPress: () => { Alert.alert('Message Details', JSON.stringify(item, null, 2)); },
+                onPress: () => setDetailMessage(item),
             },
             {
                 text: item.read ? 'Already Read' : 'Mark Read',
@@ -156,6 +170,7 @@ const InboxTab = forwardRef<InboxActions, Props>(({ mc, onActionsReady }, _ref) 
                     renderItem={({ item }) => (
                         <TouchableOpacity
                             style={s.messageRow}
+                            onPress={() => onPress(item)}
                             onLongPress={() => onLongPress(item)}
                             activeOpacity={0.7}
                         >
@@ -166,16 +181,32 @@ const InboxTab = forwardRef<InboxActions, Props>(({ mc, onActionsReady }, _ref) 
                                 <Text style={s.messageSubject} numberOfLines={1}>
                                     {item.subject ?? '(No subject)'}
                                 </Text>
+                                {item.title ? <Text style={s.messageTitle} numberOfLines={1}>{item.title}</Text> : null}
                                 <Text style={s.messageDate}>
-                                    {item.startDateUtc ? new Date(item.startDateUtc.replace(' ', 'T') + 'Z').toLocaleDateString() : '—'}
+                                    {item.endDateUtc ? new Date(item.endDateUtc.replace(' ', 'T') + 'Z').toLocaleString() : '—'}
                                 </Text>
                             </View>
-                            <Text style={s.messageId} numberOfLines={1}>{item.id}</Text>
                         </TouchableOpacity>
                     )}
                     ItemSeparatorComponent={() => <View style={s.separator} />}
                 />
             )}
+
+            <Modal visible={detailMessage !== null} animationType="slide" transparent>
+                <SafeAreaView style={s.modalOverlay}>
+                    <View style={s.modalContainer}>
+                        <Text style={s.modalTitle}>{detailMessage?.subject ?? 'Message Details'}</Text>
+                        <ScrollView style={s.modalScroll}>
+                            <Text style={s.modalBody} selectable>
+                                {detailMessage ? JSON.stringify(detailMessage, null, 2) : ''}
+                            </Text>
+                        </ScrollView>
+                        <TouchableOpacity style={s.modalClose} onPress={() => setDetailMessage(null)}>
+                            <Text style={s.modalCloseText}>Close</Text>
+                        </TouchableOpacity>
+                    </View>
+                </SafeAreaView>
+            </Modal>
         </View>
     );
 });
@@ -245,16 +276,54 @@ const s = StyleSheet.create({
         fontWeight: '500',
         color: color('label'),
     },
-    messageDate: {
-        fontSize: 12,
+    messageTitle: {
+        fontSize: 13,
         color: color('secondaryLabel'),
     },
-    messageId: {
-        fontSize: 10,
+    messageDate: {
+        fontSize: 12,
         color: color('tertiaryLabel'),
-        maxWidth: 80,
     },
     separator: {
         height: 6,
+    },
+    modalOverlay: {
+        flex: 1,
+        backgroundColor: 'rgba(0,0,0,0.5)',
+        justifyContent: 'center',
+        padding: 24,
+    },
+    modalContainer: {
+        backgroundColor: color('secondarySystemGroupedBackground'),
+        borderRadius: 14,
+        maxHeight: '80%',
+        padding: 20,
+    },
+    modalTitle: {
+        fontSize: 17,
+        fontWeight: '600',
+        color: color('label'),
+        marginBottom: 12,
+    },
+    modalScroll: {
+        flexGrow: 0,
+    },
+    modalBody: {
+        fontSize: 13,
+        fontFamily: 'Menlo',
+        color: color('label'),
+    },
+    modalClose: {
+        marginTop: 16,
+        alignSelf: 'center',
+        paddingVertical: 10,
+        paddingHorizontal: 32,
+        backgroundColor: color('systemBlue'),
+        borderRadius: 8,
+    },
+    modalCloseText: {
+        color: '#fff',
+        fontSize: 15,
+        fontWeight: '600',
     },
 });
