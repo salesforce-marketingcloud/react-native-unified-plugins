@@ -1,6 +1,6 @@
 # react-native-unified-plugins
 
-Unified React Native plugins for the **Salesforce Marketing Cloud SDK** — a Yarn workspace monorepo that wraps the native Android (`SFMCSdk`) and iOS (`MarketingCloudSDK`) libraries behind a single, modular TypeScript surface built for React Native's New Architecture (TurboModules).
+Unified React Native plugins for the **Salesforce Marketing Cloud SDK** — a Yarn workspace monorepo that wraps the native Android and iOS libraries behind a single, modular TypeScript surface built for React Native's New Architecture (TurboModules).
 
 ## Why
 
@@ -8,13 +8,13 @@ Historically, integrating Marketing Cloud features into a React Native app requi
 
 ## Packages
 
-| Package | Description | Key APIs |
-|---|---|---|
-| [`@salesforce-mc/react-native-sfmc-core`](./packages/sfmc-core) | Foundation: identity, custom attributes, structured events, logging | `setProfileId`, `setAttribute`, `setAttributes`, `track`, `setLogging`, `getSdkState` |
-| [`@salesforce-mc/react-native-push`](./packages/push) | Push registration & notifications | `enablePush`, `disablePush`, `isPushEnabled`, `getPushToken` |
-| [`@salesforce-mc/react-native-iam`](./packages/iam) | In-App Messaging SDK readiness & programmatic display | `showInAppMessage` |
-| [`@salesforce-mc/react-native-marketingcloudsdk`](./packages/marketingcloudsdk) | MarketingCloud Engagement: inbox, tags, attributes, analytics, registration | `getAllMessages`, `markMessageRead`, `addTag(s)`, `enableAnalytics`, `getContactKey`, `setRegistrationCallback` |
-| [`@salesforce-mc/react-native-mobileappmessaging`](./packages/mobileappmessaging) | MobileAppMessaging: analytics, registration | `getDeviceId`, `enableAnalytics`, `setRegistrationCallback` |
+| Package | Description |
+|---|---|
+| [`@salesforce-mc/react-native-sfmc-core`](./packages/sfmc-core) | Foundation: identity, custom attributes, structured events, logging |
+| [`@salesforce-mc/react-native-push`](./packages/push) | Push registration & notifications |
+| [`@salesforce-mc/react-native-iam`](./packages/iam) | In-App Messaging SDK readiness & programmatic display |
+| [`@salesforce-mc/react-native-marketingcloudsdk`](./packages/marketingcloudsdk) | MarketingCloud Engagement: inbox, tags, attributes, analytics, registration |
+| [`@salesforce-mc/react-native-mobileappmessaging`](./packages/mobileappmessaging) | MobileAppMessaging: analytics, registration |
 
 `marketingcloudsdk` and `mobileappmessaging` are **product** packages — they declare transitive dependencies on `sfmc-core`, `push`, and `iam`, so consumers only install one.
 
@@ -65,7 +65,9 @@ sdk.track({ objType: 'CustomEvent', name: 'purchase', attributes: { amount: '49.
 // Use the engagement product
 const mc = await MarketingCloudSdkModule.requestSdk();
 const unread = await mc.getUnreadMessages();
-mc.markMessageRead(unread[0].id);
+if (unread.length > 0) {
+  mc.markMessageRead(unread[0].id);
+}
 ```
 
 ## Requirements
