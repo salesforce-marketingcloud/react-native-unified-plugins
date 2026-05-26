@@ -10,8 +10,8 @@ import {
     Linking,
     Modal,
     ScrollView,
-    SafeAreaView,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { color } from '../colors';
 import type { MCApi, InboxMessage } from '@salesforce-mc/react-native-marketingcloudsdk';
 

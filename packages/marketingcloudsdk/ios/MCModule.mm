@@ -317,6 +317,16 @@ RCT_EXPORT_METHOD(unsetRegistrationCallback) {
     }];
 }
 
+// Best-effort cleanup if JS never called unsetRegistrationCallback before bridge
+// teardown. The block uses weakSelf so ARC already releases the module, but the
+// SDK keeps invoking the dead block forever — clear it here.
+- (void)invalidate {
+    [SFMarketingCloudSdk requestSdk:^(id<MarketingCloudSdkInterface> _Nullable mc) {
+        [mc unsetRegistrationCallback];
+    }];
+    [super invalidate];
+}
+
 RCT_EXPORT_METHOD(enableLogging) {
     [SFMarketingCloudSdk requestSdk:^(id<MarketingCloudSdkInterface> _Nullable mc) {
         [mc setDebugLoggingEnabled:YES];

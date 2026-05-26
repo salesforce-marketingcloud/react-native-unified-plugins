@@ -18,6 +18,7 @@ import com.salesforce.marketingcloud.messages.inbox.InboxMessageManager
 import com.salesforce.marketingcloud.notifications.NotificationMessage
 import com.salesforce.marketingcloud.registration.Registration
 import com.salesforce.marketingcloud.registration.RegistrationManager
+import java.lang.ref.WeakReference
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -27,16 +28,24 @@ import java.util.TimeZone
 class MCModule(reactContext: ReactApplicationContext) :
     NativeMCModuleSpec(reactContext) {
 
-    companion object { const val NAME = "MCModule" }
+    companion object {
+        const val NAME = "MCModule"
+        private const val TAG = "MCModule"
+    }
 
     private var registrationListener: RegistrationManager.RegistrationEventListener? = null
     private val messageCache = mutableMapOf<String, InboxMessage>()
 
     private fun sendEvent(name: String, params: com.facebook.react.bridge.WritableMap) {
-        if (reactApplicationContext.hasActiveReactInstance()) {
+        if (!reactApplicationContext.hasActiveReactInstance()) return
+        try {
             reactApplicationContext
                 .getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter::class.java)
                 .emit(name, params)
+        } catch (t: Throwable) {
+            // Bridge can be torn down between the active-instance check and emit,
+            // or getJSModule may fail if the catalyst instance is unavailable.
+            Log.w(TAG, "Failed to emit event '$name'", t)
         }
     }
 
@@ -271,11 +280,25 @@ class MCModule(reactContext: ReactApplicationContext) :
     @ReactMethod
     override fun setRegistrationCallback() {
         MarketingCloudSdk.requestSdk { sdk ->
-            val listener = RegistrationManager.RegistrationEventListener { registration ->
-                sendEvent("sfmc_mc_registration", registrationToWritableMap(registration))
-            }
+            // Defense in depth against bridge teardown races: WeakRegistrationListener
+            // does not capture `this`, so if invalidate() is skipped (process death,
+            // framework bug) the module + ReactApplicationContext can still be GC'd.
+            val listener = WeakRegistrationListener(this)
             registrationListener = listener
             sdk.getRegistrationManager().registerForRegistrationEvents(listener)
+        }
+    }
+
+    internal fun onRegistrationReceived(registration: Registration) {
+        sendEvent("sfmc_mc_registration", registrationToWritableMap(registration))
+    }
+
+    private class WeakRegistrationListener(
+        module: MCModule,
+    ) : RegistrationManager.RegistrationEventListener {
+        private val ref = WeakReference(module)
+        override fun onRegistrationReceived(registration: Registration) {
+            ref.get()?.onRegistrationReceived(registration)
         }
     }
 
@@ -312,6 +335,20 @@ class MCModule(reactContext: ReactApplicationContext) :
             }
             registrationListener = null
         }
+    }
+
+    override fun invalidate() {
+        // Best-effort cleanup if JS never called unsetRegistrationCallback() before
+        // bridge teardown. The SFMC SDK is Application-scoped and outlives the bridge,
+        // so the requestSdk callback is safe to fire and forget.
+        registrationListener?.let { listener ->
+            MarketingCloudSdk.requestSdk { sdk ->
+                sdk.getRegistrationManager().unregisterForRegistrationEvents(listener)
+            }
+        }
+        registrationListener = null
+        messageCache.clear()
+        super.invalidate()
     }
 
     @ReactMethod
