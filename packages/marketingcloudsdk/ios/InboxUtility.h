@@ -1,4 +1,4 @@
-// EventUtility.h
+// InboxUtility.h
 //
 // Copyright (c) 2026 Salesforce, Inc
 //
@@ -27,6 +27,8 @@
 
 #import <Foundation/Foundation.h>
 
-@interface EventUtility : NSObject
-+ (id _Nullable)eventFromDictionary:(NSDictionary * _Nonnull)dict;
+@interface InboxUtility : NSObject
+
++ (NSArray *)processInboxMessages:(NSArray *)messages;
+
 @end
