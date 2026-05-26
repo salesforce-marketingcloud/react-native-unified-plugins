@@ -1,0 +1,59 @@
+apply plugin: "com.android.application"
+apply plugin: "org.jetbrains.kotlin.android"
+apply plugin: "com.facebook.react"
+// Firebase: required for FCM push registration. Reads google-services.json from this module
+// at config time. Without google-services.json present, the build fails — add a real config
+// from your Firebase project, or comment this line out for non-push dev builds.
+apply plugin: "com.google.gms.google-services"
+
+react {
+    // Monorepo (Yarn workspaces): node_modules at repo root.
+    root = file("../../")
+    reactNativeDir = file("../../../node_modules/react-native")
+    codegenDir = file("../../../node_modules/@react-native/codegen")
+    cliFile = file("../../../node_modules/react-native/cli.js")
+    hermesCommand = "../../../node_modules/react-native/sdks/hermesc/%OS-BIN%/hermesc"
+    autolinkLibrariesWithApp()  // CRITICAL: use autolinking, not manual project references
+}
+
+android {
+    namespace "com.sfmcexample"
+    compileSdk 36
+
+    defaultConfig {
+        applicationId "com.sfmcexample"
+        minSdk 26
+        targetSdk 35
+
+        buildConfigField "String", "MC_APP_ID", "\"${System.getenv("PUSH_APP_ID") ?: ""}\""
+        buildConfigField "String", "MC_ACCESS_TOKEN", "\"${System.getenv("PUSH_ACCESS_TOKEN") ?: ""}\""
+        buildConfigField "String", "MC_SERVER_URL", "\"${System.getenv("PUSH_TSE") ?: ""}\""
+        buildConfigField "String", "MC_MID", "\"${System.getenv("MC_MID") ?: ""}\""
+        buildConfigField "String", "MAM_APP_ID", "\"${System.getenv("MAM_APP_ID") ?: ""}\""
+        buildConfigField "String", "MAM_TENANT_ID", "\"${System.getenv("MAM_TENANT_ID") ?: ""}\""
+        buildConfigField "String", "MAM_ACCESS_TOKEN", "\"${System.getenv("MAM_ACCESS_TOKEN") ?: ""}\""
+        buildConfigField "String", "MAM_ENDPOINT_URL", "\"${System.getenv("MAM_ENDPOINT_URL") ?: ""}\""
+
+        // REQUIRED by ReactNativeApplicationEntryPoint
+        buildConfigField "boolean", "IS_NEW_ARCHITECTURE_ENABLED", "true"
+        buildConfigField "boolean", "IS_EDGE_TO_EDGE_ENABLED", "false"
+    }
+}
+
+dependencies {
+    implementation("com.facebook.react:react-android")
+    implementation("com.facebook.react:hermes-android")
+
+    // CRITICAL: Native SDK dependencies must be in app build.gradle because MainApplication
+    // references MarketingCloudConfig and MobileAppMessagingConfig directly. The plugin packages
+    // declare these with `implementation` (not `api`), so they are not transitively visible to
+    // the app classpath without these explicit declarations.
+    implementation "com.salesforce.marketingcloud:marketingcloudsdk:11.0.0"
+    implementation "com.salesforce.marketingcloud:mobileappmessagingsdk:1.1.0"
+
+    // Firebase (required for push notifications).
+    implementation platform('com.google.firebase:firebase-bom:33.0.0')
+    implementation 'com.google.firebase:firebase-messaging'
+
+    // SFMC React Native modules come from autolinking — do not manually add project dependencies.
+}

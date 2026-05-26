@@ -1,0 +1,66 @@
+# Example app Podfile — mirrors the autolinking.json discovery for iOS.
+# Each SFMC package is referenced by :path so the example pulls bridge code
+# directly from the monorepo workspace.
+
+source 'https://cdn.cocoapods.org/'
+
+# In a Yarn workspaces monorepo, react-native is hoisted to the workspace root
+# (one level above example/). The require_relative must point there, NOT to
+# example/node_modules (which won't exist after yarn dedup).
+require_relative '../../node_modules/react-native/scripts/react_native_pods'
+
+# RN 0.85 does NOT ship cli-platform-ios/native_modules — the line below is intentionally absent.
+# The `use_native_modules!` call inside use_react_native! handles autolinking.
+
+platform :ios, '15.1'  # RN 0.85 minimum
+install! 'cocoapods', :deterministic_uuids => false, :warn_for_unused_master_specs_repo => false
+use_frameworks!
+
+target 'SFMCExample' do
+  config = use_native_modules!
+
+  # New Architecture is enabled — RN 0.85's interop layer allows RCT_EXPORT_MODULE ObjC++
+  # bridges to coexist with New Arch. TurboModuleRegistry.getEnforcing resolves them correctly.
+  use_react_native!(
+    :path => config[:reactNativePath],
+    :hermes_enabled => true,
+    :fabric_enabled => true,
+    :new_arch_enabled => true,
+    :app_path => "#{Pod::Config.instance.installation_root}/.."
+  )
+
+  # SFMC native SDKs — do NOT declare them explicitly here.
+  # They resolve transitively from the bridge podspecs below.
+  # Explicit declarations cause duplicate xcframework conflicts at link time.
+
+  # SFMC React Native bridge packages (local paths — explicit because monorepo :path pods
+  # are not always picked up by autolinking in a Yarn workspaces layout).
+  # Pod names must match s.name in each package's .podspec file.
+  pod 'SFMCSdkCore',            :path => '../../packages/sfmc-core/ios'
+  pod 'SFMCPush',               :path => '../../packages/push/ios'
+  pod 'SFMCIam',                :path => '../../packages/iam/ios'
+  pod 'SFMCMarketingCloudSdk',  :path => '../../packages/marketingcloudsdk/ios'
+  pod 'SFMCMobileAppMessaging', :path => '../../packages/mobileappmessaging/ios'
+
+  post_install do |installer|
+    react_native_post_install(
+      installer,
+      config[:reactNativePath],
+      :mac_catalyst_enabled => false
+    )
+  end
+end
+
+# Notification Service Extension — rich media (images, video, carousel thumbnails).
+# Subclasses SFMCNotificationService from MCExtensionSDK.
+# Does NOT include React Native pods — only the extension SDK.
+target 'ExampleServiceExtension' do
+  pod 'MarketingCloud-ExtensionSDK'
+end
+
+# Notification Content Extension — carousel UI.
+# Subclasses SFMCNotificationViewController from MCExtensionSDK.
+# SDK builds the carousel UI programmatically — no storyboard.
+target 'ExampleContentExtension' do
+  pod 'MarketingCloud-ExtensionSDK'
+end

@@ -1,0 +1,69 @@
+pluginManagement { includeBuild("../../node_modules/@react-native/gradle-plugin") }
+plugins { id("com.facebook.react.settings") }
+// Autolinking — regenerated on every build by `npx @react-native-community/cli config`,
+// post-processed to make all relative paths resolve correctly from settings.rootDir
+// (= example/android/). The CLI emits paths relative to the workspace root (example/);
+// the RN gradle helper resolves those paths via java.io.File against Gradle's user.dir
+// (= example/android/), so they end up off by one level in monorepos. We work around
+// this by running the CLI ourselves, prepending "../" to relative paths, writing the
+// fixed JSON to a per-build cache, and feeding that to autolinkLibrariesFromConfigFile.
+// No generated file is committed.
+def buildAutolinkJson() {
+    def isWindows = System.getProperty("os.name").toLowerCase().contains("windows")
+    // The RN gradle helper writes its own copy at build/generated/autolinking/autolinking.json;
+    // we write to a sibling file so its `copyTo(outputFile, overwrite = true)` doesn't fail
+    // with src == dst.
+    def out = new File(rootDir, "build/generated/autolinking-monorepo/autolinking.json")
+    out.parentFile.mkdirs()
+
+    def cli = "npx --no-install @react-native-community/cli config"
+    def cmd = isWindows ? ["cmd", "/c", cli] : ["sh", "-lc", cli]
+    def proc = new ProcessBuilder(cmd)
+        .directory(rootDir.parentFile)
+        .redirectErrorStream(false)
+        .start()
+    def stdoutText = proc.inputStream.getText("UTF-8")
+    def stderrText = proc.errorStream.getText("UTF-8")
+    proc.waitFor()
+    if (proc.exitValue() != 0) {
+        throw new RuntimeException("`${cli}` failed (exit ${proc.exitValue()}):\n${stderrText}")
+    }
+
+    def model = new groovy.json.JsonSlurper().parseText(stdoutText)
+    // CLI paths are relative to the workspace dir (example/). Two consumers care:
+    //   - sourceDir / root: java.io.File resolves them against Gradle user.dir (= rootDir =
+    //     example/android/), so paths need to be relative to example/android/ → prepend "../".
+    //   - cmakeListsPath: forwarded verbatim into Android-autolinking.cmake which CMake
+    //     evaluates with a non-obvious working dir; only absolute paths reliably resolve.
+    def workspaceDir = rootDir.parentFile.canonicalFile
+    def asMonorepoRel = { p -> (p == null || new File(p.toString()).isAbsolute()) ? p : "../${p}".toString() }
+    def asAbsolute = { p ->
+        if (p == null) return p
+        def f = new File(p.toString())
+        return (f.isAbsolute() ? f : new File(workspaceDir, p.toString())).canonicalPath
+    }
+    model.dependencies?.each { name, dep ->
+        if (dep.root) dep.root = asMonorepoRel(dep.root)
+        def android = dep.platforms?.android
+        if (android) {
+            if (android.sourceDir) android.sourceDir = asMonorepoRel(android.sourceDir)
+            ["cmakeListsPath", "cxxModuleCMakeListsPath"].each { k ->
+                if (android[k]) android[k] = asAbsolute(android[k])
+            }
+        }
+    }
+    out.text = groovy.json.JsonOutput.prettyPrint(groovy.json.JsonOutput.toJson(model))
+    return out
+}
+
+def autolinkConfigFile = buildAutolinkJson()
+
+extensions.configure(com.facebook.react.ReactSettingsExtension) { ex ->
+    ex.autolinkLibrariesFromConfigFile(autolinkConfigFile)
+}
+
+rootProject.name = 'SFMCExample'
+include ':app'
+includeBuild('../../node_modules/@react-native/gradle-plugin')
+
+// DO NOT manually include package projects - autolinking handles this.

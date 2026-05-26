@@ -1,0 +1,26 @@
+apply plugin: 'com.android.library'
+apply plugin: 'kotlin-android'
+apply plugin: "com.facebook.react"
+
+def safeExtGet(prop, fallback) {
+    rootProject.ext.has(prop) ? rootProject.ext.get(prop) : fallback
+}
+
+android {
+    namespace "com.salesforce.mc.iam"
+    compileSdk safeExtGet('compileSdkVersion', 36)
+    defaultConfig { minSdk safeExtGet('minSdkVersion', 26) }
+    sourceSets { main { java.srcDirs += 'src/main/java' } }
+    buildFeatures { buildConfig true }
+}
+
+react {
+    libraryName = "RNSFMCIamSpec"
+}
+
+dependencies {
+    implementation "com.salesforce.marketingcloud:sfmcsdk:${safeExtGet('sfmcSdkVersion', '3.1.+')}"
+    implementation "com.salesforce.marketingcloud:inappmessagingfeaturemodule:${safeExtGet('inAppMessagingFeatureVersion', '1.0.+')}"
+    implementation "com.salesforce.marketingcloud:inappmessagingmodelsmodule:${safeExtGet('inAppMessagingModelsVersion', '1.0.+')}"
+    implementation "com.facebook.react:react-android"
+}

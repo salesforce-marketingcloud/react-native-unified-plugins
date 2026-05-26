@@ -1,0 +1,74 @@
+name: SFMCExample
+options:
+  deploymentTarget:
+    iOS: "15.1"
+  createIntermediateGroups: true
+  developmentLanguage: en
+  xcodeVersion: "15.0"
+
+settings:
+  base:
+    MARKETING_VERSION: "1.0"
+    CURRENT_PROJECT_VERSION: "1"
+    SWIFT_VERSION: "5.0"
+    IPHONEOS_DEPLOYMENT_TARGET: "15.1"
+    ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES: YES
+    CLANG_ENABLE_MODULES: YES
+
+targets:
+  SFMCExample:
+    type: application
+    platform: iOS
+    sources:
+      - SFMCExample
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.salesforce.marketingcloud.react.example
+        TARGETED_DEVICE_FAMILY: "1,2"
+        ENABLE_BITCODE: NO
+        INFOPLIST_FILE: SFMCExample/Info.plist
+        CODE_SIGN_ENTITLEMENTS: SFMCExample/SFMCExample.entitlements
+    dependencies:
+      - target: ExampleServiceExtension
+      - target: ExampleContentExtension
+
+  ExampleServiceExtension:
+    type: app-extension
+    platform: iOS
+    sources:
+      - ExampleServiceExtension
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.salesforce.marketingcloud.react.example.ExampleServiceExtension
+        TARGETED_DEVICE_FAMILY: "1,2"
+        ENABLE_BITCODE: NO
+        INFOPLIST_FILE: ExampleServiceExtension/Info.plist
+        CODE_SIGN_ENTITLEMENTS: ExampleServiceExtension/ExampleServiceExtension.entitlements
+        SKIP_INSTALL: YES
+        ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES: NO
+
+  ExampleContentExtension:
+    type: app-extension
+    platform: iOS
+    sources:
+      - ExampleContentExtension
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.salesforce.marketingcloud.react.example.ExampleContentExtension
+        TARGETED_DEVICE_FAMILY: "1,2"
+        ENABLE_BITCODE: NO
+        INFOPLIST_FILE: ExampleContentExtension/Info.plist
+        CODE_SIGN_ENTITLEMENTS: ExampleContentExtension/ExampleContentExtension.entitlements
+        SKIP_INSTALL: YES
+        ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES: NO
+
+schemes:
+  SFMCExample:
+    build:
+      targets:
+        SFMCExample: all
+    run:
+      config: Debug
+      executable: SFMCExample
+    archive:
+      config: Release

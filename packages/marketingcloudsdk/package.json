@@ -1,0 +1,22 @@
+{
+  "name": "@salesforce-mc/react-native-marketingcloudsdk",
+  "version": "1.0.0",
+  "main": "src/index.ts",
+  "codegenConfig": {
+    "name": "RNMCSpec",
+    "type": "modules",
+    "jsSrcsDir": "src",
+    "android": {
+      "javaPackageName": "com.salesforce.mc.marketingcloudsdk"
+    }
+  },
+  "dependencies": {
+    "@salesforce-mc/react-native-sfmc-core": "1.0.0",
+    "@salesforce-mc/react-native-push": "1.0.0",
+    "@salesforce-mc/react-native-iam": "1.0.0"
+  },
+  "peerDependencies": {
+    "react": "^19.0.0",
+    "react-native": ">=0.85.1"
+  }
+}
