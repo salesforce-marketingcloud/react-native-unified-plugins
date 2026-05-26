@@ -1,3 +1,28 @@
+/*
+  Copyright 2026 Salesforce, Inc
+  <p>
+  Redistribution and use in source and binary forms, with or without modification, are permitted
+  provided that the following conditions are met:
+  <p>
+  1. Redistributions of source code must retain the above copyright notice, this list of
+  conditions and the following disclaimer.
+  <p>
+  2. Redistributions in binary form must reproduce the above copyright notice, this list of
+  conditions and the following disclaimer in the documentation and/or other materials provided
+  with the distribution.
+  <p>
+  3. Neither the name of the copyright holder nor the names of its contributors may be used to
+  endorse or promote products derived from this software without specific prior written permission.
+  <p>
+  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR
+  IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND
+  FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR
+  CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+  DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+  DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
+  WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
+  ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
 package com.salesforce.mc.marketingcloudsdk
 
 import android.util.Log
@@ -15,14 +40,9 @@ import com.salesforce.marketingcloud.MCLogListener
 import com.salesforce.marketingcloud.MarketingCloudSdk
 import com.salesforce.marketingcloud.messages.inbox.InboxMessage
 import com.salesforce.marketingcloud.messages.inbox.InboxMessageManager
-import com.salesforce.marketingcloud.notifications.NotificationMessage
 import com.salesforce.marketingcloud.registration.Registration
 import com.salesforce.marketingcloud.registration.RegistrationManager
 import java.lang.ref.WeakReference
-import java.text.SimpleDateFormat
-import java.util.Date
-import java.util.Locale
-import java.util.TimeZone
 
 @ReactModule(name = MCModule.NAME)
 class MCModule(reactContext: ReactApplicationContext) :
@@ -323,7 +343,7 @@ class MCModule(reactContext: ReactApplicationContext) :
         val tagsArray = Arguments.createArray()
         registration.tags.forEach { tagsArray.pushString(it) }
         map.putArray("tags", tagsArray)
-        map.putMap("attributes", stringMapToWritableMap(registration.attributes))
+        map.putMap("attributes", InboxUtils.stringMapToWritableMap(registration.attributes))
         return map
     }
 
@@ -359,90 +379,7 @@ class MCModule(reactContext: ReactApplicationContext) :
         // Required for RN event emitter parity; module emits no events.
     }
 
-    // -- Serialization helpers (discovery-driven from InboxMessage.model_fields) --
-
-    private val utcDateFormat: SimpleDateFormat = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.US).apply {
-        timeZone = TimeZone.getTimeZone("UTC")
-    }
-
-    private fun formatDate(date: Date?): String? = date?.let { utcDateFormat.format(it) }
-
-    private fun stringMapToWritableMap(src: Map<String, String>?): WritableMap? {
-        if (src == null) return null
-        val map = Arguments.createMap()
-        src.forEach { (k, v) -> map.putString(k, v) }
-        return map
-    }
-
-    private fun mediaToMap(media: InboxMessage.Media?): WritableMap? {
-        if (media == null) return null
-        val map = Arguments.createMap()
-        media.altText?.let { map.putString("altText", it) } ?: map.putNull("altText")
-        media.url?.let { map.putString("url", it) } ?: map.putNull("url")
-        return map
-    }
-
-    private fun notificationMessageToMap(nm: NotificationMessage?): WritableMap? {
-        if (nm == null) return null
-        val map = Arguments.createMap()
-        map.putString("id", nm.id)
-        map.putString("alert", nm.alert)
-        nm.title?.let { map.putString("title", it) } ?: map.putNull("title")
-        nm.subtitle?.let { map.putString("subtitle", it) } ?: map.putNull("subtitle")
-        nm.custom?.let { map.putString("custom", it) } ?: map.putNull("custom")
-        // customKeys is non-null on NotificationMessage
-        map.putMap("customKeys", stringMapToWritableMap(nm.customKeys))
-        nm.mediaUrl?.let { map.putString("mediaUrl", it) } ?: map.putNull("mediaUrl")
-        nm.mediaAltText?.let { map.putString("mediaAltText", it) } ?: map.putNull("mediaAltText")
-        if (nm.payload != null) map.putMap("payload", stringMapToWritableMap(nm.payload)) else map.putNull("payload")
-        nm.url?.let { map.putString("url", it) } ?: map.putNull("url")
-        map.putString("sound", nm.sound.name)
-        nm.soundName?.let { map.putString("soundName", it) } ?: map.putNull("soundName")
-        map.putString("type", nm.type.name)
-        map.putString("trigger", nm.trigger.name)
-        // Region and RichFeatures are not discovered here — fall back to toString for visibility.
-        nm.region?.let { map.putString("region", it.toString()) } ?: map.putNull("region")
-        // requestId is private on v11; skip.
-        nm.richFeatures?.let { map.putString("richFeatures", it.toString()) } ?: map.putNull("richFeatures")
-        return map
-    }
-
     private fun messagesToArray(messages: List<InboxMessage>): WritableArray {
-        val array = Arguments.createArray()
-        messages.forEach { msg ->
-            val map = Arguments.createMap()
-            // From InboxMessage.model_fields (discovery-driven). Note: `requestId`, `messageHash`,
-            // and `viewCount` are reported as public in discovery but compile as private at the
-            // bytecode level on v11.0.0 — skipped here to avoid IllegalAccessError. Verify with
-            // android-sdk-reflector on a future regen.
-            map.putString("id", msg.id)
-            msg.subject?.let { map.putString("subject", it) } ?: map.putNull("subject")
-            msg.title?.let { map.putString("title", it) } ?: map.putNull("title")
-            msg.alert?.let { map.putString("alert", it) } ?: map.putNull("alert")
-            msg.sound?.let { map.putString("sound", it) } ?: map.putNull("sound")
-            // Nested data class — recursive serialization
-            if (msg.media != null) map.putMap("media", mediaToMap(msg.media)) else map.putNull("media")
-            // Date fields → "yyyy-MM-dd HH:mm:ss" UTC
-            formatDate(msg.startDateUtc)?.let { map.putString("startDateUtc", it) } ?: map.putNull("startDateUtc")
-            formatDate(msg.endDateUtc)?.let { map.putString("endDateUtc", it) } ?: map.putNull("endDateUtc")
-            formatDate(msg.sendDateUtc)?.let { map.putString("sendDateUtc", it) } ?: map.putNull("sendDateUtc")
-            msg.url?.let { map.putString("url", it) } ?: map.putNull("url")
-            msg.custom?.let { map.putString("custom", it) } ?: map.putNull("custom")
-            // customKeys: Map<String, String>?
-            if (msg.customKeys != null) map.putMap("customKeys", stringMapToWritableMap(msg.customKeys)) else map.putNull("customKeys")
-            msg.subtitle?.let { map.putString("subtitle", it) } ?: map.putNull("subtitle")
-            msg.inboxMessage?.let { map.putString("inboxMessage", it) } ?: map.putNull("inboxMessage")
-            msg.inboxSubtitle?.let { map.putString("inboxSubtitle", it) } ?: map.putNull("inboxSubtitle")
-            // Nested NotificationMessage
-            if (msg.notificationMessage != null) map.putMap("notificationMessage", notificationMessageToMap(msg.notificationMessage)) else map.putNull("notificationMessage")
-            // viewCount is private at bytecode level — skip.
-            // messageType: Int?
-            if (msg.messageType != null) map.putInt("messageType", msg.messageType!!) else map.putNull("messageType")
-            // read / deleted are Kotlin var Boolean — access as msg.read / msg.deleted, NOT isRead/isDeleted
-            map.putBoolean("read", msg.read)
-            map.putBoolean("deleted", msg.deleted)
-            array.pushMap(map)
-        }
-        return array
+        return InboxUtils.messagesToArray(messages)
     }
 }

@@ -1,11 +1,15 @@
+require 'json'
+package = JSON.parse(File.read(File.join(__dir__, '..', 'package.json')))
+
 Pod::Spec.new do |s|
   s.name         = "SFMCIam"
-  s.version      = "1.0.0"
-  s.summary      = "SFMC In-App Messaging Feature SDK for React Native"
-  s.homepage     = "https://github.com/salesforce-marketing-cloud/react-native-unified-plugins"
-  s.license      = "MIT"
-  s.author       = { "Salesforce Marketing Cloud" => "mc_mobile@salesforce.com" }
-  s.source       = { :git => "https://github.com/salesforce-marketing-cloud/react-native-unified-plugins.git", :tag => "#{s.version}" }
+  s.version      = package["version"]
+  s.summary      = package["description"]
+  s.description  = package["description"]
+  s.homepage     = package["homepage"]
+  s.license      = package["license"]
+  s.author       = package["author"]
+  s.source       = { :git => "https://github.com/salesforce-marketingcloud/react-native-unified-plugins.git", :tag => "#{s.version}" }
   s.platform     = :ios, "15.1"
   s.source_files = "**/*.{h,m,mm,swift}"
 
