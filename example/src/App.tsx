@@ -93,6 +93,8 @@ function AppInner() {
     const [initializing, setInitializing] = useState(true);
     const [warnings, setWarnings] = useState<InitWarning[]>([]);
     const [activeTab, setActiveTab] = useState<Tab>('home');
+    // Lifted out of HomeTab so it survives tab switches that unmount the tab.
+    const [loggingEnabled, setLoggingEnabled] = useState(true);
 
     // Inbox nav bar actions — ref to avoid re-renders, state flag to trigger nav bar render
     const inboxActionsRef = useRef<InboxActions | null>(null);
@@ -176,7 +178,15 @@ function AppInner() {
             {/* Tab content */}
             <View style={s.content}>
                 {activeTab === 'home' && sdks.sfmc && sdks.push && sdks.mc && sdks.mam && sdks.iam && (
-                    <HomeTab sfmc={sdks.sfmc} push={sdks.push} mc={sdks.mc} mam={sdks.mam} iam={sdks.iam} />
+                    <HomeTab
+                        sfmc={sdks.sfmc}
+                        push={sdks.push}
+                        mc={sdks.mc}
+                        mam={sdks.mam}
+                        iam={sdks.iam}
+                        loggingEnabled={loggingEnabled}
+                        onLoggingChange={setLoggingEnabled}
+                    />
                 )}
                 {activeTab === 'identity' && sdks.sfmc && sdks.mc && (
                     <RegistrationTab sfmc={sdks.sfmc} mc={sdks.mc} />
