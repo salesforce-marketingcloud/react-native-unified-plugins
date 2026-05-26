@@ -36,21 +36,21 @@ export interface MobileAppMessagingApi {
   /**
    * Returns the deviceId used by Mobile App Messaging to identify the device.
    * @returns {Promise<string | null>} A promise to the device Id.
-   * @see  {@link https://salesforce-marketingcloud.github.io/MarketingCloudSDK-Android/javadocs/SFMCSdk/11.0/mobileappmessaging/index.html |Android Docs}
+   * @see  {@link https://salesforce-marketingcloud.github.io/MarketingCloudSDK-Android/javadocs/SFMCSdk/11.0/mobileappmessaging/com.salesforce.marketingcloud.mobileappmessaging.registration/-registration-manager/get-device-id.html |Android Docs}
    * @see  {@link https://salesforce-marketingcloud.github.io/MarketingCloudSDK-iOS/appledocs/MAMSdk/2.0/Classes/MobileAppMessaging.html#/c:@CM@MobileAppMessagingSDK@objc(cs)SFMobileAppMessaging(im)deviceIdentifier |iOS Docs}
    */
   getDeviceId(): Promise<string | null>;
 
   /**
    * Enables analytics in the Mobile App Messaging SDK.
-   * @see  {@link https://salesforce-marketingcloud.github.io/MarketingCloudSDK-Android/javadocs/SFMCSdk/11.0/mobileappmessaging/index.html |Android Docs}
+   * @see  {@link https://salesforce-marketingcloud.github.io/MarketingCloudSDK-Android/javadocs/SFMCSdk/11.0/mobileappmessaging/com.salesforce.marketingcloud.mobileappmessaging.analytics/-analytics-manager/enable-analytics.html |Android Docs}
    * @see  {@link https://salesforce-marketingcloud.github.io/MarketingCloudSDK-iOS/appledocs/MAMSdk/2.0/Classes/MobileAppMessaging.html#/c:@CM@MobileAppMessagingSDK@objc(cs)SFMobileAppMessaging(im)setAnalyticsEnabled: |iOS Docs}
    */
   enableAnalytics(): void;
 
   /**
    * Disables analytics in the Mobile App Messaging SDK.
-   * @see  {@link https://salesforce-marketingcloud.github.io/MarketingCloudSDK-Android/javadocs/SFMCSdk/11.0/mobileappmessaging/index.html |Android Docs}
+   * @see  {@link https://salesforce-marketingcloud.github.io/MarketingCloudSDK-Android/javadocs/SFMCSdk/11.0/mobileappmessaging/com.salesforce.marketingcloud.mobileappmessaging.analytics/-analytics-manager/disable-analytics.html |Android Docs}
    * @see  {@link https://salesforce-marketingcloud.github.io/MarketingCloudSDK-iOS/appledocs/MAMSdk/2.0/Classes/MobileAppMessaging.html#/c:@CM@MobileAppMessagingSDK@objc(cs)SFMobileAppMessaging(im)setAnalyticsEnabled: |iOS Docs}
    */
   disableAnalytics(): void;
@@ -59,21 +59,21 @@ export interface MobileAppMessagingApi {
    * Checks if analytics is enabled in the Mobile App Messaging SDK.
    * @returns {Promise<boolean>} A promise to the boolean representation of whether analytics is
    *     enabled.
-   * @see  {@link https://salesforce-marketingcloud.github.io/MarketingCloudSDK-Android/javadocs/SFMCSdk/11.0/mobileappmessaging/index.html |Android Docs}
+   * @see  {@link https://salesforce-marketingcloud.github.io/MarketingCloudSDK-Android/javadocs/SFMCSdk/11.0/mobileappmessaging/com.salesforce.marketingcloud.mobileappmessaging.analytics/-analytics-manager/are-analytics-enabled.html |Android Docs}
    * @see  {@link https://salesforce-marketingcloud.github.io/MarketingCloudSDK-iOS/appledocs/MAMSdk/2.0/Classes/MobileAppMessaging.html#/c:@CM@MobileAppMessagingSDK@objc(cs)SFMobileAppMessaging(im)isAnalyticsEnabled |iOS Docs}
    */
   isAnalyticsEnabled(): Promise<boolean>;
 
   /**
    * Registers a callback to receive registration change events from the SDK.
-   * @see  {@link https://salesforce-marketingcloud.github.io/MarketingCloudSDK-Android/javadocs/SFMCSdk/11.0/mobileappmessaging/index.html |Android Docs}
+   * @see  {@link https://salesforce-marketingcloud.github.io/MarketingCloudSDK-Android/javadocs/SFMCSdk/11.0/mobileappmessaging/com.salesforce.marketingcloud.mobileappmessaging.registration/-registration-manager/register-for-registration-events.html |Android Docs}
    * @see  {@link https://salesforce-marketingcloud.github.io/MarketingCloudSDK-iOS/appledocs/MAMSdk/2.0/Classes/MobileAppMessaging.html#/c:@CM@MobileAppMessagingSDK@objc(cs)SFMobileAppMessaging(im)setRegistrationCallback: |iOS Docs}
    */
   setRegistrationCallback(): void;
 
   /**
    * Unregisters the registration change callback.
-   * @see  {@link https://salesforce-marketingcloud.github.io/MarketingCloudSDK-Android/javadocs/SFMCSdk/11.0/mobileappmessaging/index.html |Android Docs}
+   * @see  {@link https://salesforce-marketingcloud.github.io/MarketingCloudSDK-Android/javadocs/SFMCSdk/11.0/mobileappmessaging/com.salesforce.marketingcloud.mobileappmessaging.registration/-registration-manager/unregister-for-registration-events.html |Android Docs}
    * @see  {@link https://salesforce-marketingcloud.github.io/MarketingCloudSDK-iOS/appledocs/MAMSdk/2.0/Classes/MobileAppMessaging.html#/c:@CM@MobileAppMessagingSDK@objc(cs)SFMobileAppMessaging(im)unsetRegistrationCallback |iOS Docs}
    */
   unsetRegistrationCallback(): void;

@@ -36,7 +36,7 @@ export interface IamApi {
   /**
    * Displays a specific in-app message by its identifier.
    * @param  {string} messageId - The identifier of the in-app message to display.
-   * @see  {@link https://salesforce-marketingcloud.github.io/MarketingCloudSDK-Android/javadocs/SFMCSdk/11.0/inappmessagingfeaturemodule/com.salesforce.marketingcloud.inappmessagingfeature/index.html |Android Docs}
+   * @see  {@link https://salesforce-marketingcloud.github.io/MarketingCloudSDK-Android/javadocs/SFMCSdk/11.0/inappmessagingfeaturemodule/com.salesforce.marketingcloud.inappmessagingfeature/-in-app-message-manager/show-message.html |Android Docs}
    * @see  {@link https://salesforce-marketingcloud.github.io/MarketingCloudSDK-iOS/appledocs/InAppMessagingFeatureSdk/1.0/Classes/InAppMessagingFeature.html#/c:@CM@InAppMessagingFeatureSDK@objc(cs)SFInAppMessagingFeature(im)showInAppMessageWithMessageId: |iOS Docs}
    */
   showInAppMessage(messageId: string): void;

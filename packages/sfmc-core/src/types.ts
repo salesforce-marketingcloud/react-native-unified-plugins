@@ -29,7 +29,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-import type { SFMCEvent } from './events';
+import type { SFMCEvent } from "./events";
 
 /**
  * @class SFMCSdkApi
@@ -39,7 +39,7 @@ export interface SFMCSdkApi {
    * Sets the profile identifier for the device's user.
    * @param  {string} profileId - The value to be set as the profile id of
    *     the device's user.
-   * @see  {@link https://salesforce-marketingcloud.github.io/MarketingCloudSDK-Android/javadocs/SFMCSdk/11.0/sfmcsdk/com.salesforce.marketingcloud.sfmcsdk.components.identity/-identity/profile-id.html |Android Docs}
+   * @see  {@link https://salesforce-marketingcloud.github.io/MarketingCloudSDK-Android/javadocs/SFMCSdk/11.0/sfmcsdk/com.salesforce.marketingcloud.sfmcsdk.components.identity/-identity-editor/profile-id.html |Android Docs}
    * @see  {@link https://salesforce-marketingcloud.github.io/MarketingCloudSDK-iOS/appledocs/SFMCSdk/11.0/Protocols/IdentityModifier.html#/c:@M@SFMCSDK@objc(pl)SFIdentityModifier(py)profileId |iOS Docs}
    */
   setProfileId(profileId: string): void;
@@ -50,7 +50,7 @@ export interface SFMCSdkApi {
    *     identity.
    * @param  {string} value - The value of the `key` attribute to be set in
    *     the identity.
-   * @see  {@link https://salesforce-marketingcloud.github.io/MarketingCloudSDK-Android/javadocs/SFMCSdk/11.0/sfmcsdk/com.salesforce.marketingcloud.sfmcsdk.components.identity/-identity/attributes.html |Android Docs}
+   * @see  {@link https://salesforce-marketingcloud.github.io/MarketingCloudSDK-Android/javadocs/SFMCSdk/11.0/sfmcsdk/com.salesforce.marketingcloud.sfmcsdk.components.identity/-attributes-editor/put.html |Android Docs}
    * @see  {@link https://salesforce-marketingcloud.github.io/MarketingCloudSDK-iOS/appledocs/SFMCSdk/11.0/Protocols/IdentityModifier.html#/c:@M@SFMCSDK@objc(pl)SFIdentityModifier(im)addAttributeWithKey:value: |iOS Docs}
    */
   setAttribute(key: string, value: string): void;
@@ -59,7 +59,7 @@ export interface SFMCSdkApi {
    * Clears the value of an attribute in the identity.
    * @param  {string} key - The name of the attribute whose value should be
    *     cleared from the identity.
-   * @see  {@link https://salesforce-marketingcloud.github.io/MarketingCloudSDK-Android/javadocs/SFMCSdk/11.0/sfmcsdk/com.salesforce.marketingcloud.sfmcsdk.components.identity/-identity/attributes.html |Android Docs}
+   * @see  {@link https://salesforce-marketingcloud.github.io/MarketingCloudSDK-Android/javadocs/SFMCSdk/11.0/sfmcsdk/com.salesforce.marketingcloud.sfmcsdk.components.identity/-attributes-editor/clear.html |Android Docs}
    * @see  {@link https://salesforce-marketingcloud.github.io/MarketingCloudSDK-iOS/appledocs/SFMCSdk/11.0/Protocols/IdentityModifier.html#/c:@M@SFMCSDK@objc(pl)SFIdentityModifier(im)clearAttributeWithKey: |iOS Docs}
    */
   clearAttribute(key: string): void;
@@ -67,7 +67,7 @@ export interface SFMCSdkApi {
   /**
    * Sets multiple attributes in the identity at once.
    * @param  {Object.<string, string>} attributes - A key/value map of attributes to be set.
-   * @see  {@link https://salesforce-marketingcloud.github.io/MarketingCloudSDK-Android/javadocs/SFMCSdk/11.0/sfmcsdk/com.salesforce.marketingcloud.sfmcsdk.components.identity/-identity/attributes.html |Android Docs}
+   * @see  {@link https://salesforce-marketingcloud.github.io/MarketingCloudSDK-Android/javadocs/SFMCSdk/11.0/sfmcsdk/com.salesforce.marketingcloud.sfmcsdk.components.identity/-attributes-editor/set.html |Android Docs}
    * @see  {@link https://salesforce-marketingcloud.github.io/MarketingCloudSDK-iOS/appledocs/SFMCSdk/11.0/Protocols/IdentityModifier.html#/c:@M@SFMCSDK@objc(pl)SFIdentityModifier(im)addAttributesWithAttributes: |iOS Docs}
    */
   setAttributes(attributes: { [key: string]: string }): void;
@@ -83,7 +83,7 @@ export interface SFMCSdkApi {
 
   /**
    * Clears all attributes from the identity.
-   * @see  {@link https://salesforce-marketingcloud.github.io/MarketingCloudSDK-Android/javadocs/SFMCSdk/11.0/sfmcsdk/com.salesforce.marketingcloud.sfmcsdk.components.identity/-identity/attributes.html |Android Docs}
+   * @see  {@link https://salesforce-marketingcloud.github.io/MarketingCloudSDK-Android/javadocs/SFMCSdk/11.0/sfmcsdk/com.salesforce.marketingcloud.sfmcsdk.components.identity/-identity/-builder/clear-attributes.html |Android Docs}
    * @see  {@link https://salesforce-marketingcloud.github.io/MarketingCloudSDK-iOS/appledocs/SFMCSdk/11.0/Protocols/IdentityModifier.html#/c:@M@SFMCSDK@objc(pl)SFIdentityModifier(im)clearAllAttributes |iOS Docs}
    */
   clearAllAttributes(): void;
@@ -107,7 +107,7 @@ export interface SFMCSdkApi {
   /**
    * Sets the party identification name for the device's user.
    * @param  {string} name - The display name or full name of the user.
-   * @see  {@link https://salesforce-marketingcloud.github.io/MarketingCloudSDK-Android/javadocs/SFMCSdk/11.0/sfmcsdk/com.salesforce.marketingcloud.sfmcsdk.components.identity/-identity/party-identification-name.html |Android Docs}
+   * @see  {@link https://salesforce-marketingcloud.github.io/MarketingCloudSDK-Android/javadocs/SFMCSdk/11.0/sfmcsdk/com.salesforce.marketingcloud.sfmcsdk.components.identity/-identity-editor/party-identification-name.html |Android Docs}
    * @see  {@link https://salesforce-marketingcloud.github.io/MarketingCloudSDK-iOS/appledocs/SFMCSdk/11.0/Protocols/IdentityModifier.html#/c:@M@SFMCSDK@objc(pl)SFIdentityModifier(py)partyIdentificationName |iOS Docs}
    */
   setPartyIdentificationName(name: string): void;
@@ -123,7 +123,7 @@ export interface SFMCSdkApi {
   /**
    * Sets the party identification number for the device's user.
    * @param  {string} numberValue - A unique identifier number for the user.
-   * @see  {@link https://salesforce-marketingcloud.github.io/MarketingCloudSDK-Android/javadocs/SFMCSdk/11.0/sfmcsdk/com.salesforce.marketingcloud.sfmcsdk.components.identity/-identity/party-identification-number.html |Android Docs}
+   * @see  {@link https://salesforce-marketingcloud.github.io/MarketingCloudSDK-Android/javadocs/SFMCSdk/11.0/sfmcsdk/com.salesforce.marketingcloud.sfmcsdk.components.identity/-identity-editor/party-identification-number.html |Android Docs}
    * @see  {@link https://salesforce-marketingcloud.github.io/MarketingCloudSDK-iOS/appledocs/SFMCSdk/11.0/Protocols/IdentityModifier.html#/c:@M@SFMCSDK@objc(pl)SFIdentityModifier(py)partyIdentificationNumber |iOS Docs}
    */
   setPartyIdentificationNumber(numberValue: string): void;
@@ -139,7 +139,7 @@ export interface SFMCSdkApi {
   /**
    * Sets the party identification type for the device's user.
    * @param  {string} type - The category or classification for the user.
-   * @see  {@link https://salesforce-marketingcloud.github.io/MarketingCloudSDK-Android/javadocs/SFMCSdk/11.0/sfmcsdk/com.salesforce.marketingcloud.sfmcsdk.components.identity/-identity/party-identification-type.html |Android Docs}
+   * @see  {@link https://salesforce-marketingcloud.github.io/MarketingCloudSDK-Android/javadocs/SFMCSdk/11.0/sfmcsdk/com.salesforce.marketingcloud.sfmcsdk.components.identity/-identity-editor/party-identification-type.html |Android Docs}
    * @see  {@link https://salesforce-marketingcloud.github.io/MarketingCloudSDK-iOS/appledocs/SFMCSdk/11.0/Protocols/IdentityModifier.html#/c:@M@SFMCSDK@objc(pl)SFIdentityModifier(py)partyIdentificationType |iOS Docs}
    */
   setPartyIdentificationType(type: string): void;
@@ -150,8 +150,8 @@ export interface SFMCSdkApi {
    *
    * @param {SFMCEvent} event - The event to be tracked.
    *
-   * @see  {@link https://salesforce-marketingcloud.github.io/MarketingCloudSDK-Android/javadocs/SFMCSdk/11.0/sfmcsdk/com.salesforce.marketingcloud.sfmcsdk.components.events/index.html |Android Docs}
-   * @see  {@link https://salesforce-marketingcloud.github.io/MarketingCloudSDK-iOS/appledocs/SFMCSdk/11.0/Classes/CustomEvent.html#/c:@M@SFMCSDK@objc(cs)SFMCSdkCustomEvent(im)initWithName:attributes: |iOS Docs}
+   * @see  {@link https://salesforce-marketingcloud.github.io/MarketingCloudSDK-Android/javadocs/SFMCSdk/11.0/sfmcsdk/com.salesforce.marketingcloud.sfmcsdk/-s-f-m-c-sdk/-companion/track.html |Android Docs}
+   * @see  {@link https://salesforce-marketingcloud.github.io/MarketingCloudSDK-iOS/appledocs/SFMCSdk/11.0/Classes/SFMCSdk.html#/c:@CM@SFMCSDK@objc(cs)SFMCSdk(cm)trackWithEvent: |iOS Docs}
    */
   track(event: SFMCEvent): void;
 
@@ -159,17 +159,17 @@ export interface SFMCSdkApi {
    * Sets the log level for the native Marketing Cloud SDK and Unified SFMC SDK.
    * @param  {string} level - The log level to set. One of 'DEBUG', 'WARN', 'ERROR', or 'NONE'.
    * @see  {@link https://salesforce-marketingcloud.github.io/MarketingCloudSDK-Android/javadocs/SFMCSdk/11.0/sfmcsdk/com.salesforce.marketingcloud.sfmcsdk.components.logging/-log-level/index.html |Android Docs}
-   * @see  {@link https://salesforce-marketingcloud.github.io/MarketingCloudSDK-iOS/appledocs/SFMCSdk/11.0/Classes/LogOutputter.html |iOS Docs}
+   * @see  {@link https://salesforce-marketingcloud.github.io/MarketingCloudSDK-iOS/appledocs/SFMCSdk/11.0/Classes/SFMCSdk.html#/c:@M@SFMCSDK@objc(cs)SFMCSdk(cm)setLoggerWithLogLevel:logOutputter: |iOS Docs}
    */
-  setLogging(level: 'DEBUG' | 'WARN' | 'ERROR' | 'NONE'): void;
+  setLogging(level: "DEBUG" | "WARN" | "ERROR" | "NONE"): void;
 
   /**
    * Instructs the native SDK to return the SDK state as an object. This content can help
    * diagnose most issues within the SDK and will be requested by the Marketing Cloud
    * support team.
    * @returns {Promise<Object>} A promise to the SDK state object.
-   * @see  {@link https://salesforce-marketingcloud.github.io/MarketingCloudSDK-Android/javadocs/SFMCSdk/11.0/sfmcsdk/com.salesforce.marketingcloud.sfmcsdk/index.html |Android Docs}
-   * @see  {@link https://salesforce-marketingcloud.github.io/MarketingCloudSDK-iOS/appledocs/SFMCSdk/11.0/Classes/SFMCSdk.html |iOS Docs}
+   * @see  {@link https://salesforce-marketingcloud.github.io/MarketingCloudSDK-Android/javadocs/SFMCSdk/11.0/sfmcsdk/com.salesforce.marketingcloud.sfmcsdk/-s-f-m-c-sdk/get-sdk-state.html |Android Docs}
+   * @see  {@link https://salesforce-marketingcloud.github.io/MarketingCloudSDK-iOS/appledocs/SFMCSdk/11.0/Classes/SFMCSdk.html#/c:@M@SFMCSDK@objc(cs)SFMCSdk(cm)state |iOS Docs}
    */
   getSdkState(): Promise<{ [key: string]: any }>;
 
@@ -178,15 +178,15 @@ export interface SFMCSdkApi {
    *
    * @param {SFMCEvent} event - The event to be tracked and sent immediately.
    *
-   * @see  {@link https://salesforce-marketingcloud.github.io/MarketingCloudSDK-Android/javadocs/SFMCSdk/11.0/sfmcsdk/com.salesforce.marketingcloud.sfmcsdk.components.events/index.html |Android Docs}
-   * @see  {@link https://salesforce-marketingcloud.github.io/MarketingCloudSDK-iOS/appledocs/SFMCSdk/11.0/Classes/CustomEvent.html#/c:@M@SFMCSDK@objc(cs)SFMCSdkCustomEvent(im)initWithName:attributes: |iOS Docs}
+   * @see  {@link https://salesforce-marketingcloud.github.io/MarketingCloudSDK-Android/javadocs/SFMCSdk/11.0/sfmcsdk/com.salesforce.marketingcloud.sfmcsdk/-s-f-m-c-sdk/-companion/send-immediate.html |Android Docs}
+   * @see  {@link https://salesforce-marketingcloud.github.io/MarketingCloudSDK-iOS/appledocs/SFMCSdk/11.0/Classes/SFMCSdk.html#/c:@CM@SFMCSDK@objc(cs)SFMCSdk(cm)sendImmediateWithEvent: |iOS Docs}
    */
   sendImmediate(event: SFMCEvent): void;
 
   /**
    * Flushes all queued events to the Marketing Cloud servers immediately.
-   * @see  {@link https://salesforce-marketingcloud.github.io/MarketingCloudSDK-Android/javadocs/SFMCSdk/11.0/sfmcsdk/com.salesforce.marketingcloud.sfmcsdk/index.html |Android Docs}
-   * @see  {@link https://salesforce-marketingcloud.github.io/MarketingCloudSDK-iOS/appledocs/SFMCSdk/11.0/Classes/SFMCSdk.html |iOS Docs}
+   * @see  {@link https://salesforce-marketingcloud.github.io/MarketingCloudSDK-Android/javadocs/SFMCSdk/11.0/sfmcsdk/com.salesforce.marketingcloud.sfmcsdk/-s-f-m-c-sdk/-companion/flush.html |Android Docs}
+   * @see  {@link https://salesforce-marketingcloud.github.io/MarketingCloudSDK-iOS/appledocs/SFMCSdk/11.0/Classes/SFMCSdk.html#/c:@CM@SFMCSDK@objc(cs)SFMCSdk(cm)flush |iOS Docs}
    */
   flush(): void;
 }
