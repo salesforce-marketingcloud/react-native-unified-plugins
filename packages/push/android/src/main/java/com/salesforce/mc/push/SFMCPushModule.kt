@@ -25,6 +25,7 @@
  */
 package com.salesforce.mc.push
 
+import android.util.Log
 import com.facebook.react.bridge.Arguments
 import com.facebook.react.bridge.Promise
 import com.facebook.react.bridge.ReactApplicationContext
@@ -38,13 +39,21 @@ import com.salesforce.marketingcloud.pushfeature.PushFeature
 class SFMCPushModule(reactContext: ReactApplicationContext) :
     NativeSFMCPushModuleSpec(reactContext) {
 
-    companion object { const val NAME = "SFMCPushModule" }
+    companion object {
+        const val NAME = "SFMCPushModule"
+        private const val TAG = "SFMCPushModule"
+    }
 
     private fun sendEvent(name: String, params: com.facebook.react.bridge.WritableMap) {
-        if (reactApplicationContext.hasActiveReactInstance()) {
+        if (!reactApplicationContext.hasActiveReactInstance()) return
+        try {
             reactApplicationContext
                 .getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter::class.java)
                 .emit(name, params)
+        } catch (t: Throwable) {
+            // Bridge can be torn down between the active-instance check and emit,
+            // or getJSModule may fail if the catalyst instance is unavailable.
+            Log.w(TAG, "Failed to emit event '$name'", t)
         }
     }
 

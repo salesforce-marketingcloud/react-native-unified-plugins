@@ -91,12 +91,17 @@ class SFMCSdkCoreModule(reactContext: ReactApplicationContext) :
     @ReactMethod
     override fun getAttributes(promise: Promise) {
         SFMCSdk.requestSdk { sdk ->
-            val attrs = sdk.identity.attributes
-            val map = Arguments.createMap()
-            for ((key, value) in attrs) {
-                map.putString(key, value)
+            // Snapshot SDK state on the SFMC worker thread, then hop to the
+            // Native Modules queue to build the WritableMap and resolve the
+            // promise on a React-managed thread.
+            val attrsSnapshot = sdk.identity.attributes.toMap()
+            BridgeQueue.runOnNativeModulesQueue(reactApplicationContext, promise) {
+                val map = Arguments.createMap()
+                for ((key, value) in attrsSnapshot) {
+                    map.putString(key, value)
+                }
+                promise.resolve(map)
             }
-            promise.resolve(map)
         }
     }
 
@@ -177,9 +182,15 @@ class SFMCSdkCoreModule(reactContext: ReactApplicationContext) :
     @ReactMethod
     override fun getSdkState(promise: Promise) {
         SFMCSdk.requestSdk { sdk ->
-            val map = jsonObjectToWritableMap(sdk.getSdkState())
-            Log.d(TAG, "SDK State: " + map.toString())
-            promise.resolve(map)
+            // Capture the JSONObject on the SFMC worker thread, then build the
+            // WritableMap on the Native Modules queue so all bridge data
+            // mutation + promise resolution happens on a React-managed thread.
+            val state = sdk.getSdkState()
+            BridgeQueue.runOnNativeModulesQueue(reactApplicationContext, promise) {
+                val map = jsonObjectToWritableMap(state)
+                Log.d(TAG, "SDK State: $map")
+                promise.resolve(map)
+            }
         }
     }
 

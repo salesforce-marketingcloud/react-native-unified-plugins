@@ -25,6 +25,7 @@
  */
 package com.salesforce.mc.mobileappmessaging
 
+import android.util.Log
 import com.facebook.react.bridge.Arguments
 import com.facebook.react.bridge.Promise
 import com.facebook.react.bridge.ReactApplicationContext
@@ -34,6 +35,7 @@ import com.facebook.react.module.annotations.ReactModule
 import com.facebook.react.modules.core.DeviceEventManagerModule
 import com.salesforce.marketingcloud.mobileappmessaging.MobileAppMessaging
 import com.salesforce.marketingcloud.mobileappmessaging.registration.RegistrationManager
+import java.lang.ref.WeakReference
 import org.json.JSONArray
 import org.json.JSONObject
 
@@ -41,15 +43,23 @@ import org.json.JSONObject
 class MAMModule(reactContext: ReactApplicationContext) :
     NativeMAMModuleSpec(reactContext) {
 
-    companion object { const val NAME = "MAMModule" }
+    companion object {
+        const val NAME = "MAMModule"
+        private const val TAG = "MAMModule"
+    }
 
     private var registrationListener: RegistrationManager.RegistrationEventListener? = null
 
     private fun sendEvent(name: String, params: com.facebook.react.bridge.WritableMap) {
-        if (reactApplicationContext.hasActiveReactInstance()) {
+        if (!reactApplicationContext.hasActiveReactInstance()) return
+        try {
             reactApplicationContext
                 .getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter::class.java)
                 .emit(name, params)
+        } catch (t: Throwable) {
+            // Bridge can be torn down between the active-instance check and emit,
+            // or getJSModule may fail if the catalyst instance is unavailable.
+            Log.w(TAG, "Failed to emit event '$name'", t)
         }
     }
 
@@ -84,11 +94,25 @@ class MAMModule(reactContext: ReactApplicationContext) :
     @ReactMethod
     override fun setRegistrationCallback() {
         MobileAppMessaging.requestSdk { mam ->
-            val listener = RegistrationManager.RegistrationEventListener { registration ->
-                sendEvent("sfmc_mam_registration", jsonToWritableMap(registration))
-            }
+            // Defense in depth against bridge teardown races: WeakRegistrationListener
+            // does not capture `this`, so if invalidate() is skipped (process death,
+            // framework bug) the module + ReactApplicationContext can still be GC'd.
+            val listener = WeakRegistrationListener(this)
             registrationListener = listener
             mam.getRegistrationManager().registerForRegistrationEvents(listener)
+        }
+    }
+
+    internal fun onRegistrationReceived(responseBody: JSONObject) {
+        sendEvent("sfmc_mam_registration", jsonToWritableMap(responseBody))
+    }
+
+    private class WeakRegistrationListener(
+        module: MAMModule,
+    ) : RegistrationManager.RegistrationEventListener {
+        private val ref = WeakReference(module)
+        override fun onRegistrationReceived(responseBody: JSONObject) {
+            ref.get()?.onRegistrationReceived(responseBody)
         }
     }
 
@@ -138,6 +162,19 @@ class MAMModule(reactContext: ReactApplicationContext) :
             }
             registrationListener = null
         }
+    }
+
+    override fun invalidate() {
+        // Best-effort cleanup if JS never called unsetRegistrationCallback() before
+        // bridge teardown. The MAM SDK is Application-scoped and outlives the bridge,
+        // so the requestSdk callback is safe to fire and forget.
+        registrationListener?.let { listener ->
+            MobileAppMessaging.requestSdk { mam ->
+                mam.getRegistrationManager().unregisterForRegistrationEvents(listener)
+            }
+        }
+        registrationListener = null
+        super.invalidate()
     }
 
     @ReactMethod

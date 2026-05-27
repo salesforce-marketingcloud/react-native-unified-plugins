@@ -1,19 +1,14 @@
 import React, { Component, useEffect, useRef, useState } from 'react';
-import RN, {
+import {
     View,
     Text,
     TouchableOpacity,
     ActivityIndicator,
     StatusBar,
     StyleSheet,
-    Platform,
 } from 'react-native';
+import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 import { color, brand } from './colors';
-
-// SafeAreaView from 'react-native' is marked deprecated in favor of
-// react-native-safe-area-context, which isn't a dependency here. Reach into the
-// namespace import to keep using it without the TS 6385 deprecation diagnostic.
-const SafeAreaView = RN.SafeAreaView;
 import { SFMCSdkModule } from '@salesforce-mc/react-native-sfmc-core';
 import type { SFMCSdkApi } from '@salesforce-mc/react-native-sfmc-core';
 import { PushModule } from '@salesforce-mc/react-native-push';
@@ -98,6 +93,8 @@ function AppInner() {
     const [initializing, setInitializing] = useState(true);
     const [warnings, setWarnings] = useState<InitWarning[]>([]);
     const [activeTab, setActiveTab] = useState<Tab>('home');
+    // Lifted out of HomeTab so it survives tab switches that unmount the tab.
+    const [loggingEnabled, setLoggingEnabled] = useState(true);
 
     // Inbox nav bar actions — ref to avoid re-renders, state flag to trigger nav bar render
     const inboxActionsRef = useRef<InboxActions | null>(null);
@@ -126,7 +123,11 @@ function AppInner() {
             return r.value;
         });
 
-        setSdks({ sfmc, push, iam, mc, mam } as SDKState);
+        const next = { sfmc, push, iam, mc, mam } as SDKState;
+        next.sfmc?.setLogging('DEBUG');
+        next.mc?.enableLogging();
+
+        setSdks(next);
         setWarnings(newWarnings);
         setInitializing(false);
     }
@@ -177,7 +178,15 @@ function AppInner() {
             {/* Tab content */}
             <View style={s.content}>
                 {activeTab === 'home' && sdks.sfmc && sdks.push && sdks.mc && sdks.mam && sdks.iam && (
-                    <HomeTab sfmc={sdks.sfmc} push={sdks.push} mc={sdks.mc} mam={sdks.mam} iam={sdks.iam} />
+                    <HomeTab
+                        sfmc={sdks.sfmc}
+                        push={sdks.push}
+                        mc={sdks.mc}
+                        mam={sdks.mam}
+                        iam={sdks.iam}
+                        loggingEnabled={loggingEnabled}
+                        onLoggingChange={setLoggingEnabled}
+                    />
                 )}
                 {activeTab === 'identity' && sdks.sfmc && sdks.mc && (
                     <RegistrationTab sfmc={sdks.sfmc} mc={sdks.mc} />
@@ -225,24 +234,24 @@ function AppInner() {
 // ─────────────────────────────────────────────────────────────────────────────
 
 export default function App() {
-    // Android targets SDK 35 (edge-to-edge enforced), and react-native-safe-area-context
-    // is not a dependency. Pad the top manually by the status-bar height so the navy
-    // navbar visually extends to the status bar without being clipped by it.
-    const androidTopInset = Platform.OS === 'android' ? StatusBar.currentHeight ?? 0 : 0;
     return (
-        <ErrorBoundary>
-            <View style={{ flex: 1, backgroundColor: brand.primary }}>
-                <StatusBar
-                    barStyle="light-content"
-                    backgroundColor={brand.primaryDark}
-                    translucent={false}
-                />
-                <View style={{ height: androidTopInset, backgroundColor: brand.primary }} />
-                <SafeAreaView style={{ flex: 1, backgroundColor: brand.surfaceMuted }}>
-                    <AppInner />
-                </SafeAreaView>
-            </View>
-        </ErrorBoundary>
+        <SafeAreaProvider>
+            <ErrorBoundary>
+                <View style={{ flex: 1, backgroundColor: brand.primary }}>
+                    <StatusBar
+                        barStyle="light-content"
+                        backgroundColor={brand.primaryDark}
+                        translucent={false}
+                    />
+                    <SafeAreaView
+                        style={{ flex: 1, backgroundColor: brand.surfaceMuted }}
+                        edges={['top', 'left', 'right', 'bottom']}
+                    >
+                        <AppInner />
+                    </SafeAreaView>
+                </View>
+            </ErrorBoundary>
+        </SafeAreaProvider>
     );
 }
 

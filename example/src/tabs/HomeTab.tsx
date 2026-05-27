@@ -28,9 +28,11 @@ interface Props {
     mc: MCApi;
     mam: MAMApi;
     iam: IamApi;
+    loggingEnabled: boolean;
+    onLoggingChange: (enabled: boolean) => void;
 }
 
-export default function HomeTab({ sfmc, push, mc, mam, iam }: Props) {
+export default function HomeTab({ sfmc, push, mc, mam, iam, loggingEnabled, onLoggingChange }: Props) {
     const [pushToken, setPushToken] = useState<string | null>(null);
     const [mcDeviceId, setMcDeviceId] = useState<string | null>(null);
     const [mamDeviceId, setMamDeviceId] = useState<string | null>(null);
@@ -135,6 +137,17 @@ export default function HomeTab({ sfmc, push, mc, mam, iam }: Props) {
         if (v) mam.enableAnalytics(); else mam.disableAnalytics();
     }
 
+    function onLoggingToggle(v: boolean) {
+        onLoggingChange(v);
+        if (v) {
+            sfmc.setLogging('DEBUG');
+            mc.enableLogging();
+        } else {
+            sfmc.setLogging('NONE');
+            mc.disableLogging();
+        }
+    }
+
     function sendEvent() {
         if (!eventName.trim()) {
             Alert.alert('Event name required');
@@ -211,6 +224,15 @@ export default function HomeTab({ sfmc, push, mc, mam, iam }: Props) {
                 <View style={[s.switchRow, s.noBorder]}>
                     <Text style={s.switchLabel}>MAM Analytics</Text>
                     <Switch value={mamAnalytics} onValueChange={onMamAnalyticsToggle} />
+                </View>
+            </Card>
+
+            {/* Logging */}
+            <SectionHeader title="Logging" />
+            <Card>
+                <View style={[s.switchRow, s.noBorder]}>
+                    <Text style={s.switchLabel}>Debug Logging</Text>
+                    <Switch value={loggingEnabled} onValueChange={onLoggingToggle} />
                 </View>
             </Card>
 

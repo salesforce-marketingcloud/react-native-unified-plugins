@@ -2,6 +2,7 @@ import UIKit
 import UserNotifications
 import React
 import React_RCTAppDelegate
+import ReactAppDependencyProvider
 import SFMCSDK
 import PushFeatureSDK
 import InAppMessagingFeatureSDK
@@ -37,6 +38,7 @@ class AppDelegate: RCTAppDelegate {
     ) -> Bool {
         self.moduleName = "SFMCExample"
         self.initialProps = [:]
+        self.dependencyProvider = RCTAppDependencyProvider()
         configureSFMCSdk()
         return super.application(application, didFinishLaunchingWithOptions: launchOptions)
     }
