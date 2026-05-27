@@ -113,4 +113,4 @@ Installing this package auto-resolves the shared `sfmc-core`, `push`, and `iam` 
 
 ## License
 
-MIT
+BSD 3-Clause. See [LICENSE](../../LICENSE) for details.

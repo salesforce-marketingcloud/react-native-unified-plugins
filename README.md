@@ -1,4 +1,4 @@
-# react-native-unified-plugins
+# Salesforce Unified React Native Plugin
 
 Unified React Native plugins for the **Salesforce Marketing Cloud SDK** — a Yarn workspace monorepo that wraps the native Android (`SFMCSdk`) and iOS (`MarketingCloudSDK`) libraries behind a single, modular TypeScript surface built for React Native's New Architecture (TurboModules).
 
@@ -37,18 +37,32 @@ packages/
 example/                              # RN 0.85.1 New Arch demo app (Android + iOS)
 ```
 
-## Getting started
+## Installation
 
 ```bash
-# 1. Install workspace dependencies
-yarn install
-
-# 2. Run the example app
-cd example
-yarn ios          # or: yarn android
+yarn add @salesforce-mc/react-native-marketingcloudsdk
+# or
+npm install @salesforce-mc/react-native-marketingcloudsdk
 ```
 
-The `example/` app is a self-contained RN 0.85.1 New Architecture project that imports all 5 packages and demonstrates each module's `requestSdk()` flow.
+> Installing a product package (`marketingcloudsdk` or `mobileappmessaging`) auto-resolves all shared dependencies (`sfmc-core`, `push`, `iam`).
+
+### Android Setup
+
+1. **Add the Marketing Cloud SDK Maven repository** to your project-level `android/build.gradle`.
+2. **Provide Firebase Cloud Messaging credentials** — place your `google-services.json` in `android/app/` and apply the Google Services plugin.
+3. **Configure the SDK** in your `MainApplication.kt` using the multi-module `ConfigBuilder` pattern. See the [example MainApplication.kt](./example/android/app/src/main/java/com/sfmcexample/MainApplication.kt) for a complete reference.
+
+For full setup instructions, see the [Android SDK Integration Guide](https://developer.salesforce.com/docs/marketing/mobile-unified-sdk/guide/android-sdk-integration.html).
+
+### iOS Setup
+
+1. **Install CocoaPods dependencies** — run `cd ios && pod install`.
+2. **[Enable push notifications](https://developer.salesforce.com/docs/marketing/mobile-unified-sdk/guide/ios-sdk-integration.html#enable-push-notifications)** in Xcode: Push Notifications and Background Modes (Remote Notifications).
+3. **Configure APNs** — set up an Authentication Key (`.p8`) or Certificate (`.p12`) in your Apple Developer account and upload to MobilePush Administration.
+4. **Configure the SDK** in your `AppDelegate.swift` using the multi-module `ConfigBuilder` pattern. See the [example AppDelegate.swift](./example/ios/SFMCExample/AppDelegate.swift) for a complete reference.
+
+For full setup instructions, see the [iOS SDK Integration Guide](https://developer.salesforce.com/docs/marketing/mobile-unified-sdk/guide/ios-sdk-integration.html).
 
 ## Usage
 
@@ -68,6 +82,8 @@ const unread = await mc.getUnreadMessages();
 mc.markMessageRead(unread[0].id);
 ```
 
+See each package's README for full API documentation with links to native SDK docs.
+
 ## Requirements
 
 | Platform | Minimum |
@@ -79,28 +95,10 @@ mc.markMessageRead(unread[0].id);
 | Android | minSdk 26, compileSdk 36 |
 | Ruby | 3.1.0 (for CocoaPods, see `example/.ruby-version`) |
 
-## Development
+## 3rd Party Product Language Disclaimers
 
-```bash
-yarn install                          # install root + workspace deps
-cd example && yarn android            # build & run Android
-cd example && yarn ios                # build & run iOS (runs `pod install` first)
-cd example && npx tsc --noEmit        # type-check
-cd example && yarn start --reset-cache # Metro with cleared cache
-```
-
-### Adding a new method to a package
-
-1. Add the spec method to `packages/<pkg>/src/Native<Name>Module.ts`.
-2. Implement the JS wrapper in `packages/<pkg>/src/<Name>Module.ts`.
-3. Implement the native side under `packages/<pkg>/android/` and `packages/<pkg>/ios/`.
-4. Re-run `pod install` (iOS) and rebuild — codegen regenerates the native interface.
-
-### Workspace tips
-
-- Packages reference each other as `1.0.0` — Yarn workspaces resolve them via symlinks, so changes are picked up immediately.
-- `resolutions` in the root `package.json` pin `react`, `react-native`, and `@types/react` across all packages.
+Where possible, we changed noninclusive terms to align with our company value of Equality. We retained noninclusive terms to document a third-party system, but we encourage the developer community to embrace more inclusive language. We can update the term when it's no longer required for technical accuracy.
 
 ## License
 
-MIT
+BSD 3-Clause. See [LICENSE](./LICENSE) for details.

@@ -79,4 +79,4 @@ sfmc.track({
 
 ## License
 
-MIT
+BSD 3-Clause. See [LICENSE](../../LICENSE) for details.

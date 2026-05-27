@@ -69,4 +69,4 @@ Push registration requires Firebase configuration on Android (`google-services.j
 
 ## License
 
-MIT
+BSD 3-Clause. See [LICENSE](../../LICENSE) for details.
