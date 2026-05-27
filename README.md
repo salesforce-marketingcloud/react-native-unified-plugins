@@ -4,7 +4,7 @@ Unified React Native plugins for the **Salesforce Marketing Cloud SDK** — a Ya
 
 ## Why
 
-Historically, integrating Marketing Cloud features into a React Native app required stitching together separate SDKs and bridge modules per feature. This monorepo consolidates Push, In-App Messaging, MarketingCloud Engagement, and MobileAppMessaging behind one consistent `requestSdk()` API — install one product package and get all transitively required pieces.
+Historically, integrating Marketing Cloud features into a React Native app required stitching together separate SDKs and bridge modules per feature. This monorepo consolidates Push, In-App Messaging, MarketingCloud Engagement, and MobileAppMessaging behind one consistent `requestSdk()` API — pick the product package you need and add only the optional feature packages (`push`, `iam`) you actually use.
 
 ## Packages
 
@@ -16,7 +16,7 @@ Historically, integrating Marketing Cloud features into a React Native app requi
 | [`@salesforce-mc/react-native-marketingcloudsdk`](./packages/marketingcloudsdk) | MarketingCloud Engagement: inbox, tags, attributes, analytics, registration |
 | [`@salesforce-mc/react-native-mobileappmessaging`](./packages/mobileappmessaging) | MobileAppMessaging: analytics, registration |
 
-`marketingcloudsdk` and `mobileappmessaging` are **product** packages — they declare transitive dependencies on `sfmc-core`, `push`, and `iam`, so consumers only install one.
+`marketingcloudsdk` and `mobileappmessaging` are **product** packages — they transitively depend on `sfmc-core` only. Add `push` and `iam` separately if you need those features.
 
 ## Architecture
 
@@ -32,8 +32,8 @@ packages/
 ├── sfmc-core/                        # foundation: identity, events, logging
 ├── push/                             # push tokens & permissions
 ├── iam/                              # in-app messaging
-├── marketingcloudsdk/                # product: engagement (depends on core+push+iam)
-└── mobileappmessaging/               # product: MAM (depends on core+push+iam)
+├── marketingcloudsdk/                # product: engagement (depends on core; add push/iam as needed)
+└── mobileappmessaging/               # product: MAM (depends on core; add push/iam as needed)
 example/                              # RN 0.85.1 New Arch demo app (Android + iOS)
 ```
 
@@ -45,7 +45,7 @@ yarn add @salesforce-mc/react-native-marketingcloudsdk
 npm install @salesforce-mc/react-native-marketingcloudsdk
 ```
 
-> Installing a product package (`marketingcloudsdk` or `mobileappmessaging`) auto-resolves all shared dependencies (`sfmc-core`, `push`, `iam`).
+> Installing a product package (`marketingcloudsdk` or `mobileappmessaging`) auto-resolves `sfmc-core`. Add `@salesforce-mc/react-native-push` and/or `@salesforce-mc/react-native-iam` separately to enable those optional features.
 
 ### Android Setup
 

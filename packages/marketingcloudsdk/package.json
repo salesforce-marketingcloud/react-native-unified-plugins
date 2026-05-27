@@ -22,9 +22,7 @@
     }
   },
   "dependencies": {
-    "@salesforce-mc/react-native-sfmc-core": "1.0.0",
-    "@salesforce-mc/react-native-push": "1.0.0",
-    "@salesforce-mc/react-native-iam": "1.0.0"
+    "@salesforce-mc/react-native-sfmc-core": "1.0.0"
   },
   "peerDependencies": {
     "react": "^19.0.0",
