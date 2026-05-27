@@ -32,16 +32,15 @@ import com.facebook.react.bridge.ReactApplicationContext
 import com.facebook.react.bridge.ReactMethod
 import com.facebook.react.bridge.ReadableArray
 import com.facebook.react.bridge.ReadableMap
-import com.facebook.react.bridge.WritableArray
 import com.facebook.react.bridge.WritableMap
 import com.facebook.react.module.annotations.ReactModule
 import com.facebook.react.modules.core.DeviceEventManagerModule
 import com.salesforce.marketingcloud.MCLogListener
 import com.salesforce.marketingcloud.MarketingCloudSdk
-import com.salesforce.marketingcloud.messages.inbox.InboxMessage
 import com.salesforce.marketingcloud.messages.inbox.InboxMessageManager
 import com.salesforce.marketingcloud.registration.Registration
 import com.salesforce.marketingcloud.registration.RegistrationManager
+import com.salesforce.mc.sfmccore.BridgeQueue
 import java.lang.ref.WeakReference
 
 @ReactModule(name = MCModule.NAME)
@@ -54,7 +53,6 @@ class MCModule(reactContext: ReactApplicationContext) :
     }
 
     private var registrationListener: RegistrationManager.RegistrationEventListener? = null
-    private val messageCache = mutableMapOf<String, InboxMessage>()
 
     private fun sendEvent(name: String, params: com.facebook.react.bridge.WritableMap) {
         if (!reactApplicationContext.hasActiveReactInstance()) return
@@ -89,30 +87,41 @@ class MCModule(reactContext: ReactApplicationContext) :
     override fun getAllMessages(promise: Promise) {
         MarketingCloudSdk.requestSdk { sdk ->
             val messages = sdk.getInboxMessageManager().getMessages()
-            messageCache.clear()
-            messages.forEach { messageCache[it.id] = it }
-            promise.resolve(messagesToArray(messages))
+            // Hop to the Native Modules queue so the WritableArray + promise
+            // resolution happen on a React-managed thread.
+            BridgeQueue.runOnNativeModulesQueue(reactApplicationContext, promise) {
+                promise.resolve(InboxUtils.messagesToArray(messages))
+            }
         }
     }
 
     @ReactMethod
     override fun getUnreadMessages(promise: Promise) {
         MarketingCloudSdk.requestSdk { sdk ->
-            promise.resolve(messagesToArray(sdk.getInboxMessageManager().getUnreadMessages()))
+            val messages = sdk.getInboxMessageManager().getUnreadMessages()
+            BridgeQueue.runOnNativeModulesQueue(reactApplicationContext, promise) {
+                promise.resolve(InboxUtils.messagesToArray(messages))
+            }
         }
     }
 
     @ReactMethod
     override fun getReadMessages(promise: Promise) {
         MarketingCloudSdk.requestSdk { sdk ->
-            promise.resolve(messagesToArray(sdk.getInboxMessageManager().getReadMessages()))
+            val messages = sdk.getInboxMessageManager().getReadMessages()
+            BridgeQueue.runOnNativeModulesQueue(reactApplicationContext, promise) {
+                promise.resolve(InboxUtils.messagesToArray(messages))
+            }
         }
     }
 
     @ReactMethod
     override fun getDeletedMessages(promise: Promise) {
         MarketingCloudSdk.requestSdk { sdk ->
-            promise.resolve(messagesToArray(sdk.getInboxMessageManager().getDeletedMessages()))
+            val messages = sdk.getInboxMessageManager().getDeletedMessages()
+            BridgeQueue.runOnNativeModulesQueue(reactApplicationContext, promise) {
+                promise.resolve(InboxUtils.messagesToArray(messages))
+            }
         }
     }
 
@@ -176,10 +185,13 @@ class MCModule(reactContext: ReactApplicationContext) :
     override fun trackInboxMessageOpened(message: ReadableMap) {
         val messageId = message.getString("id") ?: return
         MarketingCloudSdk.requestSdk { sdk ->
-            val inboxMessage = messageCache[messageId]
-            if (inboxMessage != null) {
-                sdk.getAnalyticsManager().trackInboxOpenEvent(inboxMessage)
-            }
+            // The SDK already keeps the canonical inbox in memory. Resolving the
+            // id against getMessages() at call-time avoids the staleness traps
+            // of a parallel cache (e.g. tracking after getUnreadMessages() but
+            // not getAllMessages()).
+            sdk.getInboxMessageManager().getMessages()
+                .firstOrNull { it.id == messageId }
+                ?.let { sdk.getAnalyticsManager().trackInboxOpenEvent(it) }
         }
     }
 
@@ -208,18 +220,24 @@ class MCModule(reactContext: ReactApplicationContext) :
     @ReactMethod
     override fun getTags(promise: Promise) {
         MarketingCloudSdk.requestSdk { sdk ->
-            val arr = Arguments.createArray()
-            sdk.getRegistrationManager().getTags().forEach { arr.pushString(it) }
-            promise.resolve(arr)
+            val tags = sdk.getRegistrationManager().getTags().toList()
+            BridgeQueue.runOnNativeModulesQueue(reactApplicationContext, promise) {
+                val arr = Arguments.createArray()
+                tags.forEach { arr.pushString(it) }
+                promise.resolve(arr)
+            }
         }
     }
 
     @ReactMethod
     override fun getAttributes(promise: Promise) {
         MarketingCloudSdk.requestSdk { sdk ->
-            val map = Arguments.createMap()
-            sdk.getRegistrationManager().getAttributes().forEach { (k, v) -> map.putString(k, v) }
-            promise.resolve(map)
+            val attributes = sdk.getRegistrationManager().getAttributes().toMap()
+            BridgeQueue.runOnNativeModulesQueue(reactApplicationContext, promise) {
+                val map = Arguments.createMap()
+                attributes.forEach { (k, v) -> map.putString(k, v) }
+                promise.resolve(map)
+            }
         }
     }
 
@@ -300,17 +318,28 @@ class MCModule(reactContext: ReactApplicationContext) :
     @ReactMethod
     override fun setRegistrationCallback() {
         MarketingCloudSdk.requestSdk { sdk ->
+            // JS only needs one bridge to the native event stream — repeat
+            // setRegistrationCallback() calls reuse the existing listener
+            // instead of stacking duplicates on the SDK's manager.
+            //
             // Defense in depth against bridge teardown races: WeakRegistrationListener
             // does not capture `this`, so if invalidate() is skipped (process death,
             // framework bug) the module + ReactApplicationContext can still be GC'd.
-            val listener = WeakRegistrationListener(this)
-            registrationListener = listener
-            sdk.getRegistrationManager().registerForRegistrationEvents(listener)
+            if (registrationListener == null) {
+                val listener = WeakRegistrationListener(this)
+                registrationListener = listener
+                sdk.getRegistrationManager().registerForRegistrationEvents(listener)
+            }
         }
     }
 
     internal fun onRegistrationReceived(registration: Registration) {
-        sendEvent("sfmc_mc_registration", registrationToWritableMap(registration))
+        // The SDK invokes this listener on its own worker thread. Hop to the
+        // Native Modules queue so WritableMap construction + bridge emission
+        // happen on a React-managed thread.
+        BridgeQueue.runOnNativeModulesQueue(reactApplicationContext) {
+            sendEvent("sfmc_mc_registration", registrationToWritableMap(registration))
+        }
     }
 
     private class WeakRegistrationListener(
@@ -367,7 +396,6 @@ class MCModule(reactContext: ReactApplicationContext) :
             }
         }
         registrationListener = null
-        messageCache.clear()
         super.invalidate()
     }
 
@@ -377,9 +405,5 @@ class MCModule(reactContext: ReactApplicationContext) :
     @ReactMethod
     override fun removeListeners(count: Double) {
         // Required for RN event emitter parity; module emits no events.
-    }
-
-    private fun messagesToArray(messages: List<InboxMessage>): WritableArray {
-        return InboxUtils.messagesToArray(messages)
     }
 }

@@ -47,38 +47,6 @@ class SFMCSdkCoreModule(reactContext: ReactApplicationContext) :
     companion object {
         const val NAME = "SFMCSdkCoreModule"
         private const val TAG = NAME
-        private const val E_BRIDGE_UNAVAILABLE = "E_BRIDGE_UNAVAILABLE"
-    }
-
-    /**
-     * Posts [block] to the Native Modules queue so any bridge data structures
-     * (WritableMap / WritableArray) and the promise resolution happen on a
-     * React-managed thread instead of whichever worker thread invoked us
-     * (e.g. SFMCSdk.requestSdk's internal executor).
-     *
-     * If the catalyst instance has already been torn down, the promise is
-     * rejected so callers don't hang forever.
-     */
-    private fun runOnNativeModulesQueue(promise: Promise, block: () -> Unit) {
-        if (!reactApplicationContext.hasActiveReactInstance()) {
-            promise.reject(E_BRIDGE_UNAVAILABLE, "React instance is not active")
-            return
-        }
-        try {
-            reactApplicationContext.runOnNativeModulesQueueThread {
-                try {
-                    block()
-                } catch (t: Throwable) {
-                    Log.w(TAG, "Native modules queue task failed", t)
-                    promise.reject(E_BRIDGE_UNAVAILABLE, t)
-                }
-            }
-        } catch (t: Throwable) {
-            // runOnNativeModulesQueueThread throws if catalyst was torn down
-            // between our hasActiveReactInstance() check and the dispatch.
-            Log.w(TAG, "Failed to dispatch to native modules queue", t)
-            promise.reject(E_BRIDGE_UNAVAILABLE, t)
-        }
     }
 
     @ReactMethod
@@ -127,7 +95,7 @@ class SFMCSdkCoreModule(reactContext: ReactApplicationContext) :
             // Native Modules queue to build the WritableMap and resolve the
             // promise on a React-managed thread.
             val attrsSnapshot = sdk.identity.attributes.toMap()
-            runOnNativeModulesQueue(promise) {
+            BridgeQueue.runOnNativeModulesQueue(reactApplicationContext, promise) {
                 val map = Arguments.createMap()
                 for ((key, value) in attrsSnapshot) {
                     map.putString(key, value)
@@ -218,7 +186,7 @@ class SFMCSdkCoreModule(reactContext: ReactApplicationContext) :
             // WritableMap on the Native Modules queue so all bridge data
             // mutation + promise resolution happens on a React-managed thread.
             val state = sdk.getSdkState()
-            runOnNativeModulesQueue(promise) {
+            BridgeQueue.runOnNativeModulesQueue(reactApplicationContext, promise) {
                 val map = jsonObjectToWritableMap(state)
                 Log.d(TAG, "SDK State: $map")
                 promise.resolve(map)
