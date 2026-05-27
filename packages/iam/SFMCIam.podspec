@@ -1,8 +1,8 @@
 require 'json'
-package = JSON.parse(File.read(File.join(__dir__, '..', 'package.json')))
+package = JSON.parse(File.read(File.join(__dir__, 'package.json')))
 
 Pod::Spec.new do |s|
-  s.name         = "SFMCMobileAppMessaging"
+  s.name         = "SFMCIam"
   s.version      = package["version"]
   s.summary      = package["description"]
   s.description  = package["description"]
@@ -11,10 +11,10 @@ Pod::Spec.new do |s|
   s.author       = package["author"]
   s.source       = { :git => "https://github.com/salesforce-marketingcloud/react-native-unified-plugins.git", :tag => "#{s.version}" }
   s.platform     = :ios, "15.1"
-  s.source_files = "**/*.{h,m,mm,swift}"
+  s.source_files = "ios/**/*.{h,m,mm,swift}"
 
   s.dependency "MarketingCloud-SFMCSdk", "~> 4.0.0"
-  s.dependency "SFMobileAppMessagingSDK", "~> 2.0.0"
+  s.dependency "SFInAppMessagingFeatureSDK", "~> 1.0.0"
   s.pod_target_xcconfig = { 'ENABLE_BITCODE' => 'NO' }
 
   install_modules_dependencies(s)

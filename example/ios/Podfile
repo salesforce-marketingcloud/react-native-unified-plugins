@@ -29,18 +29,8 @@ target 'SFMCExample' do
     :app_path => "#{Pod::Config.instance.installation_root}/.."
   )
 
-  # SFMC native SDKs — do NOT declare them explicitly here.
-  # They resolve transitively from the bridge podspecs below.
-  # Explicit declarations cause duplicate xcframework conflicts at link time.
-
-  # SFMC React Native bridge packages (local paths — explicit because monorepo :path pods
-  # are not always picked up by autolinking in a Yarn workspaces layout).
-  # Pod names must match s.name in each package's .podspec file.
-  pod 'SFMCSdkCore',            :path => '../../packages/sfmc-core/ios'
-  pod 'SFMCPush',               :path => '../../packages/push/ios'
-  pod 'SFMCIam',                :path => '../../packages/iam/ios'
-  pod 'SFMCMarketingCloudSdk',  :path => '../../packages/marketingcloudsdk/ios'
-  pod 'SFMCMobileAppMessaging', :path => '../../packages/mobileappmessaging/ios'
+  # SFMC pods are discovered automatically via autolinking (podspecs at package root).
+  # No explicit pod declarations needed.
 
   post_install do |installer|
     react_native_post_install(
