@@ -2048,11 +2048,11 @@ DEPENDENCIES:
   - ReactCommon/turbomodule/core (from `../../node_modules/react-native/ReactCommon`)
   - ReactNativeDependencies (from `../../node_modules/react-native/third-party-podspecs/ReactNativeDependencies.podspec`)
   - "RNCClipboard (from `../../node_modules/@react-native-clipboard/clipboard`)"
-  - SFMCIam (from `../../packages/iam/ios`)
-  - SFMCMarketingCloudSdk (from `../../packages/marketingcloudsdk/ios`)
-  - SFMCMobileAppMessaging (from `../../packages/mobileappmessaging/ios`)
-  - SFMCPush (from `../../packages/push/ios`)
-  - SFMCSdkCore (from `../../packages/sfmc-core/ios`)
+  - "SFMCIam (from `../../node_modules/@salesforce-mc/react-native-iam`)"
+  - "SFMCMarketingCloudSdk (from `../../node_modules/@salesforce-mc/react-native-marketingcloudsdk`)"
+  - "SFMCMobileAppMessaging (from `../../node_modules/@salesforce-mc/react-native-mobileappmessaging`)"
+  - "SFMCPush (from `../../node_modules/@salesforce-mc/react-native-push`)"
+  - "SFMCSdkCore (from `../../node_modules/@salesforce-mc/react-native-sfmc-core`)"
   - Yoga (from `../../node_modules/react-native/ReactCommon/yoga`)
 
 SPEC REPOS:
@@ -2216,15 +2216,15 @@ EXTERNAL SOURCES:
   RNCClipboard:
     :path: "../../node_modules/@react-native-clipboard/clipboard"
   SFMCIam:
-    :path: "../../packages/iam/ios"
+    :path: "../../node_modules/@salesforce-mc/react-native-iam"
   SFMCMarketingCloudSdk:
-    :path: "../../packages/marketingcloudsdk/ios"
+    :path: "../../node_modules/@salesforce-mc/react-native-marketingcloudsdk"
   SFMCMobileAppMessaging:
-    :path: "../../packages/mobileappmessaging/ios"
+    :path: "../../node_modules/@salesforce-mc/react-native-mobileappmessaging"
   SFMCPush:
-    :path: "../../packages/push/ios"
+    :path: "../../node_modules/@salesforce-mc/react-native-push"
   SFMCSdkCore:
-    :path: "../../packages/sfmc-core/ios"
+    :path: "../../node_modules/@salesforce-mc/react-native-sfmc-core"
   Yoga:
     :path: "../../node_modules/react-native/ReactCommon/yoga"
 
@@ -2308,15 +2308,15 @@ SPEC CHECKSUMS:
   ReactNativeDependencies: 32538f9a81ab0273b8eb5f2429046a53cf9b7e4a
   RNCClipboard: 7a7d4557bfd3370b35c99dfecd92ae7b9fc4948a
   SFInAppMessagingFeatureSDK: 602a31c47341b0d031e8df69c35327dc877a9591
-  SFMCIam: 0204aa063b150f33ce853f68e160e6fdfd35ca5d
-  SFMCMarketingCloudSdk: fb4bc9ed31409003a098702b04230e0e256d80bf
-  SFMCMobileAppMessaging: 18f5746c915707ef5df64205935d7cc6848492d9
-  SFMCPush: bad555c79ca992c4f27dcbf9372d3e31943213f7
-  SFMCSdkCore: 55037a4b34869607994aab2ffea200ac3245f336
+  SFMCIam: dfb697f1ab83cec5997487c1383724ce015366dc
+  SFMCMarketingCloudSdk: 83cb559b9307ae316ebc0622691f8cd5a7f71307
+  SFMCMobileAppMessaging: ac8ecadbfde84f7bc8423f940cdc4f1d1a1fc467
+  SFMCPush: c03d2d4c3b9ec3965aa9409c22bb83fe76035dd0
+  SFMCSdkCore: d21292a8693689d8d8491f12f87bec045c303a2a
   SFMobileAppMessagingSDK: 7d9d24582a13aa451c02d98702c1f05debeef2c1
   SFPushFeatureSDK: 894482aa7b09516b893973310a59a0bda5363221
   Yoga: bb9419b17da842d8aa3d6f93f8deaf9fcd82abd3
 
-PODFILE CHECKSUM: c8071c24fae7ef9e7db942ea524285f904a00b0c
+PODFILE CHECKSUM: 528a147f08973ab37895c75eca0988381649355f
 
 COCOAPODS: 1.16.2
