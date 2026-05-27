@@ -19,8 +19,8 @@ Android: no additional steps — Gradle autolinking discovers the module automat
 
 ### Required SDK configuration
 
-- **Android** — initialize in your `MainApplication.kt` via `SFMCSdk.configure(...)`. See `example/android/app/src/main/java/com/sfmcexample/MainApplication.kt` in the bundled example app.
-- **iOS** — initialize in your `AppDelegate.swift` via `SFMCSdk.initializeSdk(...)`. See `example/ios/SFMCExample/AppDelegate.swift`.
+- **Android** — initialize in your `MainApplication.kt` via `SFMCSdk.configure(...)`. See the [Android SDK Integration Guide](https://developer.salesforce.com/docs/marketing/mobile-unified-sdk/guide/android-sdk-integration.html).
+- **iOS** — initialize in your `AppDelegate.swift` via `SFMCSdk.initializeSdk(...)`. See the [iOS SDK Integration Guide](https://developer.salesforce.com/docs/marketing/mobile-unified-sdk/guide/ios-sdk-integration.html).
 - Configure Firebase (Android) and APNs (iOS) credentials before push will deliver.
 
 ## Usage
@@ -113,4 +113,4 @@ Installing this package auto-resolves the shared `sfmc-core`, `push`, and `iam` 
 
 ## License
 
-MIT
+BSD 3-Clause. See [LICENSE](../../LICENSE) for details.

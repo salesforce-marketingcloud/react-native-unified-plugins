@@ -241,13 +241,7 @@ class MCModule(reactContext: ReactApplicationContext) :
         }
     }
 
-    // Analytics methods — STUBBED. The Android SDK's MC AnalyticsManager interface did not
-    // surface any methods in API discovery for v11.0.0, so we cannot verify the actual
-    // setter/getter shape against bytecode. The Kotlin compiler rejects every speculative
-    // anchor name (setAnalyticsEnabled, enableAnalytics, isAnalyticsEnabled, etc.) when
-    // emitted directly. To unblock the build, these methods are no-ops that log a warning.
-    // The TS spec preserves cross-platform API parity; iOS implements them correctly.
-    // Re-enable once a verified Android API discovery is available.
+    // Analytics methods
     @ReactMethod
     override fun enablePiAnalytics() {
         MarketingCloudSdk.requestSdk { sdk ->
