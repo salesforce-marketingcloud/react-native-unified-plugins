@@ -51,16 +51,16 @@ npm install @salesforce-mc/react-native-marketingcloudsdk
 
 1. **Add the Marketing Cloud SDK Maven repository** to your project-level `android/build.gradle`.
 2. **Provide Firebase Cloud Messaging credentials** — place your `google-services.json` in `android/app/` and apply the Google Services plugin.
-3. **Configure the SDK** in your `MainApplication.kt` using the multi-module `ConfigBuilder` pattern. See the [example MainApplication.kt](./example/android/app/src/main/java/com/sfmcexample/MainApplication.kt) for a complete reference.
+3. **Configure the SDK** in your `MainApplication.kt` using the multi-module `ConfigBuilder` pattern. See [Initialize the SDK](https://developer.salesforce.com/docs/marketing/mobile-unified-sdk/guide/android-sdk-integration.html#initialize-the-sdk).
 
 For full setup instructions, see the [Android SDK Integration Guide](https://developer.salesforce.com/docs/marketing/mobile-unified-sdk/guide/android-sdk-integration.html).
 
 ### iOS Setup
 
 1. **Install CocoaPods dependencies** — run `cd ios && pod install`.
-2. **[Enable push notifications](https://developer.salesforce.com/docs/marketing/mobile-unified-sdk/guide/ios-sdk-integration.html#enable-push-notifications)** in Xcode: Push Notifications and Background Modes (Remote Notifications).
-3. **Configure APNs** — set up an Authentication Key (`.p8`) or Certificate (`.p12`) in your Apple Developer account and upload to MobilePush Administration.
-4. **Configure the SDK** in your `AppDelegate.swift` using the multi-module `ConfigBuilder` pattern. See the [example AppDelegate.swift](./example/ios/SFMCExample/AppDelegate.swift) for a complete reference.
+2. **Configure APNs** — set up an Authentication Key (`.p8`) or Certificate (`.p12`) in your Apple Developer account and upload to MobilePush Administration.
+3. **Configure the SDK** in your `AppDelegate.swift` using the multi-module `ConfigBuilder` pattern. See [Configure the SDK](https://developer.salesforce.com/docs/marketing/mobile-unified-sdk/guide/ios-sdk-integration.html#configure-the-sdk).
+4. **[Enable push notifications](https://developer.salesforce.com/docs/marketing/mobile-unified-sdk/guide/ios-sdk-integration.html#enable-push-notifications)** in Xcode: Push Notifications and Background Modes (Remote Notifications).
 
 For full setup instructions, see the [iOS SDK Integration Guide](https://developer.salesforce.com/docs/marketing/mobile-unified-sdk/guide/ios-sdk-integration.html).
 
