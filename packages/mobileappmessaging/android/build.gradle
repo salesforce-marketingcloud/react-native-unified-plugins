@@ -19,8 +19,8 @@ react {
 }
 
 dependencies {
-    implementation "com.salesforce.marketingcloud:sfmcsdk:${safeExtGet('sfmcSdkVersion', '3.1.+')}"
-    implementation "com.salesforce.marketingcloud:mobileappmessagingsdk:${safeExtGet('mobileAppMessagingSdkVersion', '1.1.+')}"
+    api "com.salesforce.marketingcloud:sfmcsdk:${safeExtGet('sfmcSdkVersion', '3.1.+')}"
+    api "com.salesforce.marketingcloud:mobileappmessagingsdk:${safeExtGet('mobileAppMessagingSdkVersion', '1.1.+')}"
     implementation platform("com.google.firebase:firebase-bom:${safeExtGet('firebaseBomVersion', '33.0.+')}")
     implementation "com.google.firebase:firebase-messaging"
     implementation "com.facebook.react:react-android"

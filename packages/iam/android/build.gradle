@@ -19,8 +19,7 @@ react {
 }
 
 dependencies {
-    implementation "com.salesforce.marketingcloud:sfmcsdk:${safeExtGet('sfmcSdkVersion', '3.1.+')}"
-    implementation "com.salesforce.marketingcloud:inappmessagingfeaturemodule:${safeExtGet('inAppMessagingFeatureVersion', '1.0.+')}"
-    implementation "com.salesforce.marketingcloud:inappmessagingmodelsmodule:${safeExtGet('inAppMessagingModelsVersion', '1.0.+')}"
+    api "com.salesforce.marketingcloud:sfmcsdk:${safeExtGet('sfmcSdkVersion', '3.1.+')}"
+    api "com.salesforce.marketingcloud:inappmessagingfeaturemodule:${safeExtGet('inAppMessagingFeatureVersion', '1.0.+')}"
     implementation "com.facebook.react:react-android"
 }
