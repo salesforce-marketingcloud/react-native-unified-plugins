@@ -21,7 +21,6 @@ react {
 dependencies {
     api "com.salesforce.marketingcloud:sfmcsdk:${safeExtGet('sfmcSdkVersion', '3.1.+')}"
     api "com.salesforce.marketingcloud:pushfeaturemodule:${safeExtGet('pushFeatureVersion', '2.0.+')}"
-    // api "com.salesforce.marketingcloud:pushmodelsmodule:${safeExtGet('pushModelsVersion', '1.0.+')}"
     implementation platform("com.google.firebase:firebase-bom:${safeExtGet('firebaseBomVersion', '33.0.+')}")
     implementation "com.google.firebase:firebase-messaging"
     implementation "com.facebook.react:react-android"
