@@ -1,5 +1,5 @@
 {
-  "name": "@salesforce-mc/react-native-marketingcloudsdk",
+  "name": "@sfmc/react-native-marketingcloudsdk",
   "version": "1.0.0",
   "description": "Marketing Cloud MobilePush SDK for React Native — inbox, tags, analytics, and registration",
   "author": "Salesforce Marketing Cloud",
@@ -22,7 +22,7 @@
     }
   },
   "dependencies": {
-    "@salesforce-mc/react-native-sfmc-core": "1.0.0"
+    "@sfmc/react-native-sfmc-core": "1.0.0"
   },
   "peerDependencies": {
     "react": "^19.0.0",

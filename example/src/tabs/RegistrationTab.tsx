@@ -10,8 +10,8 @@ import {
     Alert,
 } from 'react-native';
 import { color } from '../colors';
-import type { SFMCSdkApi } from '@salesforce-mc/react-native-sfmc-core';
-import type { MCApi } from '@salesforce-mc/react-native-marketingcloudsdk';
+import type { SFMCSdkApi } from '@sfmc/react-native-sfmc-core';
+import type { MCApi } from '@sfmc/react-native-marketingcloudsdk';
 import { SectionHeader, Card, PrimaryButton } from '../components';
 
 interface Props {

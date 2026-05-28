@@ -1,5 +1,5 @@
 {
-  "name": "@salesforce-mc/react-native-mobileappmessaging",
+  "name": "@sfmc/react-native-mobileappmessaging",
   "version": "1.0.0",
   "description": "Mobile App Messaging SDK for React Native — device registration and analytics",
   "author": "Salesforce Marketing Cloud",
@@ -22,7 +22,7 @@
     }
   },
   "dependencies": {
-    "@salesforce-mc/react-native-sfmc-core": "1.0.0"
+    "@sfmc/react-native-sfmc-core": "1.0.0"
   },
   "peerDependencies": {
     "react": "^19.0.0",

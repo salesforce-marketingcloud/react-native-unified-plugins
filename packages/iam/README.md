@@ -5,9 +5,9 @@
 ## Installation
 
 ```bash
-yarn add @salesforce-mc/react-native-iam
+yarn add @sfmc/react-native-iam
 # or
-npm install @salesforce-mc/react-native-iam
+npm install @sfmc/react-native-iam
 ```
 
 iOS:
@@ -25,8 +25,8 @@ Android: no additional steps — Gradle autolinking discovers the module automat
 ## Usage
 
 ```ts
-import { IamModule } from '@salesforce-mc/react-native-iam';
-import type { IamApi } from '@salesforce-mc/react-native-iam';
+import { IamModule } from '@sfmc/react-native-iam';
+import type { IamApi } from '@sfmc/react-native-iam';
 
 const iam: IamApi = await IamModule.requestSdk();
 

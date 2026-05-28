@@ -1,5 +1,5 @@
 {
-  "name": "@salesforce-mc/react-native-push",
+  "name": "@sfmc/react-native-push",
   "version": "1.0.0",
   "description": "Push messaging for the Salesforce Marketing Cloud Unified Mobile SDK",
   "author": "Salesforce Marketing Cloud",

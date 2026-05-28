@@ -5,9 +5,9 @@
 ## Installation
 
 ```bash
-yarn add @salesforce-mc/react-native-mobileappmessaging
+yarn add @sfmc/react-native-mobileappmessaging
 # or
-npm install @salesforce-mc/react-native-mobileappmessaging
+npm install @sfmc/react-native-mobileappmessaging
 ```
 
 iOS:
@@ -25,8 +25,8 @@ Android: no additional steps — Gradle autolinking discovers the module automat
 ## Usage
 
 ```ts
-import { MobileAppMessagingModule } from '@salesforce-mc/react-native-mobileappmessaging';
-import type { MAMApi } from '@salesforce-mc/react-native-mobileappmessaging';
+import { MobileAppMessagingModule } from '@sfmc/react-native-mobileappmessaging';
+import type { MAMApi } from '@sfmc/react-native-mobileappmessaging';
 
 const mam: MAMApi = await MobileAppMessagingModule.requestSdk();
 const deviceId = await mam.getDeviceId();

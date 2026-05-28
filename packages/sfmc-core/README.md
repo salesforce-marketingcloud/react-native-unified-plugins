@@ -5,9 +5,9 @@
 ## Installation
 
 ```bash
-yarn add @salesforce-mc/react-native-sfmc-core
+yarn add @sfmc/react-native-sfmc-core
 # or
-npm install @salesforce-mc/react-native-sfmc-core
+npm install @sfmc/react-native-sfmc-core
 ```
 
 iOS:
@@ -25,8 +25,8 @@ Android: no additional steps — Gradle autolinking discovers the module automat
 ## Usage
 
 ```ts
-import { SFMCSdkModule } from '@salesforce-mc/react-native-sfmc-core';
-import type { SFMCSdkApi, SFMCEvent } from '@salesforce-mc/react-native-sfmc-core';
+import { SFMCSdkModule } from '@sfmc/react-native-sfmc-core';
+import type { SFMCSdkApi, SFMCEvent } from '@sfmc/react-native-sfmc-core';
 
 const sfmc: SFMCSdkApi = await SFMCSdkModule.requestSdk();
 sfmc.setProfileId('user-1234');

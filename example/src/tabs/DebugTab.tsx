@@ -11,7 +11,7 @@ import {
 } from 'react-native';
 import Clipboard from '@react-native-clipboard/clipboard';
 import { color } from '../colors';
-import type { SFMCSdkApi } from '@salesforce-mc/react-native-sfmc-core';
+import type { SFMCSdkApi } from '@sfmc/react-native-sfmc-core';
 
 interface Props {
     sfmc: SFMCSdkApi;

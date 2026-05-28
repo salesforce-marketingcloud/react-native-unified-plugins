@@ -10,11 +10,11 @@
   },
   "dependencies": {
     "@react-native-clipboard/clipboard": "^1.16.3",
-    "@salesforce-mc/react-native-iam": "*",
-    "@salesforce-mc/react-native-marketingcloudsdk": "*",
-    "@salesforce-mc/react-native-mobileappmessaging": "*",
-    "@salesforce-mc/react-native-push": "*",
-    "@salesforce-mc/react-native-sfmc-core": "*",
+    "@sfmc/react-native-iam": "*",
+    "@sfmc/react-native-marketingcloudsdk": "*",
+    "@sfmc/react-native-mobileappmessaging": "*",
+    "@sfmc/react-native-push": "*",
+    "@sfmc/react-native-sfmc-core": "*",
     "react": "19.2.3",
     "react-native": "0.85.1",
     "react-native-safe-area-context": "^5.8.0"

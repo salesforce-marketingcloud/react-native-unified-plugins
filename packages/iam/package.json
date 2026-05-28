@@ -1,5 +1,5 @@
 {
-  "name": "@salesforce-mc/react-native-iam",
+  "name": "@sfmc/react-native-iam",
   "version": "1.0.0",
   "description": "In-App Messaging for the Salesforce Marketing Cloud Unified Mobile SDK",
   "author": "Salesforce Marketing Cloud",

@@ -2048,11 +2048,11 @@ DEPENDENCIES:
   - ReactCommon/turbomodule/core (from `../../node_modules/react-native/ReactCommon`)
   - ReactNativeDependencies (from `../../node_modules/react-native/third-party-podspecs/ReactNativeDependencies.podspec`)
   - "RNCClipboard (from `../../node_modules/@react-native-clipboard/clipboard`)"
-  - "SFMCIam (from `../../node_modules/@salesforce-mc/react-native-iam`)"
-  - "SFMCMarketingCloudSdk (from `../../node_modules/@salesforce-mc/react-native-marketingcloudsdk`)"
-  - "SFMCMobileAppMessaging (from `../../node_modules/@salesforce-mc/react-native-mobileappmessaging`)"
-  - "SFMCPush (from `../../node_modules/@salesforce-mc/react-native-push`)"
-  - "SFMCSdkCore (from `../../node_modules/@salesforce-mc/react-native-sfmc-core`)"
+  - "SFMCIam (from `../../node_modules/@sfmc/react-native-iam`)"
+  - "SFMCMarketingCloudSdk (from `../../node_modules/@sfmc/react-native-marketingcloudsdk`)"
+  - "SFMCMobileAppMessaging (from `../../node_modules/@sfmc/react-native-mobileappmessaging`)"
+  - "SFMCPush (from `../../node_modules/@sfmc/react-native-push`)"
+  - "SFMCSdkCore (from `../../node_modules/@sfmc/react-native-sfmc-core`)"
   - Yoga (from `../../node_modules/react-native/ReactCommon/yoga`)
 
 SPEC REPOS:
@@ -2216,15 +2216,15 @@ EXTERNAL SOURCES:
   RNCClipboard:
     :path: "../../node_modules/@react-native-clipboard/clipboard"
   SFMCIam:
-    :path: "../../node_modules/@salesforce-mc/react-native-iam"
+    :path: "../../node_modules/@sfmc/react-native-iam"
   SFMCMarketingCloudSdk:
-    :path: "../../node_modules/@salesforce-mc/react-native-marketingcloudsdk"
+    :path: "../../node_modules/@sfmc/react-native-marketingcloudsdk"
   SFMCMobileAppMessaging:
-    :path: "../../node_modules/@salesforce-mc/react-native-mobileappmessaging"
+    :path: "../../node_modules/@sfmc/react-native-mobileappmessaging"
   SFMCPush:
-    :path: "../../node_modules/@salesforce-mc/react-native-push"
+    :path: "../../node_modules/@sfmc/react-native-push"
   SFMCSdkCore:
-    :path: "../../node_modules/@salesforce-mc/react-native-sfmc-core"
+    :path: "../../node_modules/@sfmc/react-native-sfmc-core"
   Yoga:
     :path: "../../node_modules/react-native/ReactCommon/yoga"
 

@@ -5,9 +5,9 @@
 ## Installation
 
 ```bash
-yarn add @salesforce-mc/react-native-push
+yarn add @sfmc/react-native-push
 # or
-npm install @salesforce-mc/react-native-push
+npm install @sfmc/react-native-push
 ```
 
 iOS:
@@ -26,8 +26,8 @@ Android: no additional steps — Gradle autolinking discovers the module automat
 ## Usage
 
 ```ts
-import { PushModule } from '@salesforce-mc/react-native-push';
-import type { PushApi } from '@salesforce-mc/react-native-push';
+import { PushModule } from '@sfmc/react-native-push';
+import type { PushApi } from '@sfmc/react-native-push';
 
 const push: PushApi = await PushModule.requestSdk();
 push.enablePush();

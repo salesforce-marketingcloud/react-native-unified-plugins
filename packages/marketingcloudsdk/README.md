@@ -5,9 +5,9 @@
 ## Installation
 
 ```bash
-yarn add @salesforce-mc/react-native-marketingcloudsdk
+yarn add @sfmc/react-native-marketingcloudsdk
 # or
-npm install @salesforce-mc/react-native-marketingcloudsdk
+npm install @sfmc/react-native-marketingcloudsdk
 ```
 
 iOS:
@@ -26,8 +26,8 @@ Android: no additional steps — Gradle autolinking discovers the module automat
 ## Usage
 
 ```ts
-import { MarketingCloudSdkModule } from '@salesforce-mc/react-native-marketingcloudsdk';
-import type { MCApi, InboxMessage } from '@salesforce-mc/react-native-marketingcloudsdk';
+import { MarketingCloudSdkModule } from '@sfmc/react-native-marketingcloudsdk';
+import type { MCApi, InboxMessage } from '@sfmc/react-native-marketingcloudsdk';
 
 const mc: MCApi = await MarketingCloudSdkModule.requestSdk();
 
