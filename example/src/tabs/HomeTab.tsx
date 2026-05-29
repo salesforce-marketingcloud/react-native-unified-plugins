@@ -15,11 +15,11 @@ import {
 } from 'react-native';
 import Clipboard from '@react-native-clipboard/clipboard';
 import { color } from '../colors';
-import type { SFMCSdkApi } from '@salesforce-mc/react-native-sfmc-core';
-import type { PushApi } from '@salesforce-mc/react-native-push';
-import type { MCApi } from '@salesforce-mc/react-native-marketingcloudsdk';
-import type { MAMApi } from '@salesforce-mc/react-native-mobileappmessaging';
-import type { IamApi } from '@salesforce-mc/react-native-iam';
+import type { SFMCSdkApi } from '@sfmc/react-native-sfmc-core';
+import type { PushApi } from '@sfmc/react-native-push';
+import type { MCApi } from '@sfmc/react-native-marketingcloudsdk';
+import type { MAMApi } from '@sfmc/react-native-mobileappmessaging';
+import type { IamApi } from '@sfmc/react-native-iam';
 import { SectionHeader, Card, Row, PrimaryButton } from '../components';
 
 interface Props {

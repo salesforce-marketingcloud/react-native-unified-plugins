@@ -10,11 +10,11 @@ Historically, integrating Marketing Cloud features into a React Native app requi
 
 | Package | Description |
 |---|---|
-| [`@salesforce-mc/react-native-sfmc-core`](./packages/sfmc-core) | Foundation: identity, custom attributes, structured events, logging |
-| [`@salesforce-mc/react-native-push`](./packages/push) | Push registration & notifications |
-| [`@salesforce-mc/react-native-iam`](./packages/iam) | In-App Messaging SDK readiness & programmatic display |
-| [`@salesforce-mc/react-native-marketingcloudsdk`](./packages/marketingcloudsdk) | MarketingCloud Engagement: inbox, tags, attributes, analytics, registration |
-| [`@salesforce-mc/react-native-mobileappmessaging`](./packages/mobileappmessaging) | MobileAppMessaging: analytics, registration |
+| [`@sfmc/react-native-sfmc-core`](./packages/sfmc-core) | Foundation: identity, custom attributes, structured events, logging |
+| [`@sfmc/react-native-push`](./packages/push) | Push registration & notifications |
+| [`@sfmc/react-native-iam`](./packages/iam) | In-App Messaging SDK readiness & programmatic display |
+| [`@sfmc/react-native-marketingcloudsdk`](./packages/marketingcloudsdk) | MarketingCloud Engagement: inbox, tags, attributes, analytics, registration |
+| [`@sfmc/react-native-mobileappmessaging`](./packages/mobileappmessaging) | MobileAppMessaging: analytics, registration |
 
 `marketingcloudsdk` and `mobileappmessaging` are **product** packages — they transitively depend on `sfmc-core` only. Add `push` and `iam` separately if you need those features.
 
@@ -40,12 +40,12 @@ example/                              # RN 0.85.1 New Arch demo app (Android + i
 ## Installation
 
 ```bash
-yarn add @salesforce-mc/react-native-marketingcloudsdk
+yarn add @sfmc/react-native-marketingcloudsdk
 # or
-npm install @salesforce-mc/react-native-marketingcloudsdk
+npm install @sfmc/react-native-marketingcloudsdk
 ```
 
-> Installing a product package (`marketingcloudsdk` or `mobileappmessaging`) auto-resolves `sfmc-core`. Add `@salesforce-mc/react-native-push` and/or `@salesforce-mc/react-native-iam` separately to enable those optional features.
+> Installing a product package (`marketingcloudsdk` or `mobileappmessaging`) auto-resolves `sfmc-core`. Add `@sfmc/react-native-push` and/or `@sfmc/react-native-iam` separately to enable those optional features.
 
 ### Android Setup
 
@@ -67,8 +67,8 @@ For full setup instructions, see the [iOS SDK Integration Guide](https://develop
 ## Usage
 
 ```ts
-import { SFMCSdkModule } from '@salesforce-mc/react-native-sfmc-core';
-import { MarketingCloudSdkModule } from '@salesforce-mc/react-native-marketingcloudsdk';
+import { SFMCSdkModule } from '@sfmc/react-native-sfmc-core';
+import { MarketingCloudSdkModule } from '@sfmc/react-native-marketingcloudsdk';
 
 // Initialize core
 const sdk = await SFMCSdkModule.requestSdk();

@@ -187,7 +187,7 @@ export interface MarketingCloudSdkApi {
    * Returns the maps of attributes set in the registration.
    * @returns {Promise<Object.<string, string>>} A promise to the key/value map of attributes set
    *     in the registration.
-   * @deprecated Use {@link SFMCSdkApi.getAttributes} from `@salesforce-mc/react-native-sfmc-core` instead.
+   * @deprecated Use {@link SFMCSdkApi.getAttributes} from `@sfmc/react-native-sfmc-core` instead.
    * @see  {@link https://salesforce-marketingcloud.github.io/MarketingCloudSDK-Android/javadocs/SFMCSdk/11.0/sdk/com.salesforce.marketingcloud.registration/-registration-manager/get-attributes.html |Android Docs}
    * @see  {@link https://salesforce-marketingcloud.github.io/MarketingCloudSDK-iOS/appledocs/MarketingCloudSdk/11.0/Classes/MarketingCloudSdk.html#/c:@CM@MarketingCloudSDK@objc(cs)SFMarketingCloudSdk(im)attributes |iOS Docs}
    */
@@ -250,7 +250,7 @@ export interface MarketingCloudSdkApi {
   /**
    * Returns the contact key currently set on the device.
    * @returns {Promise<string | null>} A promise to the current contact key.
-   * @deprecated Use {@link SFMCSdkApi.getProfileId} from `@salesforce-mc/react-native-sfmc-core` instead.
+   * @deprecated Use {@link SFMCSdkApi.getProfileId} from `@sfmc/react-native-sfmc-core` instead.
    * @see  {@link https://salesforce-marketingcloud.github.io/MarketingCloudSDK-Android/javadocs/SFMCSdk/11.0/sdk/com.salesforce.marketingcloud.registration/-registration-manager/get-contact-key.html |Android Docs}
    * @see  {@link https://salesforce-marketingcloud.github.io/MarketingCloudSDK-iOS/appledocs/MarketingCloudSdk/11.0/Classes/MarketingCloudSdk.html#/c:@CM@MarketingCloudSDK@objc(cs)SFMarketingCloudSdk(im)contactKey |iOS Docs}
    */

@@ -13,7 +13,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { color } from '../colors';
-import type { MCApi, InboxMessage } from '@salesforce-mc/react-native-marketingcloudsdk';
+import type { MCApi, InboxMessage } from '@sfmc/react-native-marketingcloudsdk';
 
 type Segment = 'all' | 'unread' | 'read' | 'deleted';
 
