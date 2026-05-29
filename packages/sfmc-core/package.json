@@ -1,6 +1,6 @@
 {
   "name": "@sfmc/react-native-sfmc-core",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Core identity, event tracking, and logging for the Salesforce Marketing Cloud Unified Mobile SDK",
   "author": "Salesforce Marketing Cloud",
   "license": "BSD-3-Clause",

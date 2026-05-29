@@ -22,7 +22,7 @@
     }
   },
   "dependencies": {
-    "@sfmc/react-native-sfmc-core": "1.0.0"
+    "@sfmc/react-native-sfmc-core": "1.0.1"
   },
   "peerDependencies": {
     "react": "^19.0.0",
