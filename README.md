@@ -100,7 +100,3 @@ See each package's README for full API documentation with links to native SDK do
 ## 3rd Party Product Language Disclaimers
 
 Where possible, we changed noninclusive terms to align with our company value of Equality. We retained noninclusive terms to document a third-party system, but we encourage the developer community to embrace more inclusive language. We can update the term when it's no longer required for technical accuracy.
-
-## License
-
-BSD 3-Clause. See [LICENSE](./LICENSE) for details.

@@ -50,6 +50,3 @@ IAM lifecycle events (will show, did show, did close) are handled on the native 
 - Android: sfmcsdk 3.1.0, inappmessagingfeaturemodule 1.0.0
 - iOS: SFInAppMessagingFeatureSDK 1.0.0, MarketingCloud-SFMCSdk 4.0.1
 
-## License
-
-BSD 3-Clause. See [LICENSE](../../LICENSE) for details.

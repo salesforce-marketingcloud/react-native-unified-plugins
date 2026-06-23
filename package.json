@@ -3,7 +3,6 @@
   "private": true,
   "description": "React Native plugins for the Salesforce Marketing Cloud Unified Mobile SDK",
   "author": "Salesforce Marketing Cloud",
-  "license": "BSD-3-Clause",
   "workspaces": [
     "packages/*",
     "example"

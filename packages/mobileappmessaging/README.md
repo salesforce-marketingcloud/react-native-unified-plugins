@@ -73,6 +73,3 @@ Installing this package auto-resolves the shared `sfmc-core`, `push`, and `iam` 
 - Android: sfmcsdk 3.1.0, mobileappmessagingsdk 1.1.0
 - iOS: SFMobileAppMessagingSDK 2.0.0, MarketingCloud-SFMCSdk 4.0.1
 
-## License
-
-BSD 3-Clause. See [LICENSE](../../LICENSE) for details.
