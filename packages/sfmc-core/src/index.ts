@@ -29,6 +29,6 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-export { SFMCSdkModule } from './SFMCSdkModule';
-export type { SFMCSdkApi } from './types';
-export * from './events';
+export { SFMCSdkModule } from "./SFMCSdkModule";
+export type { SFMCSdkApi } from "./types";
+export * from "./events";

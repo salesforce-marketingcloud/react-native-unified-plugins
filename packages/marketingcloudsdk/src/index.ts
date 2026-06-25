@@ -32,9 +32,9 @@
 export {
   MarketingCloudSdkModule,
   MarketingCloudSdkModule as MCModule,
-} from './MarketingCloudSdkModule';
+} from "./MarketingCloudSdkModule";
 export type {
   MarketingCloudSdkApi,
   MarketingCloudSdkApi as MCApi,
-} from './types';
-export type { InboxMessage, PiCart, PiOrder } from './types';
+} from "./types";
+export type { InboxMessage, PiCart, PiOrder } from "./types";

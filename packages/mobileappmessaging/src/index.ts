@@ -32,9 +32,9 @@
 export {
   MobileAppMessagingModule,
   MobileAppMessagingModule as MAMModule,
-} from './MobileAppMessagingModule';
+} from "./MobileAppMessagingModule";
 export type {
   MobileAppMessagingApi,
   MobileAppMessagingApi as MAMApi,
-} from './types';
-export type { Registration } from './types';
+} from "./types";
+export type { Registration } from "./types";
