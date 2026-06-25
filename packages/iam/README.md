@@ -88,3 +88,7 @@ The close action's `type` is normalized across platforms to `IamDismissReason`: 
 - Android: sfmcsdk 3.1.0, inappmessagingfeaturemodule 1.0.0
 - iOS: SFInAppMessagingFeatureSDK 1.0.0, MarketingCloud-SFMCSdk 4.0.1
 
+## License
+
+BSD 3-Clause. See [LICENSE](../../LICENSE) for details.
+

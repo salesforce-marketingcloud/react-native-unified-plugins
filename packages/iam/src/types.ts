@@ -213,7 +213,6 @@ export interface IamApi {
    * Requires {@link IamApi.setEventDelegateEnabled} to be enabled so the native
    * listener is registered.
    * @param {IamMessageFilter} filter - The per-message rule set.
-   * @see  {@link https://salesforce-marketingcloud.github.io/MarketingCloudSDK-iOS/appledocs/SFMCSdk/11.0/Protocols/InAppMessageEventDelegate.html#/c:@M@SFMCSDK@objc(pl)SFMCSdkInAppMessageEventDelegate(im)shouldShowInAppMessage: |iOS Docs}
    */
   setMessageFilter(filter: IamMessageFilter): void;
 

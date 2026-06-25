@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "description": "In-App Messaging for the Salesforce Marketing Cloud Unified Mobile SDK",
   "author": "Salesforce Marketing Cloud",
+  "license": "BSD-3-Clause",
   "homepage": "https://github.com/salesforce-marketingcloud/react-native-unified-plugins",
   "repository": {
     "type": "git",

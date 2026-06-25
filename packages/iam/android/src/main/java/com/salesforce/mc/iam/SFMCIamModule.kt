@@ -146,7 +146,10 @@ class SFMCIamModule(reactContext: ReactApplicationContext) :
         messageFilter = MessageFilter(
             blockedIds = readStringSet(filter.takeIf { it.hasKey("blockedIds") }?.getArray("blockedIds"))
                 ?: emptySet(),
-            allowedIds = readStringSet(filter.takeIf { it.hasKey("allowedIds") }?.getArray("allowedIds")),
+            // An empty allowedIds array means "no allow-list restriction" (per the
+            // JS contract), not "allow zero messages" — coalesce empty to null.
+            allowedIds = readStringSet(filter.takeIf { it.hasKey("allowedIds") }?.getArray("allowedIds"))
+                ?.takeIf { it.isNotEmpty() },
             defaultShow = if (filter.hasKey("defaultShow")) filter.getBoolean("defaultShow") else true,
         )
     }

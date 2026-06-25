@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "description": "Mobile App Messaging SDK for React Native — device registration and analytics",
   "author": "Salesforce Marketing Cloud",
+  "license": "BSD-3-Clause",
   "homepage": "https://github.com/salesforce-marketingcloud/react-native-unified-plugins",
   "repository": {
     "type": "git",

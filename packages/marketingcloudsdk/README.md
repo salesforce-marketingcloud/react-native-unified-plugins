@@ -113,3 +113,7 @@ Installing this package auto-resolves the shared `sfmc-core`, `push`, and `iam` 
 - Android: sfmcsdk 3.1.0, marketingcloudsdk 11.0.0
 - iOS: MarketingCloudSDK 11.0.0, MarketingCloud-SFMCSdk 4.0.1
 
+## License
+
+BSD 3-Clause. See [LICENSE](../../LICENSE) for details.
+

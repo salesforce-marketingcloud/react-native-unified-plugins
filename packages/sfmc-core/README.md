@@ -77,3 +77,7 @@ sfmc.track({
 - Android: sfmcsdk 3.1.0
 - iOS: MarketingCloud-SFMCSdk 4.0.1
 
+## License
+
+BSD 3-Clause. See [LICENSE](../../LICENSE) for details.
+

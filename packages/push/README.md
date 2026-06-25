@@ -80,3 +80,7 @@ Push registration requires Firebase configuration on Android (`google-services.j
 - Android: sfmcsdk 3.1.0, pushfeaturemodule 2.0.0
 - iOS: SFPushFeatureSDK 2.0.0, MarketingCloud-SFMCSdk 4.0.1
 
+## License
+
+BSD 3-Clause. See [LICENSE](../../LICENSE) for details.
+

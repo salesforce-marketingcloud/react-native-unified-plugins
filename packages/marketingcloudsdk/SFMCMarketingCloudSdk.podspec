@@ -7,7 +7,7 @@ Pod::Spec.new do |s|
   s.summary      = package["description"]
   s.description  = package["description"]
   s.homepage     = package["homepage"]
-  s.license      = { :file => "LICENSE" }
+  s.license      = package["license"]
   s.author       = package["author"]
   s.source       = { :git => "https://github.com/salesforce-marketingcloud/react-native-unified-plugins.git", :tag => "#{s.version}" }
   s.platform     = :ios, "15.1"
