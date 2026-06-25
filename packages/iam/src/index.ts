@@ -29,8 +29,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-export { IamModule } from "./IamModule";
-export { IamEvent } from "./types";
+export { IamModule } from './IamModule';
+export { IamEvent } from './types';
 export type {
   IamApi,
   IamDismissReason,
@@ -39,4 +39,4 @@ export type {
   IamUrlAction,
   InAppMessage,
   InAppMessageCloseAction,
-} from "./types";
+} from './types';

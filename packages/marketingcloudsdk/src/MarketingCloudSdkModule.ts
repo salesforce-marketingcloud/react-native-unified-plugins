@@ -30,9 +30,9 @@
  * @class MarketingCloudSdkModule
  */
 
-import { NativeEventEmitter } from "react-native";
-import NativeModule from "./NativeMCModule";
-import type { MarketingCloudSdkApi, InboxMessage } from "./types";
+import { NativeEventEmitter } from 'react-native';
+import NativeModule from './NativeMCModule';
+import type { MarketingCloudSdkApi, InboxMessage } from './types';
 
 let _api: MarketingCloudSdkApi | null = null;
 let _emitter: NativeEventEmitter | null = null;

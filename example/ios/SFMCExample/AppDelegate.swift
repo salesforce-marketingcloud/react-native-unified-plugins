@@ -138,9 +138,6 @@ class AppDelegate: RCTAppDelegate {
     }
 
     func setupPushFeature() {
-        // No native URL-handling setup needed: the React Native layer owns the
-        // PushFeature URL-handling delegate, registering it on demand via
-        // setURLHandlingEnabled(true) so URL actions are delivered to JS.
         DispatchQueue.main.async {
             UNUserNotificationCenter.current().delegate = self
             UNUserNotificationCenter.current().requestAuthorization(
@@ -163,12 +160,7 @@ class AppDelegate: RCTAppDelegate {
         }
     }
 
-    func setupInAppMessaging() {
-        // No native setup needed: the React Native layer owns the IAM event and
-        // URL-handling delegates, registering them on demand via
-        // setEventDelegateEnabled(true) / setURLHandlingEnabled(true) so lifecycle
-        // events and URL actions are delivered to JS.
-    }
+    func setupInAppMessaging() {}
 
     // MARK: - Remote Notifications
 

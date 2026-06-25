@@ -35,13 +35,13 @@
  * the type can't be resolved).
  */
 export type IamMessageType =
-  | "bannerTop"
-  | "bannerBottom"
-  | "fullImageFill"
-  | "full"
-  | "modal"
-  | "pushPrimer"
-  | "unknown";
+  | 'bannerTop'
+  | 'bannerBottom'
+  | 'fullImageFill'
+  | 'full'
+  | 'modal'
+  | 'pushPrimer'
+  | 'unknown';
 
 /**
  * A serialized in-app message delivered with lifecycle events.
@@ -100,7 +100,7 @@ export interface InAppMessage {
  * - `CLOSED` — the user closed the message (e.g. via the close control)
  * - `UNKNOWN` — the reason could not be determined (Android may report this)
  */
-export type IamDismissReason = "AUTO" | "BUTTON" | "CLOSED" | "UNKNOWN";
+export type IamDismissReason = 'AUTO' | 'BUTTON' | 'CLOSED' | 'UNKNOWN';
 
 /**
  * Describes how an in-app message was closed.
@@ -161,17 +161,17 @@ export const IamEvent = {
    * The show/suppress decision itself is made natively via the rules set with
    * {@link IamApi.setMessageFilter}; this event is observational.
    */
-  WillShowMessage: "sfmc_iam_will_show",
+  WillShowMessage: 'sfmc_iam_will_show',
   /** Emitted when a message is first shown on screen. */
-  DidShowMessage: "sfmc_iam_did_show",
+  DidShowMessage: 'sfmc_iam_did_show',
   /** Emitted when a message is dismissed. */
-  DidCloseMessage: "sfmc_iam_did_close",
+  DidCloseMessage: 'sfmc_iam_did_close',
   /**
    * iOS only — emitted with an {@link IamUrlAction} when the user selects a URL
    * action in a message and URL handling has been routed to JS via
    * {@link IamApi.setURLHandlingEnabled}.
    */
-  UrlActionSelected: "sfmc_iam_url_action",
+  UrlActionSelected: 'sfmc_iam_url_action',
 } as const;
 
 export type IamEventName = (typeof IamEvent)[keyof typeof IamEvent];

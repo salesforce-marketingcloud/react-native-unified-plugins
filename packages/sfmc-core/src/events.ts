@@ -30,27 +30,27 @@
  */
 
 export interface LineItem {
-    catalogObjectType: string;
-    catalogObjectId: string;
-    quantity: number;
-    price: number;
-    currency: string;
-    attributes?: Record<string, string | number | boolean>;
+  catalogObjectType: string;
+  catalogObjectId: string;
+  quantity: number;
+  price: number;
+  currency: string;
+  attributes?: Record<string, string | number | boolean>;
 }
 
 export interface CatalogObject {
-    type: string;
-    id: string;
-    attributes?: Record<string, string | number | boolean>;
-    relatedCatalogObjects?: Record<string, string[]>;
+  type: string;
+  id: string;
+  attributes?: Record<string, string | number | boolean>;
+  relatedCatalogObjects?: Record<string, string[]>;
 }
 
 export interface Order {
-    id: string;
-    lineItems: LineItem[];
-    totalValue: number;
-    currency: string;
-    attributes?: Record<string, string | number | boolean>;
+  id: string;
+  lineItems: LineItem[];
+  totalValue: number;
+  currency: string;
+  attributes?: Record<string, string | number | boolean>;
 }
 
 /**
@@ -58,68 +58,68 @@ export interface Order {
  * @see  {@link https://salesforce-marketingcloud.github.io/MarketingCloudSDK-iOS/appledocs/SFMCSdk/11.0/Classes/CustomEvent.html |iOS Docs}
  */
 export interface CustomEvent {
-    objType: 'CustomEvent';
-    name: string;
-    attributes?: Record<string, string | number | boolean>;
+  objType: 'CustomEvent';
+  name: string;
+  attributes?: Record<string, string | number | boolean>;
 }
 
 export interface EngagementEvent {
-    objType: 'EngagementEvent';
-    name: string;
-    attributes?: Record<string, string | number | boolean>;
+  objType: 'EngagementEvent';
+  name: string;
+  attributes?: Record<string, string | number | boolean>;
 }
 
 export interface SystemEvent {
-    objType: 'SystemEvent';
-    name: string;
-    attributes?: Record<string, string | number | boolean>;
+  objType: 'SystemEvent';
+  name: string;
+  attributes?: Record<string, string | number | boolean>;
 }
 
 /**
  * @deprecated Use {@link CustomEvent} instead with an appropriate event name and attributes.
  */
 export interface CartEvent {
-    objType: 'CartEvent';
-    subtype: 'add' | 'remove' | 'replace';
-    lineItems: LineItem[];
+  objType: 'CartEvent';
+  subtype: 'add' | 'remove' | 'replace';
+  lineItems: LineItem[];
 }
 
 /**
  * @deprecated Use {@link CustomEvent} instead with an appropriate event name and attributes.
  */
 export interface OrderEvent {
-    objType: 'OrderEvent';
-    subtype:
-        | 'purchase'
-        | 'preorder'
-        | 'cancel'
-        | 'ship'
-        | 'deliver'
-        | 'return'
-        | 'exchange';
-    order: Order;
+  objType: 'OrderEvent';
+  subtype:
+    | 'purchase'
+    | 'preorder'
+    | 'cancel'
+    | 'ship'
+    | 'deliver'
+    | 'return'
+    | 'exchange';
+  order: Order;
 }
 
 /**
  * @deprecated Use {@link CustomEvent} instead with an appropriate event name and attributes.
  */
 export interface CatalogObjectEvent {
-    objType: 'CatalogEvent';
-    subtype:
-        | 'comment'
-        | 'view'
-        | 'quickView'
-        | 'viewDetail'
-        | 'favorite'
-        | 'share'
-        | 'review';
-    catalogObject: CatalogObject;
+  objType: 'CatalogEvent';
+  subtype:
+    | 'comment'
+    | 'view'
+    | 'quickView'
+    | 'viewDetail'
+    | 'favorite'
+    | 'share'
+    | 'review';
+  catalogObject: CatalogObject;
 }
 
 export type SFMCEvent =
-    | CustomEvent
-    | EngagementEvent
-    | SystemEvent
-    | CartEvent
-    | OrderEvent
-    | CatalogObjectEvent;
+  | CustomEvent
+  | EngagementEvent
+  | SystemEvent
+  | CartEvent
+  | OrderEvent
+  | CatalogObjectEvent;

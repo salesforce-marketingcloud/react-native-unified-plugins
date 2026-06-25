@@ -29,7 +29,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-import type { SFMCEvent } from "./events";
+import type { SFMCEvent } from './events';
 
 /**
  * @class SFMCSdkApi
@@ -161,7 +161,7 @@ export interface SFMCSdkApi {
    * @see  {@link https://salesforce-marketingcloud.github.io/MarketingCloudSDK-Android/javadocs/SFMCSdk/11.0/sfmcsdk/com.salesforce.marketingcloud.sfmcsdk.components.logging/-log-level/index.html |Android Docs}
    * @see  {@link https://salesforce-marketingcloud.github.io/MarketingCloudSDK-iOS/appledocs/SFMCSdk/11.0/Classes/SFMCSdk.html#/c:@M@SFMCSDK@objc(cs)SFMCSdk(cm)setLoggerWithLogLevel:logOutputter: |iOS Docs}
    */
-  setLogging(level: "DEBUG" | "WARN" | "ERROR" | "NONE"): void;
+  setLogging(level: 'DEBUG' | 'WARN' | 'ERROR' | 'NONE'): void;
 
   /**
    * Instructs the native SDK to return the SDK state as an object. This content can help

@@ -30,9 +30,9 @@
  * @class IamModule
  */
 
-import { NativeEventEmitter } from "react-native";
-import NativeModule from "./NativeSFMCIamModule";
-import type { IamApi, IamMessageFilter } from "./types";
+import { NativeEventEmitter } from 'react-native';
+import NativeModule from './NativeSFMCIamModule';
+import type { IamApi, IamMessageFilter } from './types';
 
 let _api: IamApi | null = null;
 let _emitter: NativeEventEmitter | null = null;

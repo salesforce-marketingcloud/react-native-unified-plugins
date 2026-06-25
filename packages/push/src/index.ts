@@ -29,8 +29,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-export { PushModule } from "./PushModule";
-export { PushEvent } from "./types";
+export { PushModule } from './PushModule';
+export { PushEvent } from './types';
 export type {
   PushApi,
   PushEventName,
@@ -38,4 +38,4 @@ export type {
   NotificationMessage,
   Region,
   Action,
-} from "./types";
+} from './types';

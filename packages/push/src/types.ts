@@ -49,7 +49,7 @@ export const PushEvent = {
    * from a push notification and URL handling has been routed to JS via
    * {@link PushApi.setURLHandlingEnabled}.
    */
-  UrlActionSelected: "sfmc_push_url_action",
+  UrlActionSelected: 'sfmc_push_url_action',
 } as const;
 
 export type PushEventName = (typeof PushEvent)[keyof typeof PushEvent];
@@ -123,10 +123,10 @@ export interface Region {
   latitude: number;
   longitude: number;
   radius: number;
-  proximity?: "enter" | "exit";
+  proximity?: 'enter' | 'exit';
 }
 
 export interface Action {
-  type: "OPEN_APP" | "DEEPLINK" | "URL" | "DISMISS" | "CLOUD_PAGE";
+  type: 'OPEN_APP' | 'DEEPLINK' | 'URL' | 'DISMISS' | 'CLOUD_PAGE';
   data?: string;
 }
