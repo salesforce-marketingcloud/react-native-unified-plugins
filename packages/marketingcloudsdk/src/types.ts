@@ -257,6 +257,24 @@ export interface MarketingCloudSdkApi {
   getContactKey(): Promise<string | null>;
 
   /**
+   * Sets the signed string security token used to verify registration. Pass `null`
+   * to clear the previously stored value.
+   * @param  {string | null} signedString - The signed string token, or `null` to clear it.
+   * @returns {Promise<boolean>} A promise to whether the signed string was successfully set.
+   * @see  {@link https://salesforce-marketingcloud.github.io/MarketingCloudSDK-Android/javadocs/SFMCSdk/11.0/sdk/com.salesforce.marketingcloud.registration/-registration-manager/-editor/set-signed-string.html |Android Docs}
+   * @see  {@link https://salesforce-marketingcloud.github.io/MarketingCloudSDK-iOS/appledocs/MarketingCloudSdk/11.0/Classes/MarketingCloudSdk.html#/c:@CM@MarketingCloudSDK@objc(cs)SFMarketingCloudSdk(im)setSignedString: |iOS Docs}
+   */
+  setSignedString(signedString: string | null): Promise<boolean>;
+
+  /**
+   * Returns the value of the last stored signed string security token.
+   * @returns {Promise<string | null>} A promise to the current signed string, or `null` if none is set.
+   * @see  {@link https://salesforce-marketingcloud.github.io/MarketingCloudSDK-Android/javadocs/SFMCSdk/11.0/sdk/com.salesforce.marketingcloud.registration/-registration-manager/get-signed-string.html |Android Docs}
+   * @see  {@link https://salesforce-marketingcloud.github.io/MarketingCloudSDK-iOS/appledocs/MarketingCloudSdk/11.0/Classes/MarketingCloudSdk.html#/c:@CM@MarketingCloudSDK@objc(cs)SFMarketingCloudSdk(im)signedString |iOS Docs}
+   */
+  getSignedString(): Promise<string | null>;
+
+  /**
    * Enables verbose logging within the native Marketing Cloud SDK.
    * @see  {@link https://salesforce-marketingcloud.github.io/MarketingCloudSDK-Android/javadocs/SFMCSdk/11.0/sfmcsdk/com.salesforce.marketingcloud.sfmcsdk.components.logging/-log-level/index.html |Android Docs}
    * @see  {@link https://salesforce-marketingcloud.github.io/MarketingCloudSDK-iOS/appledocs/MarketingCloudSdk/11.0/Classes/MarketingCloudSdk.html#/c:@CM@MarketingCloudSDK@objc(cs)SFMarketingCloudSdk(im)setDebugLoggingEnabled: |iOS Docs}

@@ -30,9 +30,9 @@
  * @class MarketingCloudSdkModule
  */
 
-import { NativeEventEmitter } from 'react-native';
-import NativeModule from './NativeMCModule';
-import type { MarketingCloudSdkApi, InboxMessage } from './types';
+import { NativeEventEmitter } from "react-native";
+import NativeModule from "./NativeMCModule";
+import type { MarketingCloudSdkApi, InboxMessage } from "./types";
 
 let _api: MarketingCloudSdkApi | null = null;
 let _emitter: NativeEventEmitter | null = null;
@@ -43,25 +43,33 @@ export const MarketingCloudSdkModule = {
     await NativeModule.requestMcSdk();
     _api = {
       refreshInbox: () => NativeModule.refreshInbox(),
-      getAllMessages: () => NativeModule.getAllMessages() as Promise<InboxMessage[]>,
-      getUnreadMessages: () => NativeModule.getUnreadMessages() as Promise<InboxMessage[]>,
-      getReadMessages: () => NativeModule.getReadMessages() as Promise<InboxMessage[]>,
-      getDeletedMessages: () => NativeModule.getDeletedMessages() as Promise<InboxMessage[]>,
+      getAllMessages: () =>
+        NativeModule.getAllMessages() as Promise<InboxMessage[]>,
+      getUnreadMessages: () =>
+        NativeModule.getUnreadMessages() as Promise<InboxMessage[]>,
+      getReadMessages: () =>
+        NativeModule.getReadMessages() as Promise<InboxMessage[]>,
+      getDeletedMessages: () =>
+        NativeModule.getDeletedMessages() as Promise<InboxMessage[]>,
       getMessageCount: () => NativeModule.getMessageCount(),
       getUnreadMessageCount: () => NativeModule.getUnreadMessageCount(),
       getReadMessageCount: () => NativeModule.getReadMessageCount(),
       getDeletedMessageCount: () => NativeModule.getDeletedMessageCount(),
-      markMessageRead: (messageId: string) => NativeModule.markMessageRead(messageId),
-      markMessageDeleted: (messageId: string) => NativeModule.markMessageDeleted(messageId),
+      markMessageRead: (messageId: string) =>
+        NativeModule.markMessageRead(messageId),
+      markMessageDeleted: (messageId: string) =>
+        NativeModule.markMessageDeleted(messageId),
       markAllMessagesRead: () => NativeModule.markAllMessagesRead(),
       markAllMessagesDeleted: () => NativeModule.markAllMessagesDeleted(),
-      trackInboxMessageOpened: (message: InboxMessage) => NativeModule.trackInboxMessageOpened(message as unknown as Object),
+      trackInboxMessageOpened: (message: InboxMessage) =>
+        NativeModule.trackInboxMessageOpened(message as unknown as Object),
       addTag: (tag: string) => NativeModule.addTag(tag),
       addTags: (tags: string[]) => NativeModule.addTags(tags),
       removeTag: (tag: string) => NativeModule.removeTag(tag),
       removeTags: (tags: string[]) => NativeModule.removeTags(tags),
       getTags: () => NativeModule.getTags() as Promise<string[]>,
-      getAttributes: () => NativeModule.getAttributes() as Promise<{ [key: string]: string }>,
+      getAttributes: () =>
+        NativeModule.getAttributes() as Promise<{ [key: string]: string }>,
       enablePiAnalytics: () => NativeModule.enablePiAnalytics(),
       disablePiAnalytics: () => NativeModule.disablePiAnalytics(),
       isPiAnalyticsEnabled: () => NativeModule.isPiAnalyticsEnabled(),
@@ -70,6 +78,9 @@ export const MarketingCloudSdkModule = {
       isAnalyticsEnabled: () => NativeModule.isAnalyticsEnabled(),
       getDeviceId: () => NativeModule.getDeviceId(),
       getContactKey: () => NativeModule.getContactKey(),
+      setSignedString: (signedString: string | null) =>
+        NativeModule.setSignedString(signedString),
+      getSignedString: () => NativeModule.getSignedString(),
       enableLogging: () => NativeModule.enableLogging(),
       disableLogging: () => NativeModule.disableLogging(),
       setRegistrationCallback: () => NativeModule.setRegistrationCallback(),

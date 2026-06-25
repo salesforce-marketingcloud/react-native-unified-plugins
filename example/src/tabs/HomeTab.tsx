@@ -16,10 +16,17 @@ import {
 import Clipboard from '@react-native-clipboard/clipboard';
 import { color } from '../colors';
 import type { SFMCSdkApi } from '@sfmc/react-native-sfmc-core';
-import type { PushApi } from '@sfmc/react-native-push';
+import { PushModule, PushEvent } from '@sfmc/react-native-push';
+import type { PushApi, PushUrlAction } from '@sfmc/react-native-push';
 import type { MCApi } from '@sfmc/react-native-marketingcloudsdk';
 import type { MAMApi } from '@sfmc/react-native-mobileappmessaging';
-import type { IamApi } from '@sfmc/react-native-iam';
+import { IamModule, IamEvent } from '@sfmc/react-native-iam';
+import type {
+    IamApi,
+    InAppMessage,
+    InAppMessageCloseAction,
+    IamUrlAction,
+} from '@sfmc/react-native-iam';
 import { SectionHeader, Card, Row, PrimaryButton } from '../components';
 
 interface Props {
@@ -49,11 +56,10 @@ export default function HomeTab({ sfmc, push, mc, mam, iam, loggingEnabled, onLo
 
     // IAM state
     const [iamMessageId, setIamMessageId] = useState('');
+    const [iamFontName, setIamFontName] = useState('');
     const [iamLog, setIamLog] = useState('');
-
-    useEffect(() => {
-        loadState();
-    }, []);
+    const [iamDefaultShow, setIamDefaultShow] = useState(true);
+    const [iamBlockedIds, setIamBlockedIds] = useState('');
 
     const loadState = useCallback(async () => {
         const [token, mceId, mamId, pushOn, mcOn, mamOn] = await Promise.allSettled([
@@ -71,6 +77,71 @@ export default function HomeTab({ sfmc, push, mc, mam, iam, loggingEnabled, onLo
         if (mcOn.status === 'fulfilled') setMcAnalytics(mcOn.value);
         if (mamOn.status === 'fulfilled') setMamAnalytics(mamOn.value);
     }, [mc, mam, push]);
+
+    // Prepend timestamped lines so the most recent event is on top; cap the log.
+    // Stable identity (functional updater, no captured state) so effects that use
+    // it don't need to re-subscribe.
+    const logEvent = useCallback((line: string) => {
+        const ts = new Date().toLocaleTimeString();
+        setIamLog((prev) => [`[${ts}] ${line}`, ...prev.split('\n')].slice(0, 8).join('\n'));
+    }, []);
+
+    useEffect(() => {
+        loadState();
+    }, [loadState]);
+
+    // The event and URL-handling delegates are always enabled in this example so
+    // lifecycle events and URL actions are delivered to JS for the whole session.
+    useEffect(() => {
+        iam.setEventDelegateEnabled(true);
+        iam.setURLHandlingEnabled(true);
+        // Route push notification URL actions to JS as well (iOS only).
+        push.setURLHandlingEnabled(true);
+    }, [iam, push]);
+
+    // Subscribe to IAM lifecycle events for the whole session and surface them in
+    // the log. The native listener is registered via setEventDelegateEnabled(true)
+    // in the effect above.
+    useEffect(() => {
+        const emitter = IamModule.getEmitter();
+        const subs = [
+            emitter.addListener(IamEvent.WillShowMessage, (m: InAppMessage) =>
+                logEvent(`willShow: ${m.id}`),
+            ),
+            emitter.addListener(IamEvent.DidShowMessage, (m: InAppMessage) =>
+                logEvent(`didShow: ${m.id}`),
+            ),
+            emitter.addListener(
+                IamEvent.DidCloseMessage,
+                (m: InAppMessage & { action: InAppMessageCloseAction }) =>
+                    logEvent(`didClose: ${m.id} (${m.action?.type ?? 'n/a'})`),
+            ),
+            emitter.addListener(IamEvent.UrlActionSelected, (a: IamUrlAction) => {
+                logEvent(`urlAction: ${a.type} → ${a.url}`);
+                // URL handling was routed to JS, so the SDK won't open it — do it here.
+                Linking.openURL(a.url).catch((err) =>
+                    logEvent(`openURL failed: ${err?.message ?? err}`),
+                );
+            }),
+        ];
+        return () => subs.forEach((sub) => sub.remove());
+    }, [logEvent]);
+
+    // Subscribe to push notification URL actions (iOS only). URL handling was
+    // routed to JS via push.setURLHandlingEnabled(true), so the SDK won't open
+    // the URL — do it here.
+    useEffect(() => {
+        const sub = PushModule.getEmitter().addListener(
+            PushEvent.UrlActionSelected,
+            (a: PushUrlAction) => {
+                logEvent(`pushUrlAction: ${a.type} → ${a.url}`);
+                Linking.openURL(a.url).catch((err) =>
+                    logEvent(`openURL failed: ${err?.message ?? err}`),
+                );
+            },
+        );
+        return () => sub.remove();
+    }, [logEvent]);
 
     function copyToClipboard(label: string, value: string | null | undefined) {
         if (!value) return;
@@ -171,12 +242,36 @@ export default function HomeTab({ sfmc, push, mc, mam, iam, loggingEnabled, onLo
     }
 
     function triggerIam() {
-        if (!iamMessageId.trim()) {
-            setIamLog('Enter a message ID first.');
-            return;
-        }
+        if (!iamMessageId.trim()) return;
         iam.showInAppMessage(iamMessageId.trim());
-        setIamLog(`Showing in-app message: "${iamMessageId.trim()}"`);
+    }
+
+    // Build the data-driven filter from the current UI state and push it to the
+    // native gate, which evaluates it per message inside shouldShowMessage.
+    function applyIamFilter(next: { defaultShow?: boolean; blockedIds?: string }) {
+        const defaultShow = next.defaultShow ?? iamDefaultShow;
+        const blockedRaw = next.blockedIds ?? iamBlockedIds;
+        const blockedIds = blockedRaw
+            .split(',')
+            .map((s) => s.trim())
+            .filter(Boolean);
+        iam.setMessageFilter({ blockedIds, defaultShow });
+    }
+
+    function onIamDefaultShowToggle(v: boolean) {
+        setIamDefaultShow(v);
+        applyIamFilter({ defaultShow: v });
+    }
+
+    function applyIamFont() {
+        const name = iamFontName.trim();
+        if (!name) return;
+        iam.setFont(name);
+    }
+
+    function applyIamStatusBarColor() {
+        // SFMC blue (0xAARRGGBB). Android-only; no-op on iOS.
+        iam.setStatusBarColor(0xff0a84ff);
     }
 
     return (
@@ -255,9 +350,55 @@ export default function HomeTab({ sfmc, push, mc, mam, iam, loggingEnabled, onLo
                         autoCapitalize="none"
                     />
                 </View>
-                {iamLog ? <Text style={s.iamLog}>{iamLog}</Text> : null}
             </Card>
             <PrimaryButton title="Show In-App Message" onPress={triggerIam} />
+
+            {/* IAM behavior toggles */}
+            <Card>
+                <View style={[s.switchRow, s.noBorder]}>
+                    <Text style={s.switchLabel}>Allow Auto-Display (default)</Text>
+                    <Switch value={iamDefaultShow} onValueChange={onIamDefaultShowToggle} />
+                </View>
+            </Card>
+
+            {/* IAM per-message filter: blocked IDs are suppressed natively */}
+            <Card>
+                <View style={s.inputRow}>
+                    <TextInput
+                        style={s.textInput}
+                        placeholder="Blocked message IDs (comma-separated)"
+                        placeholderTextColor={color('placeholderText')}
+                        value={iamBlockedIds}
+                        onChangeText={setIamBlockedIds}
+                        autoCorrect={false}
+                        autoCapitalize="none"
+                    />
+                </View>
+            </Card>
+            <PrimaryButton title="Apply Message Filter" onPress={() => applyIamFilter({})} />
+
+            {/* IAM styling */}
+            <Card>
+                <View style={s.inputRow}>
+                    <TextInput
+                        style={s.textInput}
+                        placeholder="Font name (e.g. Helvetica-Bold)"
+                        placeholderTextColor={color('placeholderText')}
+                        value={iamFontName}
+                        onChangeText={setIamFontName}
+                        autoCorrect={false}
+                        autoCapitalize="none"
+                    />
+                </View>
+            </Card>
+            <PrimaryButton title="Set Message Font" onPress={applyIamFont} />
+            <PrimaryButton title="Set Status Bar Color (Android)" onPress={applyIamStatusBarColor} />
+
+            {iamLog ? (
+                <Card>
+                    <Text style={s.iamLog}>{iamLog}</Text>
+                </Card>
+            ) : null}
 
             <View style={{ height: 32 }} />
 
@@ -338,8 +479,7 @@ const s = StyleSheet.create({
     iamLog: {
         fontSize: 12,
         color: color('secondaryLabel'),
-        paddingHorizontal: 16,
-        paddingBottom: 8,
+        padding: 12,
         fontFamily: 'Menlo',
     },
     modal: {

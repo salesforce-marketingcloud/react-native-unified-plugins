@@ -269,6 +269,25 @@ RCT_EXPORT_METHOD(getContactKey:(RCTPromiseResolveBlock)resolve
     }];
 }
 
+// ── Signed string ───────────────────────────────────────────────────────────────
+// Discovered selectors: setSignedString: (BOOL return), signedString.
+// nil signedString clears the stored token.
+
+RCT_EXPORT_METHOD(setSignedString:(NSString *)signedString
+                  resolver:(RCTPromiseResolveBlock)resolve
+                  rejecter:(RCTPromiseRejectBlock)reject) {
+    [SFMarketingCloudSdk requestSdk:^(id<MarketingCloudSdkInterface> _Nullable mc) {
+        resolve(@([mc setSignedString:signedString]));
+    }];
+}
+
+RCT_EXPORT_METHOD(getSignedString:(RCTPromiseResolveBlock)resolve
+                  rejecter:(RCTPromiseRejectBlock)reject) {
+    [SFMarketingCloudSdk requestSdk:^(id<MarketingCloudSdkInterface> _Nullable mc) {
+        resolve([mc signedString]);
+    }];
+}
+
 // ── Registration callback ──────────────────────────────────────────────────────
 // iOS: setRegistrationCallback: / unsetRegistrationCallback on MarketingCloudSdk
 

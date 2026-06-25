@@ -8,6 +8,7 @@ import {
     StyleSheet,
 } from 'react-native';
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
+import Ionicons from 'react-native-vector-icons/Ionicons';
 import { color, brand } from './colors';
 import { SFMCSdkModule } from '@sfmc/react-native-sfmc-core';
 import type { SFMCSdkApi } from '@sfmc/react-native-sfmc-core';
@@ -61,10 +62,10 @@ const eb = StyleSheet.create({
 type Tab = 'home' | 'identity' | 'inbox' | 'debug';
 
 const TABS: { key: Tab; icon: string; label: string }[] = [
-    { key: 'home',     icon: '⌂', label: 'Home' },
-    { key: 'identity', icon: '✎', label: 'Identity' },
-    { key: 'inbox',    icon: '✉', label: 'Inbox' },
-    { key: 'debug',    icon: '⚙', label: 'Debug' },
+    { key: 'home',     icon: 'home-outline',          label: 'Home' },
+    { key: 'identity', icon: 'person-circle-outline', label: 'Identity' },
+    { key: 'inbox',    icon: 'mail-outline',          label: 'Inbox' },
+    { key: 'debug',    icon: 'settings-outline',      label: 'Debug' },
 ];
 
 const TITLES: Record<Tab, string> = {
@@ -220,7 +221,11 @@ function AppInner() {
                         onPress={() => setActiveTab(t.key)}
                         activeOpacity={0.7}
                     >
-                        <Text style={[s.tabIcon, activeTab === t.key && s.tabIconActive]}>{t.icon}</Text>
+                        <Ionicons
+                            name={t.icon}
+                            size={22}
+                            color={activeTab === t.key ? brand.primary : '#8A95A5'}
+                        />
                         <Text style={[s.tabLabel, activeTab === t.key && s.tabLabelActive]}>{t.label}</Text>
                     </TouchableOpacity>
                 ))}
@@ -353,13 +358,6 @@ const s = StyleSheet.create({
         alignItems: 'center',
         paddingVertical: 6,
         gap: 3,
-    },
-    tabIcon: {
-        fontSize: 20,
-        color: '#8A95A5',
-    },
-    tabIconActive: {
-        color: brand.primary,
     },
     tabLabel: {
         fontSize: 11,

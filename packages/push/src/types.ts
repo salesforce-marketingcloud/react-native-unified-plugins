@@ -30,6 +30,31 @@
  */
 
 /**
+ * Payload for the {@link PushEvent.UrlActionSelected} event (iOS only).
+ * Mirrors the `sfmc_handleURL(_:type:)` URL handling delegate.
+ */
+export interface PushUrlAction {
+  /** The URL associated with the selected action. */
+  url: string;
+  /** The action type reported by the SDK. */
+  type: string;
+}
+
+/**
+ * Event names emitted through the {@link PushModule.getEmitter} event emitter.
+ */
+export const PushEvent = {
+  /**
+   * iOS only — emitted with a {@link PushUrlAction} when the user opens a URL
+   * from a push notification and URL handling has been routed to JS via
+   * {@link PushApi.setURLHandlingEnabled}.
+   */
+  UrlActionSelected: "sfmc_push_url_action",
+} as const;
+
+export type PushEventName = (typeof PushEvent)[keyof typeof PushEvent];
+
+/**
  * @class PushApi
  */
 export interface PushApi {
@@ -65,6 +90,17 @@ export interface PushApi {
    * @see  {@link https://salesforce-marketingcloud.github.io/MarketingCloudSDK-iOS/appledocs/PushFeatureSdk/2.0/Classes/PushFeature.html#/c:@CM@PushFeatureSDK@objc(cs)SFPushFeature(im)isPushEnabled |iOS Docs}
    */
   isPushEnabled(): Promise<boolean>;
+
+  /**
+   * Routes URL actions from push notifications to JS via the
+   * {@link PushEvent.UrlActionSelected} event instead of letting the SDK open
+   * them directly.
+   *
+   * **iOS only** — no-op on Android, which has no URL handling delegate.
+   * @param {boolean} enabled - `true` to route URL actions to JS.
+   * @see  {@link https://salesforce-marketingcloud.github.io/MarketingCloudSDK-iOS/appledocs/PushFeatureSdk/2.0/Classes/PushFeature.html#/c:@CM@PushFeatureSDK@objc(cs)SFPushFeature(im)setURLHandlingDelegate: |iOS Docs}
+   */
+  setURLHandlingEnabled(enabled: boolean): void;
 }
 
 export interface NotificationMessage {
@@ -87,10 +123,10 @@ export interface Region {
   latitude: number;
   longitude: number;
   radius: number;
-  proximity?: 'enter' | 'exit';
+  proximity?: "enter" | "exit";
 }
 
 export interface Action {
-  type: 'OPEN_APP' | 'DEEPLINK' | 'URL' | 'DISMISS' | 'CLOUD_PAGE';
+  type: "OPEN_APP" | "DEEPLINK" | "URL" | "DISMISS" | "CLOUD_PAGE";
   data?: string;
 }

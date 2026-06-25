@@ -1845,6 +1845,28 @@ PODS:
     - ReactCommon/turbomodule/core
     - ReactNativeDependencies
     - Yoga
+  - RNVectorIcons (10.3.0):
+    - hermes-engine
+    - RCTRequired
+    - RCTTypeSafety
+    - React-Core
+    - React-Core-prebuilt
+    - React-debug
+    - React-Fabric
+    - React-featureflags
+    - React-graphics
+    - React-ImageManager
+    - React-jsi
+    - React-NativeModulesApple
+    - React-RCTFabric
+    - React-renderercss
+    - React-rendererdebug
+    - React-utils
+    - ReactCodegen
+    - ReactCommon/turbomodule/bridging
+    - ReactCommon/turbomodule/core
+    - ReactNativeDependencies
+    - Yoga
   - SFInAppMessagingFeatureSDK (1.0.0)
   - SFMCIam (1.0.0):
     - hermes-engine
@@ -1942,7 +1964,7 @@ PODS:
     - ReactNativeDependencies
     - SFPushFeatureSDK (~> 2.0.0)
     - Yoga
-  - SFMCSdkCore (1.0.0):
+  - SFMCSdkCore (1.0.1):
     - hermes-engine
     - MarketingCloud-SFMCSdk (~> 4.0.0)
     - RCTRequired
@@ -2048,6 +2070,7 @@ DEPENDENCIES:
   - ReactCommon/turbomodule/core (from `../../node_modules/react-native/ReactCommon`)
   - ReactNativeDependencies (from `../../node_modules/react-native/third-party-podspecs/ReactNativeDependencies.podspec`)
   - "RNCClipboard (from `../../node_modules/@react-native-clipboard/clipboard`)"
+  - RNVectorIcons (from `../../node_modules/react-native-vector-icons`)
   - "SFMCIam (from `../../node_modules/@sfmc/react-native-iam`)"
   - "SFMCMarketingCloudSdk (from `../../node_modules/@sfmc/react-native-marketingcloudsdk`)"
   - "SFMCMobileAppMessaging (from `../../node_modules/@sfmc/react-native-mobileappmessaging`)"
@@ -2215,6 +2238,8 @@ EXTERNAL SOURCES:
     :podspec: "../../node_modules/react-native/third-party-podspecs/ReactNativeDependencies.podspec"
   RNCClipboard:
     :path: "../../node_modules/@react-native-clipboard/clipboard"
+  RNVectorIcons:
+    :path: "../../node_modules/react-native-vector-icons"
   SFMCIam:
     :path: "../../node_modules/@sfmc/react-native-iam"
   SFMCMarketingCloudSdk:
@@ -2307,12 +2332,13 @@ SPEC CHECKSUMS:
   ReactCommon: 66763e5bd1b778828ff6cb82d771b7162a5215c2
   ReactNativeDependencies: 32538f9a81ab0273b8eb5f2429046a53cf9b7e4a
   RNCClipboard: 7a7d4557bfd3370b35c99dfecd92ae7b9fc4948a
+  RNVectorIcons: bd88db8836a8611aff4b44f061364c07002a6c2a
   SFInAppMessagingFeatureSDK: 602a31c47341b0d031e8df69c35327dc877a9591
-  SFMCIam: dfb697f1ab83cec5997487c1383724ce015366dc
-  SFMCMarketingCloudSdk: 83cb559b9307ae316ebc0622691f8cd5a7f71307
-  SFMCMobileAppMessaging: ac8ecadbfde84f7bc8423f940cdc4f1d1a1fc467
-  SFMCPush: c03d2d4c3b9ec3965aa9409c22bb83fe76035dd0
-  SFMCSdkCore: d21292a8693689d8d8491f12f87bec045c303a2a
+  SFMCIam: e6a99c042bd30a9fb78aafac291d0f4130f1affd
+  SFMCMarketingCloudSdk: 0a3bc5e67f8a2414d6c3b8cfaf01409b4c7a2c3a
+  SFMCMobileAppMessaging: 61a527bf027d055c094733dc8074273712b921d5
+  SFMCPush: b8e5d12f56444c3d35baa0180623eba0cf284f9d
+  SFMCSdkCore: 725894d629395ccd8146907c6cfad8a697b0240c
   SFMobileAppMessagingSDK: 7d9d24582a13aa451c02d98702c1f05debeef2c1
   SFPushFeatureSDK: 894482aa7b09516b893973310a59a0bda5363221
   Yoga: bb9419b17da842d8aa3d6f93f8deaf9fcd82abd3

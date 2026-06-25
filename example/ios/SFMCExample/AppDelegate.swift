@@ -138,12 +138,9 @@ class AppDelegate: RCTAppDelegate {
     }
 
     func setupPushFeature() {
-        PushFeature.requestSdk { pushFeature in
-            DispatchQueue.main.async {
-                pushFeature?.setURLHandlingDelegate(self)
-            }
-        }
-
+        // No native URL-handling setup needed: the React Native layer owns the
+        // PushFeature URL-handling delegate, registering it on demand via
+        // setURLHandlingEnabled(true) so URL actions are delivered to JS.
         DispatchQueue.main.async {
             UNUserNotificationCenter.current().delegate = self
             UNUserNotificationCenter.current().requestAuthorization(
@@ -167,10 +164,10 @@ class AppDelegate: RCTAppDelegate {
     }
 
     func setupInAppMessaging() {
-        InAppMessagingFeature.requestSdk { iamFeature in
-            iamFeature?.setEventDelegate(self)
-            iamFeature?.setURLHandlingDelegate(self)
-        }
+        // No native setup needed: the React Native layer owns the IAM event and
+        // URL-handling delegates, registering them on demand via
+        // setEventDelegateEnabled(true) / setURLHandlingEnabled(true) so lifecycle
+        // events and URL actions are delivered to JS.
     }
 
     // MARK: - Remote Notifications
@@ -214,16 +211,6 @@ class AppDelegate: RCTAppDelegate {
     }
 }
 
-// MARK: - URLHandlingDelegate (PushFeature + IAM)
-
-extension AppDelegate: URLHandlingDelegate {
-    func sfmc_handleURL(_ url: URL, type: String) {
-        UIApplication.shared.open(url, options: [:]) { success in
-            print("Open \(url): \(success)")
-        }
-    }
-}
-
 // MARK: - UNUserNotificationCenterDelegate
 
 extension AppDelegate: UNUserNotificationCenterDelegate {
@@ -247,17 +234,4 @@ extension AppDelegate: UNUserNotificationCenterDelegate {
     ) {
         completionHandler([.banner, .sound, .badge])
     }
-}
-
-// MARK: - InAppMessageEventDelegate
-
-extension AppDelegate: InAppMessageEventDelegate {
-
-    func shouldShow(inAppMessage message: any InAppMessageDetails) -> Bool {
-        return true
-    }
-
-    func didShow(inAppMessage message: any InAppMessageDetails) {}
-
-    func didClose(inAppMessage message: any InAppMessageDetails, action: InAppMessageCloseAction) {}
 }

@@ -30,9 +30,9 @@
  * @class IamModule
  */
 
-import { NativeEventEmitter } from 'react-native';
-import NativeModule from './NativeSFMCIamModule';
-import type { IamApi } from './types';
+import { NativeEventEmitter } from "react-native";
+import NativeModule from "./NativeSFMCIamModule";
+import type { IamApi, IamMessageFilter } from "./types";
 
 let _api: IamApi | null = null;
 let _emitter: NativeEventEmitter | null = null;
@@ -42,7 +42,17 @@ export const IamModule = {
     if (_api) return _api;
     await NativeModule.requestIamSdk();
     _api = {
-      showInAppMessage: (messageId: string) => NativeModule.showInAppMessage(messageId),
+      showInAppMessage: (messageId: string) =>
+        NativeModule.showInAppMessage(messageId),
+      setEventDelegateEnabled: (enabled: boolean) =>
+        NativeModule.setEventDelegateEnabled(enabled),
+      setMessageFilter: (filter: IamMessageFilter) =>
+        NativeModule.setMessageFilter(filter),
+      setFont: (name: string) => NativeModule.setFont(name),
+      setStatusBarColor: (color: number) =>
+        NativeModule.setStatusBarColor(color),
+      setURLHandlingEnabled: (enabled: boolean) =>
+        NativeModule.setURLHandlingEnabled(enabled),
     };
     return _api;
   },

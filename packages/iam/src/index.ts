@@ -30,4 +30,13 @@
  */
 
 export { IamModule } from "./IamModule";
-export type { IamApi } from "./types";
+export { IamEvent } from "./types";
+export type {
+  IamApi,
+  IamDismissReason,
+  IamEventName,
+  IamMessageFilter,
+  IamUrlAction,
+  InAppMessage,
+  InAppMessageCloseAction,
+} from "./types";

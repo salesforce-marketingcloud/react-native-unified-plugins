@@ -26,8 +26,9 @@ Android: no additional steps — Gradle autolinking discovers the module automat
 ## Usage
 
 ```ts
-import { PushModule } from '@sfmc/react-native-push';
-import type { PushApi } from '@sfmc/react-native-push';
+import { Linking } from 'react-native';
+import { PushModule, PushEvent } from '@sfmc/react-native-push';
+import type { PushApi, PushUrlAction } from '@sfmc/react-native-push';
 
 const push: PushApi = await PushModule.requestSdk();
 push.enablePush();
@@ -38,6 +39,16 @@ const enabled = await push.isPushEnabled();
 const sub = PushModule.getEmitter().addListener('sfmc_push_token_refreshed', ({ token }) => {
   console.log('Token refreshed:', token);
 });
+
+// Route push notification URL actions to JS (iOS only)
+push.setURLHandlingEnabled(true);
+const urlSub = PushModule.getEmitter().addListener(
+  PushEvent.UrlActionSelected,
+  (a: PushUrlAction) => {
+    // The SDK won't open the URL itself — handle it here.
+    Linking.openURL(a.url);
+  },
+);
 ```
 
 ## API
@@ -48,12 +59,14 @@ const sub = PushModule.getEmitter().addListener('sfmc_push_token_refreshed', ({ 
 | `disablePush()` | `void` | Disable push notifications |
 | `isPushEnabled()` | `Promise<boolean>` | Check if push is enabled |
 | `getPushToken()` | `Promise<string \| null>` | Get the current device push token |
+| `setURLHandlingEnabled(enabled)` | `void` | iOS only — route push notification URL actions to JS via the `UrlActionSelected` event. No-op on Android |
 
 ### Events
 
 | Event Name | Payload | Platform | Description |
 |------------|---------|----------|-------------|
 | `sfmc_push_token_refreshed` | `{ token: string }` | Android only | Emitted when the push token is refreshed |
+| `sfmc_push_url_action` (`PushEvent.UrlActionSelected`) | `PushUrlAction` (`{ url, type }`) | iOS only — a URL action was selected (requires `setURLHandlingEnabled(true)`) |
 
 > **iOS note:** The `sfmc_push_token_refreshed` event is not emitted on iOS. Token refresh on iOS is handled natively via `AppDelegate.application(_:didRegisterForRemoteNotificationsWithDeviceToken:)`, which passes the token directly to `PushFeature.setDeviceToken(_:)`. Use `getPushToken()` to read the current token on demand.
 

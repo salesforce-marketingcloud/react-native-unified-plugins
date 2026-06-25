@@ -196,7 +196,12 @@ RCT_EXPORT_METHOD(setLogging:(NSString *)level) {
     } else {
         logLevel = SFMCSdkLogLevelNone;
     }
-    [SFMCSdk setLoggerWithLogLevel:logLevel logOutputter:nil];
+    // A nil outputter installs no log destination, silently suppressing ALL SDK
+    // output (including engagement API logs). Provide the SDK's default
+    // LogOutputter for any active level; only NONE leaves it nil to disable.
+    SFMCSdkLogOutputter *outputter =
+        logLevel == SFMCSdkLogLevelNone ? nil : [[SFMCSdkLogOutputter alloc] init];
+    [SFMCSdk setLoggerWithLogLevel:logLevel logOutputter:outputter];
 }
 
 @end

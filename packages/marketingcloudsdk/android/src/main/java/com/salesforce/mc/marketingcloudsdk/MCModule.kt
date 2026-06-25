@@ -299,6 +299,21 @@ class MCModule(reactContext: ReactApplicationContext) :
     }
 
     @ReactMethod
+    override fun setSignedString(signedString: String?, promise: Promise) {
+        MarketingCloudSdk.requestSdk { sdk ->
+            val committed = sdk.getRegistrationManager().edit().setSignedString(signedString).commit()
+            promise.resolve(committed)
+        }
+    }
+
+    @ReactMethod
+    override fun getSignedString(promise: Promise) {
+        MarketingCloudSdk.requestSdk { sdk ->
+            promise.resolve(sdk.getRegistrationManager().getSignedString())
+        }
+    }
+
+    @ReactMethod
     override fun enableLogging() {
         MarketingCloudSdk.setLogLevel(MCLogListener.VERBOSE)
         MarketingCloudSdk.setLogListener(MCLogListener.AndroidLogListener())

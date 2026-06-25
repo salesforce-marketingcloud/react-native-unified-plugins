@@ -30,4 +30,12 @@
  */
 
 export { PushModule } from "./PushModule";
-export type { PushApi, NotificationMessage, Region, Action } from "./types";
+export { PushEvent } from "./types";
+export type {
+  PushApi,
+  PushEventName,
+  PushUrlAction,
+  NotificationMessage,
+  Region,
+  Action,
+} from "./types";

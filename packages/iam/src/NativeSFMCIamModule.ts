@@ -29,14 +29,19 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-import type { TurboModule } from 'react-native';
-import { TurboModuleRegistry } from 'react-native';
+import type { TurboModule } from "react-native";
+import { TurboModuleRegistry } from "react-native";
 
 export interface Spec extends TurboModule {
   requestIamSdk(): Promise<void>;
   showInAppMessage(messageId: string): void;
+  setEventDelegateEnabled(enabled: boolean): void;
+  setMessageFilter(filter: Object): void;
+  setFont(name: string): void;
+  setStatusBarColor(color: number): void;
+  setURLHandlingEnabled(enabled: boolean): void;
   addListener(eventName: string): void;
   removeListeners(count: number): void;
 }
 
-export default TurboModuleRegistry.getEnforcing<Spec>('SFMCIamModule');
+export default TurboModuleRegistry.getEnforcing<Spec>("SFMCIamModule");

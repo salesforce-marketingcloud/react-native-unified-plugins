@@ -88,6 +88,8 @@ mc.unsetRegistrationCallback();
 | `isAnalyticsEnabled()` | `Promise<boolean>` | Check analytics state |
 | `getDeviceId()` | `Promise<string \| null>` | Get device identifier |
 | `getContactKey()` | `Promise<string \| null>` | Get contact key |
+| `setSignedString(signedString)` | `Promise<boolean>` | Set the signed string security token (pass `null` to clear) |
+| `getSignedString()` | `Promise<string \| null>` | Get the last stored signed string |
 | `enableLogging()` | `void` | Enable debug logging |
 | `disableLogging()` | `void` | Disable debug logging |
 | `setRegistrationCallback()` | `void` | Start receiving registration change events |
