@@ -31,9 +31,7 @@ import { SectionHeader, Card, Row, PrimaryButton } from '../components';
 // active. An empty set means "show everything". This is just a code-defined
 // allow-list to demonstrate setInAppMessageDecisionHandler — a real app could
 // run any logic here (feature flags, current screen, quiet hours, A/B bucket).
-const IAM_ALLOWED_MESSAGE_IDS = new Set<string>([
-    'MTM2MTU6MTE0OjA6cVF2ZVBpdW9PRVMtWV8wSzJLeDFuZw',
-]);
+const IAM_ALLOWED_MESSAGE_IDS = new Set<string>();
 
 interface Props {
     sfmc: SFMCSdkApi;
@@ -123,8 +121,8 @@ export default function HomeTab({ sfmc, push, mc, mam, iam, loggingEnabled, onLo
         return () => {
             IamModule.setInAppMessageDecisionHandler(null);
         };
-        // shouldShowInAppMessage only reads the const allow-list and the stable
-        // logEvent callback, so registering once on mount/unmount is intentional.
+        // shouldShowInAppMessage is a stable module-scope rule (reads only the
+        // const allow-list), so this runs once on mount/unmount.
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 

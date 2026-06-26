@@ -14,20 +14,20 @@ import MobileAppMessagingSDK
 class AppDelegate: RCTAppDelegate {
 
 
-    let appID = "995b5b1a-162c-4e5d-a4cf-ac5ddeb14e47"
-    let accessToken = "cyg6ftcd8sbqetq7wy5v7ez3"
-    let appEndpointURL = "https://mcgrjfgk81ckrt0h4rwlnbhmbvf4.device.marketingcloudapis.com/"
-    let mid = "NDA0NjoxMTQ6MA"
+    let appID = "YOUR_MC_APP_ID"
+    let accessToken = "YOUR_MC_ACCESS_TOKEN"
+    let appEndpointURL = "YOUR_MC_SERVER_URL"
+    let mid = "YOUR_MC_MID"
 
     let inbox = true
     let location = true
     let pushAnalytics = true
     let markMessageReadOnInboxNotificationOpen = true
 
-    let mamAppID = "91a18bfa-6fe6-482a-a20b-a3b7d5e882a6"
-    let mamAccessToken = "RWAOoBSiAH1LYeYrNMeQ7HMj"
-    let mamServerURL = "https://api.salesforce.com"
-    let mamTenantId = "core/prod/00DWt00000GomjNMAR"
+    let mamAppID = "YOUR_MAM_APP_ID"
+    let mamAccessToken = "YOUR_MAM_ACCESS_TOKEN"
+    let mamServerURL = "YOUR_MAM_SERVER_URL"
+    let mamTenantId = "YOUR_MAM_TENANT_ID"
     let mamAnalyticsEnabled = true
 
     // MARK: - UIApplicationDelegate
