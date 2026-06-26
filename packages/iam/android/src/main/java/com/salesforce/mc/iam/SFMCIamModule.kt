@@ -31,8 +31,6 @@ import com.facebook.react.bridge.Arguments
 import com.facebook.react.bridge.Promise
 import com.facebook.react.bridge.ReactApplicationContext
 import com.facebook.react.bridge.ReactMethod
-import com.facebook.react.bridge.ReadableArray
-import com.facebook.react.bridge.ReadableMap
 import com.facebook.react.bridge.WritableMap
 import com.facebook.react.module.annotations.ReactModule
 import com.facebook.react.modules.core.DeviceEventManagerModule
@@ -53,16 +51,27 @@ class SFMCIamModule(reactContext: ReactApplicationContext) :
         private const val EVENT_WILL_SHOW = "sfmc_iam_will_show"
         private const val EVENT_DID_SHOW = "sfmc_iam_did_show"
         private const val EVENT_DID_CLOSE = "sfmc_iam_did_close"
+        // Emitted (decision mode only) to ask JS whether a message should
+        // display. JS replies via resolveInAppMessageDecision().
+        private const val EVENT_DECISION_REQUEST = "sfmc_iam_decision_request"
     }
 
     // ── State ───────────────────────────────────────────────────────────────────
 
-    // Per-message rules evaluated synchronously inside shouldShowMessage(). JS
-    // sets them via setMessageFilter(). @Volatile because the SDK invokes the
-    // listener on its own thread while setMessageFilter() runs on the bridge
-    // thread; the reference is swapped atomically and never mutated in place.
+    // Defer-then-reshow decision mode (mirrors the Flutter plugin). When JS
+    // registers a decision handler, shouldShowMessage() defers to JS. Since the
+    // listener callback is
+    // synchronous and JS replies asynchronously, we defer: return false now,
+    // emit a decision-request event, and re-show via showMessage() if JS
+    // approves. approvedIds records ids approved for exactly one re-show so the
+    // re-show pass returns true once and does not loop.
+    //
+    // @Volatile for decisionEnabled and a synchronized set for approvedIds: both
+    // are read on the SDK thread (shouldShowMessage) and written on the bridge
+    // thread (setDecisionHandlerEnabled / resolveInAppMessageDecision).
     @Volatile
-    private var messageFilter: MessageFilter = MessageFilter()
+    private var decisionEnabled: Boolean = false
+    private val approvedIds = java.util.Collections.synchronizedSet(HashSet<String>())
 
     private var eventListener: InAppMessageManager.EventListener? = null
 
@@ -89,31 +98,22 @@ class SFMCIamModule(reactContext: ReactApplicationContext) :
 
     @ReactMethod
     override fun requestIamSdk(promise: Promise) {
-        InAppMessagingFeature.requestSdk { promise.resolve(null) }
-    }
-
-    @ReactMethod
-    override fun setEventDelegateEnabled(enabled: Boolean) {
         InAppMessagingFeature.requestSdk { iam ->
-            if (enabled) {
-                // WeakIamListener does not capture `this`, so the module +
-                // ReactApplicationContext can still be GC'd if cleanup is skipped
-                // (process death, framework bug).
-                if (eventListener == null) {
-                    val listener = WeakIamListener(this)
-                    eventListener = listener
-                    iam.getInAppMessageManager().setInAppMessageListener(listener)
-                }
-            } else {
-                iam.getInAppMessageManager().setInAppMessageListener(null)
-                eventListener = null
+            // Register the lifecycle listener once the module is ready so the
+            // shouldShow/didShow/didClose events flow for the whole session
+            // (mirrors the Flutter plugin). JS gates emission via its listener
+            // count, so there is no separate enable toggle.
+            //
+            // WeakIamListener does not capture `this`, so the module +
+            // ReactApplicationContext can still be GC'd if cleanup is skipped
+            // (process death, framework bug).
+            if (eventListener == null) {
+                val listener = WeakIamListener(this)
+                eventListener = listener
+                iam.getInAppMessageManager().setInAppMessageListener(listener)
             }
+            promise.resolve(null)
         }
-    }
-
-    @ReactMethod
-    override fun setURLHandlingEnabled(enabled: Boolean) {
-        // iOS-only API. Android has no URL handling delegate — no-op for parity.
     }
 
     @ReactMethod
@@ -141,25 +141,46 @@ class SFMCIamModule(reactContext: ReactApplicationContext) :
         }
     }
 
+    // Enable/disable the per-message JS decision handler. When enabled,
+    // shouldShowMessage() defers to JS. Disabling clears any pending one-shot
+    // approvals so a later re-enable starts clean.
     @ReactMethod
-    override fun setMessageFilter(filter: ReadableMap) {
-        messageFilter = MessageFilter(
-            blockedIds = readStringSet(filter.takeIf { it.hasKey("blockedIds") }?.getArray("blockedIds"))
-                ?: emptySet(),
-            // An empty allowedIds array means "no allow-list restriction" (per the
-            // JS contract), not "allow zero messages" — coalesce empty to null.
-            allowedIds = readStringSet(filter.takeIf { it.hasKey("allowedIds") }?.getArray("allowedIds"))
-                ?.takeIf { it.isNotEmpty() },
-            defaultShow = if (filter.hasKey("defaultShow")) filter.getBoolean("defaultShow") else true,
-        )
+    override fun setDecisionHandlerEnabled(enabled: Boolean) {
+        decisionEnabled = enabled
+        if (!enabled) approvedIds.clear()
+    }
+
+    // JS's reply to an EVENT_DECISION_REQUEST. On approval, mark the id for a
+    // single re-show and ask the SDK to present it again; the next
+    // shouldShowMessage() pass for that id returns true once. On rejection there
+    // is nothing to do — the message was already suppressed when
+    // shouldShowMessage() returned false.
+    @ReactMethod
+    override fun resolveInAppMessageDecision(messageId: String, show: Boolean) {
+        if (!show) return
+        approvedIds.add(messageId)
+        InAppMessagingFeature.requestSdk { iam ->
+            iam.getInAppMessageManager().showMessage(messageId)
+        }
     }
 
     // ── Lifecycle callbacks (invoked on the SDK thread) ─────────────────────────
 
     internal fun onShouldShowMessage(message: InAppMessage): Boolean {
+        // Re-show pass for a message JS already approved: allow it through once,
+        // skipping the observational will-show event (it already fired on the
+        // first pass).
+        if (decisionEnabled) {
+            if (approvedIds.remove(message.id)) return true
+            // First pass: defer to JS.
+            sendEvent(EVENT_WILL_SHOW, messageToWritableMap(message))
+            sendEvent(EVENT_DECISION_REQUEST, messageToWritableMap(message))
+            return false
+        }
+        // No decision handler registered: emit the observational will-show event
+        // and let the SDK display the message (default behavior).
         sendEvent(EVENT_WILL_SHOW, messageToWritableMap(message))
-        // Per-message decision from the JS-supplied rules, evaluated on this id.
-        return messageFilter.shouldShow(message.id)
+        return true
     }
 
     internal fun onDidShowMessage(message: InAppMessage) {
@@ -240,15 +261,6 @@ class SFMCIamModule(reactContext: ReactApplicationContext) :
         return map
     }
 
-    private fun readStringSet(array: ReadableArray?): Set<String>? {
-        if (array == null) return null
-        val set = HashSet<String>(array.size())
-        for (i in 0 until array.size()) {
-            array.getString(i)?.let { set.add(it) }
-        }
-        return set
-    }
-
     // ── Teardown ──────────────────────────────────────────────────────────────────
 
     override fun invalidate() {
@@ -265,18 +277,6 @@ class SFMCIamModule(reactContext: ReactApplicationContext) :
     }
 
     // ── Helper types ──────────────────────────────────────────────────────────────
-
-    private data class MessageFilter(
-        val blockedIds: Set<String> = emptySet(),
-        val allowedIds: Set<String>? = null,
-        val defaultShow: Boolean = true,
-    ) {
-        fun shouldShow(messageId: String): Boolean = when {
-            blockedIds.contains(messageId) -> false
-            allowedIds != null -> allowedIds.contains(messageId)
-            else -> defaultShow
-        }
-    }
 
     private class WeakIamListener(
         module: SFMCIamModule,

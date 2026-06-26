@@ -35,8 +35,7 @@ export type {
   IamApi,
   IamDismissReason,
   IamEventName,
-  IamMessageFilter,
-  IamUrlAction,
   InAppMessage,
   InAppMessageCloseAction,
+  InAppMessageDecisionHandler,
 } from "./types";

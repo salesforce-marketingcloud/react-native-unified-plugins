@@ -16,8 +16,7 @@ import {
 import Clipboard from '@react-native-clipboard/clipboard';
 import { color } from '../colors';
 import type { SFMCSdkApi } from '@sfmc/react-native-sfmc-core';
-import { PushModule, PushEvent } from '@sfmc/react-native-push';
-import type { PushApi, PushUrlAction } from '@sfmc/react-native-push';
+import type { PushApi } from '@sfmc/react-native-push';
 import type { MCApi } from '@sfmc/react-native-marketingcloudsdk';
 import type { MAMApi } from '@sfmc/react-native-mobileappmessaging';
 import { IamModule, IamEvent } from '@sfmc/react-native-iam';
@@ -25,9 +24,16 @@ import type {
     IamApi,
     InAppMessage,
     InAppMessageCloseAction,
-    IamUrlAction,
 } from '@sfmc/react-native-iam';
 import { SectionHeader, Card, Row, PrimaryButton } from '../components';
+
+// Message ids the example is willing to display while the decision handler is
+// active. An empty set means "show everything". This is just a code-defined
+// allow-list to demonstrate setInAppMessageDecisionHandler — a real app could
+// run any logic here (feature flags, current screen, quiet hours, A/B bucket).
+const IAM_ALLOWED_MESSAGE_IDS = new Set<string>([
+    'MTM2MTU6MTE0OjA6cVF2ZVBpdW9PRVMtWV8wSzJLeDFuZw',
+]);
 
 interface Props {
     sfmc: SFMCSdkApi;
@@ -58,8 +64,7 @@ export default function HomeTab({ sfmc, push, mc, mam, iam, loggingEnabled, onLo
     const [iamMessageId, setIamMessageId] = useState('');
     const [iamFontName, setIamFontName] = useState('');
     const [iamLog, setIamLog] = useState('');
-    const [iamDefaultShow, setIamDefaultShow] = useState(true);
-    const [iamBlockedIds, setIamBlockedIds] = useState('');
+    const [iamDecisionMode, setIamDecisionMode] = useState(true);
 
     const loadState = useCallback(async () => {
         const [token, mceId, mamId, pushOn, mcOn, mamOn] = await Promise.allSettled([
@@ -90,18 +95,9 @@ export default function HomeTab({ sfmc, push, mc, mam, iam, loggingEnabled, onLo
         loadState();
     }, [loadState]);
 
-    // The event and URL-handling delegates are always enabled in this example so
-    // lifecycle events and URL actions are delivered to JS for the whole session.
-    useEffect(() => {
-        iam.setEventDelegateEnabled(true);
-        iam.setURLHandlingEnabled(true);
-        // Route push notification URL actions to JS as well (iOS only).
-        push.setURLHandlingEnabled(true);
-    }, [iam, push]);
-
     // Subscribe to IAM lifecycle events for the whole session and surface them in
-    // the log. The native listener is registered via setEventDelegateEnabled(true)
-    // in the effect above.
+    // the log. The native listener is registered automatically when the SDK is
+    // requested, so we only add an emitter listener here.
     useEffect(() => {
         const emitter = IamModule.getEmitter();
         const subs = [
@@ -116,32 +112,21 @@ export default function HomeTab({ sfmc, push, mc, mam, iam, loggingEnabled, onLo
                 (m: InAppMessage & { action: InAppMessageCloseAction }) =>
                     logEvent(`didClose: ${m.id} (${m.action?.type ?? 'n/a'})`),
             ),
-            emitter.addListener(IamEvent.UrlActionSelected, (a: IamUrlAction) => {
-                logEvent(`urlAction: ${a.type} → ${a.url}`);
-                // URL handling was routed to JS, so the SDK won't open it — do it here.
-                Linking.openURL(a.url).catch((err) =>
-                    logEvent(`openURL failed: ${err?.message ?? err}`),
-                );
-            }),
         ];
         return () => subs.forEach((sub) => sub.remove());
     }, [logEvent]);
 
-    // Subscribe to push notification URL actions (iOS only). URL handling was
-    // routed to JS via push.setURLHandlingEnabled(true), so the SDK won't open
-    // the URL — do it here.
+    // Decision mode defaults to on, so register the handler on mount. Clear it
+    // when this screen goes away so the SDK resumes default behavior.
     useEffect(() => {
-        const sub = PushModule.getEmitter().addListener(
-            PushEvent.UrlActionSelected,
-            (a: PushUrlAction) => {
-                logEvent(`pushUrlAction: ${a.type} → ${a.url}`);
-                Linking.openURL(a.url).catch((err) =>
-                    logEvent(`openURL failed: ${err?.message ?? err}`),
-                );
-            },
-        );
-        return () => sub.remove();
-    }, [logEvent]);
+        IamModule.setInAppMessageDecisionHandler(shouldShowInAppMessage);
+        return () => {
+            IamModule.setInAppMessageDecisionHandler(null);
+        };
+        // shouldShowInAppMessage only reads the const allow-list and the stable
+        // logEvent callback, so registering once on mount/unmount is intentional.
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
 
     function copyToClipboard(label: string, value: string | null | undefined) {
         if (!value) return;
@@ -246,21 +231,24 @@ export default function HomeTab({ sfmc, push, mc, mam, iam, loggingEnabled, onLo
         iam.showInAppMessage(iamMessageId.trim());
     }
 
-    // Build the data-driven filter from the current UI state and push it to the
-    // native gate, which evaluates it per message inside shouldShowMessage.
-    function applyIamFilter(next: { defaultShow?: boolean; blockedIds?: string }) {
-        const defaultShow = next.defaultShow ?? iamDefaultShow;
-        const blockedRaw = next.blockedIds ?? iamBlockedIds;
-        const blockedIds = blockedRaw
-            .split(',')
-            .map((s) => s.trim())
-            .filter(Boolean);
-        iam.setMessageFilter({ blockedIds, defaultShow });
+    // The app's custom display rule, invoked (via the native bridge) for every
+    // message the SDK wants to show while decision mode is on. Returning true
+    // shows the message, false suppresses it. Here it consults the code-defined
+    // allow-list; an approved message is re-shown a moment later by the native
+    // defer-then-reshow path.
+    function shouldShowInAppMessage(message: InAppMessage): boolean {
+        const show =
+            IAM_ALLOWED_MESSAGE_IDS.size === 0 ||
+            IAM_ALLOWED_MESSAGE_IDS.has(message.id);
+        logEvent(`decision: ${message.id} → ${show ? 'show' : 'hide'}`);
+        return show;
     }
 
-    function onIamDefaultShowToggle(v: boolean) {
-        setIamDefaultShow(v);
-        applyIamFilter({ defaultShow: v });
+    // Enabling registers the decision handler; disabling clears it so the SDK
+    // resumes showing every message by default.
+    function onIamDecisionModeToggle(v: boolean) {
+        setIamDecisionMode(v);
+        IamModule.setInAppMessageDecisionHandler(v ? shouldShowInAppMessage : null);
     }
 
     function applyIamFont() {
@@ -356,32 +344,23 @@ export default function HomeTab({ sfmc, push, mc, mam, iam, loggingEnabled, onLo
             {/* IAM behavior toggles */}
             <Card>
                 <View style={[s.switchRow, s.noBorder]}>
-                    <Text style={s.switchLabel}>Allow Auto-Display (default)</Text>
-                    <Switch value={iamDefaultShow} onValueChange={onIamDefaultShowToggle} />
+                    <View style={s.switchLabelColumn}>
+                        <Text style={s.switchLabel}>App decides display</Text>
+                        <Text style={s.switchSubLabel}>
+                            Run a custom code rule per message instead of showing automatically.
+                        </Text>
+                    </View>
+                    <Switch value={iamDecisionMode} onValueChange={onIamDecisionModeToggle} />
                 </View>
             </Card>
-
-            {/* IAM per-message filter: blocked IDs are suppressed natively */}
-            <Card>
-                <View style={s.inputRow}>
-                    <TextInput
-                        style={s.textInput}
-                        placeholder="Blocked message IDs (comma-separated)"
-                        placeholderTextColor={color('placeholderText')}
-                        value={iamBlockedIds}
-                        onChangeText={setIamBlockedIds}
-                        autoCorrect={false}
-                        autoCapitalize="none"
-                    />
-                </View>
-            </Card>
-            <PrimaryButton title="Apply Message Filter" onPress={() => applyIamFilter({})} />
 
             {/* IAM styling */}
             <Card>
                 <View style={s.inputRow}>
+                    <Text style={s.inputLabel}>Font name</Text>
                     <TextInput
                         style={s.textInput}
+                        accessibilityLabel="Font name"
                         placeholder="Font name (e.g. Helvetica-Bold)"
                         placeholderTextColor={color('placeholderText')}
                         value={iamFontName}
@@ -463,13 +442,27 @@ const s = StyleSheet.create({
         borderBottomColor: color('separator'),
     },
     noBorder: { borderBottomWidth: 0 },
+    switchLabelColumn: {
+        flex: 1,
+        paddingRight: 12,
+    },
     switchLabel: {
         fontSize: 15,
         color: color('label'),
     },
+    switchSubLabel: {
+        fontSize: 13,
+        color: color('secondaryLabel'),
+        marginTop: 2,
+    },
     inputRow: {
         paddingHorizontal: 16,
         paddingVertical: 8,
+    },
+    inputLabel: {
+        fontSize: 13,
+        color: color('secondaryLabel'),
+        marginBottom: 4,
     },
     textInput: {
         fontSize: 15,

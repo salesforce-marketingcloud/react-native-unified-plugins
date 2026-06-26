@@ -35,13 +35,13 @@
  * the type can't be resolved).
  */
 export type IamMessageType =
-  | 'bannerTop'
-  | 'bannerBottom'
-  | 'fullImageFill'
-  | 'full'
-  | 'modal'
-  | 'pushPrimer'
-  | 'unknown';
+  | "bannerTop"
+  | "bannerBottom"
+  | "fullImageFill"
+  | "full"
+  | "modal"
+  | "pushPrimer"
+  | "unknown";
 
 /**
  * A serialized in-app message delivered with lifecycle events.
@@ -100,7 +100,7 @@ export interface InAppMessage {
  * - `CLOSED` — the user closed the message (e.g. via the close control)
  * - `UNKNOWN` — the reason could not be determined (Android may report this)
  */
-export type IamDismissReason = 'AUTO' | 'BUTTON' | 'CLOSED' | 'UNKNOWN';
+export type IamDismissReason = "AUTO" | "BUTTON" | "CLOSED" | "UNKNOWN";
 
 /**
  * Describes how an in-app message was closed.
@@ -114,43 +114,15 @@ export interface InAppMessageCloseAction {
 }
 
 /**
- * Payload for the {@link IamEvent.UrlActionSelected} event (iOS only).
- * Mirrors the `sfmc_handleURL(_:type:)` URL handling delegate.
+ * Decides, per message, whether the SDK should display an in-app message —
+ * giving the app the final say over the native `shouldShowMessage`/`shouldShow`
+ * gate. Receives the full {@link InAppMessage} so the decision can be based on
+ * more than the id. Return (or resolve) `true` to display, `false` to suppress.
+ * See {@link IamModule.setInAppMessageDecisionHandler}.
  */
-export interface IamUrlAction {
-  /** The URL associated with the selected action. */
-  url: string;
-  /** The action type reported by the SDK. */
-  type: string;
-}
-
-/**
- * A data-driven rule set evaluated natively, per message, inside the
- * synchronous `shouldShowMessage` gate to decide whether each message displays.
- *
- * The native `shouldShowMessage` callback must return a boolean immediately and
- * cannot make an async round trip to JS, so the decision is expressed as data
- * here and applied to each incoming message's fields by the native module.
- */
-export interface IamMessageFilter {
-  /**
-   * Message IDs that must never display. If the incoming message's `id` is in
-   * this list, the gate returns `false`. Takes precedence over `allowedIds`.
-   */
-  blockedIds?: string[];
-  /**
-   * When provided, only messages whose `id` is in this list may display; any
-   * other message is suppressed. Omit (or leave empty) to allow all IDs that
-   * are not blocked.
-   */
-  allowedIds?: string[];
-  /**
-   * The decision applied when no rule above matches a message.
-   * Defaults to `true` (show). Set to `false` to suppress everything by default
-   * and opt messages in via `allowedIds`.
-   */
-  defaultShow?: boolean;
-}
+export type InAppMessageDecisionHandler = (
+  message: InAppMessage,
+) => boolean | Promise<boolean>;
 
 /**
  * Event names emitted through the {@link IamModule.getEmitter} event emitter.
@@ -158,20 +130,14 @@ export interface IamMessageFilter {
 export const IamEvent = {
   /**
    * Emitted before a message is displayed, carrying the {@link InAppMessage}.
-   * The show/suppress decision itself is made natively via the rules set with
-   * {@link IamApi.setMessageFilter}; this event is observational.
+   * This event is observational; to gate whether a message displays, register a
+   * handler via {@link IamModule.setInAppMessageDecisionHandler}.
    */
-  WillShowMessage: 'sfmc_iam_will_show',
+  WillShowMessage: "sfmc_iam_will_show",
   /** Emitted when a message is first shown on screen. */
-  DidShowMessage: 'sfmc_iam_did_show',
+  DidShowMessage: "sfmc_iam_did_show",
   /** Emitted when a message is dismissed. */
-  DidCloseMessage: 'sfmc_iam_did_close',
-  /**
-   * iOS only — emitted with an {@link IamUrlAction} when the user selects a URL
-   * action in a message and URL handling has been routed to JS via
-   * {@link IamApi.setURLHandlingEnabled}.
-   */
-  UrlActionSelected: 'sfmc_iam_url_action',
+  DidCloseMessage: "sfmc_iam_did_close",
 } as const;
 
 export type IamEventName = (typeof IamEvent)[keyof typeof IamEvent];
@@ -187,34 +153,6 @@ export interface IamApi {
    * @see  {@link https://salesforce-marketingcloud.github.io/MarketingCloudSDK-iOS/appledocs/InAppMessagingFeatureSdk/1.0/Classes/InAppMessagingFeature.html#/c:@CM@InAppMessagingFeatureSDK@objc(cs)SFInAppMessagingFeature(im)showInAppMessageWithMessageId: |iOS Docs}
    */
   showInAppMessage(messageId: string): void;
-
-  /**
-   * Enables or disables delivery of in-app message lifecycle events
-   * ({@link IamEvent.WillShowMessage}, {@link IamEvent.DidShowMessage},
-   * {@link IamEvent.DidCloseMessage}) to the JS event emitter. When enabled, the
-   * native lifecycle listener/delegate is registered; when disabled, it is
-   * removed. Defaults to disabled — call this with `true` before subscribing via
-   * {@link IamModule.getEmitter}.
-   * @param {boolean} enabled - `true` to receive lifecycle events, `false` to stop.
-   * @see  {@link https://salesforce-marketingcloud.github.io/MarketingCloudSDK-Android/javadocs/SFMCSdk/11.0/inappmessagingfeaturemodule/com.salesforce.marketingcloud.inappmessagingfeature/-in-app-message-manager/set-in-app-message-listener.html |Android Docs}
-   * @see  {@link https://salesforce-marketingcloud.github.io/MarketingCloudSDK-iOS/appledocs/InAppMessagingFeatureSdk/1.0/Classes/InAppMessagingFeature.html#/c:@CM@InAppMessagingFeatureSDK@objc(cs)SFInAppMessagingFeature(im)setEventDelegate: |iOS Docs}
-   */
-  setEventDelegateEnabled(enabled: boolean): void;
-
-  /**
-   * Sets the data-driven rules used by the native `shouldShowMessage` gate to
-   * decide, per message, whether each in-app message displays. The native
-   * module reads each incoming message's `id` and evaluates it against the
-   * filter synchronously: blocked IDs are always suppressed, an `allowedIds`
-   * list (when present) restricts display to those IDs, and anything not
-   * matched falls back to `defaultShow`.
-   *
-   * Pass an empty object (or `{ defaultShow: true }`) to allow all messages.
-   * Requires {@link IamApi.setEventDelegateEnabled} to be enabled so the native
-   * listener is registered.
-   * @param {IamMessageFilter} filter - The per-message rule set.
-   */
-  setMessageFilter(filter: IamMessageFilter): void;
 
   /**
    * Sets the font used to render in-app message content.
@@ -234,15 +172,4 @@ export interface IamApi {
    * @see  {@link https://salesforce-marketingcloud.github.io/MarketingCloudSDK-Android/javadocs/SFMCSdk/11.0/inappmessagingfeaturemodule/com.salesforce.marketingcloud.inappmessagingfeature/-in-app-message-manager/set-status-bar-color.html |Android Docs}
    */
   setStatusBarColor(color: number): void;
-
-  /**
-   * Routes URL actions from in-app message buttons to JS via the
-   * {@link IamEvent.UrlActionSelected} event instead of letting the SDK open
-   * them directly.
-   *
-   * **iOS only** — no-op on Android, which has no URL handling delegate.
-   * @param {boolean} enabled - `true` to route URL actions to JS.
-   * @see  {@link https://salesforce-marketingcloud.github.io/MarketingCloudSDK-iOS/appledocs/InAppMessagingFeatureSdk/1.0/Classes/InAppMessagingFeature.html#/c:@CM@InAppMessagingFeatureSDK@objc(cs)SFInAppMessagingFeature(im)setURLHandlingDelegate: |iOS Docs}
-   */
-  setURLHandlingEnabled(enabled: boolean): void;
 }

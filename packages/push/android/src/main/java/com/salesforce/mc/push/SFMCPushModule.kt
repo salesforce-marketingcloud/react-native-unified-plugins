@@ -90,11 +90,6 @@ class SFMCPushModule(reactContext: ReactApplicationContext) :
     }
 
     @ReactMethod
-    override fun setURLHandlingEnabled(enabled: Boolean) {
-        // iOS-only API. Android has no URL handling delegate — no-op for parity.
-    }
-
-    @ReactMethod
     override fun addListener(eventName: String) {}
 
     @ReactMethod

@@ -49,55 +49,12 @@
 static NSString *const kEventWillShow = @"sfmc_iam_will_show";
 static NSString *const kEventDidShow = @"sfmc_iam_did_show";
 static NSString *const kEventDidClose = @"sfmc_iam_did_close";
-static NSString *const kEventUrlAction = @"sfmc_iam_url_action";
-
-#pragma mark - Message filter (immutable snapshot)
-
-// An immutable snapshot of the JS-supplied per-message rules. Mirrors Android's
-// MessageFilter: the whole object is swapped atomically and never mutated in
-// place, so the shouldShow delegate (called on the SDK thread) always reads one
-// consistent set of rules even while setMessageFilter (bridge thread) replaces
-// it. See _filter below.
-@interface SFMCIamMessageFilter : NSObject
-@property (nonatomic, readonly) NSSet<NSString *> *blockedIds;
-@property (nonatomic, readonly, nullable) NSSet<NSString *> *allowedIds;  // nil = no allow-list restriction
-@property (nonatomic, readonly) BOOL defaultShow;
-- (instancetype)initWithBlockedIds:(NSSet<NSString *> *)blockedIds
-                        allowedIds:(nullable NSSet<NSString *> *)allowedIds
-                       defaultShow:(BOOL)defaultShow;
-- (BOOL)shouldShowMessageId:(nullable NSString *)messageId;
-@end
-
-@implementation SFMCIamMessageFilter
-- (instancetype)initWithBlockedIds:(NSSet<NSString *> *)blockedIds
-                        allowedIds:(NSSet<NSString *> *)allowedIds
-                       defaultShow:(BOOL)defaultShow {
-    if (self = [super init]) {
-        _blockedIds = blockedIds;
-        _allowedIds = allowedIds;
-        _defaultShow = defaultShow;
-    }
-    return self;
-}
-
-// Evaluate the rules against a single message id (blocked wins, then the
-// allow-list restricts, otherwise fall back to defaultShow).
-- (BOOL)shouldShowMessageId:(NSString *)messageId {
-    if (messageId && [_blockedIds containsObject:messageId]) return NO;
-    if (_allowedIds != nil) return messageId != nil && [_allowedIds containsObject:messageId];
-    return _defaultShow;
-}
-@end
+// Emitted (decision mode only) to ask JS whether a message should display. JS
+// replies via resolveInAppMessageDecision:show:. See the decision-handler block.
+static NSString *const kEventDecisionRequest = @"sfmc_iam_decision_request";
 
 @interface SFMCIamModule : RCTEventEmitter <RCTBridgeModule, RCTTurboModule,
-                                            SFMCSdkInAppMessageEventDelegate,
-                                            SFMCSdkURLHandlingDelegate>
-// Per-message rules read synchronously inside the shouldShow delegate callback
-// (SDK thread); JS replaces them via setMessageFilter (bridge thread). `atomic`
-// guarantees the pointer read/write is safe across those threads, and because
-// the filter object is immutable, a reader always sees a complete, consistent
-// snapshot — never a torn mix of old/new fields.
-@property (atomic, strong) SFMCIamMessageFilter *filter;
+                                            SFMCSdkInAppMessageEventDelegate>
 @end
 
 @implementation SFMCIamModule {
@@ -106,6 +63,21 @@ static NSString *const kEventUrlAction = @"sfmc_iam_url_action";
     // (e.g. a screen unmounts). Emitting with no listeners logs a warning, so we
     // gate emissions on this flag, set via start/stopObserving.
     BOOL _hasListeners;
+
+    // Defer-then-reshow decision mode (mirrors the Flutter plugin). When JS
+    // registers a decision handler, shouldShow can no longer answer from the
+    // static filter — it must ask JS. Since the delegate is synchronous and JS
+    // replies asynchronously, we defer: return NO now, emit a decision-request
+    // event, and re-show via showInAppMessage if JS approves. _approvedIds
+    // records ids approved for exactly one re-show so the re-show pass returns
+    // YES once and does not loop.
+    //
+    // All three are guarded by _decisionLock: _decisionEnabled and _approvedIds
+    // are read on the SDK thread (shouldShow) and written on the bridge thread
+    // (setDecisionHandlerEnabled / resolveInAppMessageDecision).
+    BOOL _decisionEnabled;
+    NSMutableSet<NSString *> *_approvedIds;
+    NSLock *_decisionLock;
 }
 
 RCT_EXPORT_MODULE(SFMCIamModule);
@@ -114,17 +86,16 @@ RCT_EXPORT_MODULE(SFMCIamModule);
 
 - (instancetype)init {
     if (self = [super init]) {
-        // Default: no block-list, no allow-list restriction, show everything.
-        self.filter = [[SFMCIamMessageFilter alloc] initWithBlockedIds:[NSSet set]
-                                                            allowedIds:nil
-                                                           defaultShow:YES];
         _hasListeners = NO;
+        _decisionEnabled = NO;
+        _approvedIds = [NSMutableSet set];
+        _decisionLock = [[NSLock alloc] init];
     }
     return self;
 }
 
 - (NSArray<NSString *> *)supportedEvents {
-    return @[kEventWillShow, kEventDidShow, kEventDidClose, kEventUrlAction];
+    return @[kEventWillShow, kEventDidShow, kEventDidClose, kEventDecisionRequest];
 }
 
 - (void)startObserving {
@@ -161,22 +132,14 @@ RCT_EXPORT_METHOD(removeListeners:(double)count) {
 
 RCT_EXPORT_METHOD(requestIamSdk:(RCTPromiseResolveBlock)resolve
                   rejecter:(RCTPromiseRejectBlock)reject) {
+    __weak __typeof(self) weakSelf = self;
     [SFInAppMessagingFeature requestSdk:^(id<SFInAppMessagingFeatureApi> _Nullable iam) {
+        // Register the lifecycle delegate once the module is ready so the
+        // shouldShow/didShow/didClose events flow for the whole session
+        // (mirrors the Flutter plugin). JS gates emission via its listener
+        // count, so there is no separate enable toggle.
+        [iam setEventDelegate:weakSelf];
         resolve(nil);
-    }];
-}
-
-RCT_EXPORT_METHOD(setEventDelegateEnabled:(BOOL)enabled) {
-    __weak __typeof(self) weakSelf = self;
-    [SFInAppMessagingFeature requestSdk:^(id<SFInAppMessagingFeatureApi> _Nullable iam) {
-        [iam setEventDelegate:enabled ? weakSelf : nil];
-    }];
-}
-
-RCT_EXPORT_METHOD(setURLHandlingEnabled:(BOOL)enabled) {
-    __weak __typeof(self) weakSelf = self;
-    [SFInAppMessagingFeature requestSdk:^(id<SFInAppMessagingFeatureApi> _Nullable iam) {
-        [iam setURLHandlingDelegate:enabled ? weakSelf : nil];
     }];
 }
 
@@ -197,25 +160,29 @@ RCT_EXPORT_METHOD(setStatusBarColor:(double)color) {
     // no-op for parity.
 }
 
-RCT_EXPORT_METHOD(setMessageFilter:(NSDictionary *)filter) {
-    id blocked = filter[@"blockedIds"];
-    NSSet *blockedIds = [blocked isKindOfClass:[NSArray class]] ? [NSSet setWithArray:blocked] : [NSSet set];
+// Enable/disable the per-message JS decision handler. When enabled, shouldShow
+// defers to JS (see the delegate below) instead of the static filter. Disabling
+// clears any pending one-shot approvals so a later re-enable starts clean.
+RCT_EXPORT_METHOD(setDecisionHandlerEnabled:(BOOL)enabled) {
+    [_decisionLock lock];
+    _decisionEnabled = enabled;
+    if (!enabled) [_approvedIds removeAllObjects];
+    [_decisionLock unlock];
+}
 
-    id allowed = filter[@"allowedIds"];
-    // An empty array means "no allow-list restriction" (per the JS contract),
-    // not "allow zero messages" — treat it the same as omitting the key.
-    NSSet *allowedIds = ([allowed isKindOfClass:[NSArray class]] && [allowed count] > 0)
-        ? [NSSet setWithArray:allowed]
-        : nil;
-
-    id def = filter[@"defaultShow"];
-    BOOL defaultShow = [def isKindOfClass:[NSNumber class]] ? [def boolValue] : YES;
-
-    // Build the new rules off-thread-safe locals, then publish them in a single
-    // atomic pointer swap so the SDK-thread reader never sees a partial update.
-    self.filter = [[SFMCIamMessageFilter alloc] initWithBlockedIds:blockedIds
-                                                        allowedIds:allowedIds
-                                                       defaultShow:defaultShow];
+// JS's reply to a kEventDecisionRequest. On approval, mark the id for a single
+// re-show and ask the SDK to present it again; the next shouldShow pass for that
+// id returns YES once. On rejection there is nothing to do — the message was
+// already suppressed when shouldShow returned NO.
+RCT_EXPORT_METHOD(resolveInAppMessageDecision:(NSString *)messageId
+                  show:(BOOL)show) {
+    if (!show || messageId == nil) return;
+    [_decisionLock lock];
+    [_approvedIds addObject:messageId];
+    [_decisionLock unlock];
+    [SFInAppMessagingFeature requestSdk:^(id<SFInAppMessagingFeatureApi> _Nullable iam) {
+        [iam showInAppMessageWithMessageId:messageId];
+    }];
 }
 
 #pragma mark - SFMCSdkInAppMessageEventDelegate
@@ -224,12 +191,30 @@ RCT_EXPORT_METHOD(setMessageFilter:(NSDictionary *)filter) {
 
 - (BOOL)shouldShowInAppMessage:(id)message {
     NSDictionary *serialized = [self serializeMessage:message];
+    id rawId = serialized[@"id"];
+    NSString *messageId = [rawId isKindOfClass:[NSString class]] ? rawId : nil;
+
+    [_decisionLock lock];
+    BOOL deciding = _decisionEnabled;
+    // Re-show pass for a message JS already approved: allow it through once.
+    BOOL preApproved = messageId != nil && [_approvedIds containsObject:messageId];
+    if (preApproved) [_approvedIds removeObject:messageId];
+    [_decisionLock unlock];
+
+    if (deciding) {
+        // First pass: defer to JS. The pre-approved re-show pass skips the
+        // observational will-show event (it already fired on the first pass)
+        // and returns YES so the SDK displays the message now.
+        if (preApproved) return YES;
+        [self emitEvent:kEventWillShow body:serialized];
+        [self emitEvent:kEventDecisionRequest body:serialized];
+        return NO;
+    }
+
+    // No decision handler registered: emit the observational will-show event and
+    // let the SDK display the message (default behavior).
     [self emitEvent:kEventWillShow body:serialized];
-    // The decision must be returned regardless of whether JS is listening.
-    // Read the filter once: the atomic getter hands back a consistent immutable
-    // snapshot even if setMessageFilter swaps it concurrently.
-    id messageId = serialized[@"id"];
-    return [self.filter shouldShowMessageId:[messageId isKindOfClass:[NSString class]] ? messageId : nil];
+    return YES;
 }
 
 - (void)didShowInAppMessage:(id)message {
@@ -240,15 +225,6 @@ RCT_EXPORT_METHOD(setMessageFilter:(NSDictionary *)filter) {
     NSMutableDictionary *body = [[self serializeMessage:message] mutableCopy];
     body[@"action"] = [self serializeCloseAction:action];
     [self emitEvent:kEventDidClose body:body];
-}
-
-#pragma mark - SFMCSdkURLHandlingDelegate
-// Selector: sfmc_handleURL:type: — receives the tapped URL and a type string.
-
-- (void)sfmc_handleURL:(NSURL *)url type:(NSString *)type {
-    [self emitEvent:kEventUrlAction
-               body:@{ @"url": url.absoluteString ?: [NSNull null],
-                       @"type": type ?: [NSNull null] }];
 }
 
 #pragma mark - Serialization
@@ -275,11 +251,10 @@ RCT_EXPORT_METHOD(setMessageFilter:(NSDictionary *)filter) {
 
 #pragma mark - Teardown
 
-// Best-effort cleanup if JS never disabled the delegates before bridge teardown.
+// Best-effort cleanup if JS never disabled the delegate before bridge teardown.
 - (void)invalidate {
     [SFInAppMessagingFeature requestSdk:^(id<SFInAppMessagingFeatureApi> _Nullable iam) {
         [iam setEventDelegate:nil];
-        [iam setURLHandlingDelegate:nil];
     }];
     [super invalidate];
 }

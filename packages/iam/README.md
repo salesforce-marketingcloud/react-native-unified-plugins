@@ -33,22 +33,26 @@ const iam: IamApi = await IamModule.requestSdk();
 // Programmatically show an in-app message by ID
 iam.showInAppMessage('message-id');
 
-// Gate auto-display per message with data-driven rules (evaluated natively).
-// Requires the event delegate to be enabled (see below).
-iam.setMessageFilter({ blockedIds: ['promo-1', 'promo-2'] });
-// or allow-list only: iam.setMessageFilter({ allowedIds: ['welcome'], defaultShow: false });
+// Gate auto-display per message: register a handler that decides whether each
+// message displays. Return (or resolve) true to show, false to suppress.
+IamModule.setInAppMessageDecisionHandler((message) => {
+  return message.id !== 'promo-1';
+});
+// async is supported too:
+// IamModule.setInAppMessageDecisionHandler(async (message) => await shouldShow(message));
+// later: IamModule.setInAppMessageDecisionHandler(null); // restore default (show all)
 
 // Style messages
 iam.setFont('Helvetica-Bold');
 iam.setStatusBarColor(0xff0000ff); // Android only
 
-// Subscribe to lifecycle events (must enable delivery first)
-iam.setEventDelegateEnabled(true);
+// Subscribe to lifecycle events (the native delegate is registered for you when
+// the SDK is requested)
 const emitter = IamModule.getEmitter();
 const sub = emitter.addListener(IamEvent.DidShowMessage, (msg: InAppMessage) => {
   console.log('shown', msg.id);
 });
-// later: sub.remove(); iam.setEventDelegateEnabled(false);
+// later: sub.remove();
 ```
 
 ## API
@@ -56,22 +60,19 @@ const sub = emitter.addListener(IamEvent.DidShowMessage, (msg: InAppMessage) => 
 | Method | Return | Platform | Description |
 |--------|--------|----------|-------------|
 | `showInAppMessage(messageId)` | `void` | iOS · Android | Programmatically display an in-app message by ID |
-| `setEventDelegateEnabled(enabled)` | `void` | iOS · Android | Register/unregister the native lifecycle listener that drives the events below and the per-message gate (default off) |
-| `setMessageFilter(filter)` | `void` | iOS · Android | Set data-driven rules (`blockedIds` / `allowedIds` / `defaultShow`) evaluated natively per message to decide whether each one displays |
+| `IamModule.setInAppMessageDecisionHandler(handler)` | `void` | iOS · Android | Register a handler that decides, per message, whether each one displays (or `null` to clear and show all). The handler may return a `boolean` or `Promise<boolean>` |
 | `setFont(name)` | `void` | iOS · Android | Set the font used to render message content |
 | `setStatusBarColor(color)` | `void` | Android only | Set the message activity status bar color (ARGB int). No-op on iOS |
-| `setURLHandlingEnabled(enabled)` | `void` | iOS only | Route message URL actions to JS via the `UrlActionSelected` event. No-op on Android |
 
 ## Events
 
-Lifecycle events are delivered through `IamModule.getEmitter()` once you have called `setEventDelegateEnabled(true)`. Event names are exported as `IamEvent`:
+Lifecycle events are delivered through `IamModule.getEmitter()`. The native lifecycle listener is registered for you when the SDK is requested via `IamModule.requestSdk()`, so you only need to add an emitter listener. Event names are exported as `IamEvent`:
 
 | `IamEvent` constant | Name | Payload | Description |
 |---------------------|------|---------|-------------|
-| `WillShowMessage` | `sfmc_iam_will_show` | `InAppMessage` | A message is about to display. Observational — the show/suppress decision is made natively via `setMessageFilter` |
+| `WillShowMessage` | `sfmc_iam_will_show` | `InAppMessage` | A message is about to display. Observational — to gate display, register a handler via `setInAppMessageDecisionHandler` |
 | `DidShowMessage` | `sfmc_iam_did_show` | `InAppMessage` | A message was shown on screen |
 | `DidCloseMessage` | `sfmc_iam_did_close` | `InAppMessage & { action: InAppMessageCloseAction }` | A message was dismissed |
-| `UrlActionSelected` | `sfmc_iam_url_action` | `IamUrlAction` (`{ url, type }`) | iOS only — a URL action was selected (requires `setURLHandlingEnabled(true)`) |
 
 The `InAppMessage` payload guarantees `id` on both platforms and surfaces the same set of JSON-safe scalar fields on each (`type`, `source`, `displayCount`, `displayLimit`, `displayLimitOverride`, `displayDuration`, `messageDelaySec`, `priority`, `backgroundColor`, `windowColor`, `displaySuppressionAction`, and `startDateUtc`/`endDateUtc`/`modifiedDateUtc` as epoch-ms). Every field other than `id` is best-effort (present only when the SDK supplied it); the nested object graph (title/body/media/buttons/styling) is not serialized.
 
@@ -79,8 +80,8 @@ The close action's `type` is normalized across platforms to `IamDismissReason`: 
 
 ## Notes
 
-- The native `shouldShowMessage` gate is synchronous and cannot make an async round trip to JS, so the per-message show/suppress decision is expressed as data via `setMessageFilter` and evaluated natively against each message's `id`. The `willShow` event is still emitted on every gate decision so JS can observe it.
-- The lifecycle listener (`InAppMessageManager.EventListener` on Android, `InAppMessageEventDelegate` on iOS) is opt-in: it is registered when you call `setEventDelegateEnabled(true)`, removed on `setEventDelegateEnabled(false)`, and torn down automatically on bridge teardown.
+- The native `shouldShowMessage` gate is synchronous and cannot block on an async JS reply, so `setInAppMessageDecisionHandler` uses a defer-then-reshow model: the SDK is told *not* to show the message immediately, the handler is invoked with the full message, and if it resolves `true` the message is re-displayed (the same path as `showInAppMessage`). The visible effect is that an approved message appears a few milliseconds later than it would natively. The `willShow` event is still emitted on every gate decision so JS can observe it.
+- The lifecycle listener (`InAppMessageManager.EventListener` on Android, `InAppMessageEventDelegate` on iOS) is registered automatically when the SDK is requested via `IamModule.requestSdk()` and stays active for the whole session; it is torn down automatically on bridge teardown. Emission is gated on JS having an active emitter listener, so no events are delivered until you subscribe.
 
 ## Versions
 
