@@ -74,7 +74,7 @@ Lifecycle events are delivered through `IamModule.getEmitter()`. The native life
 | `DidShowMessage` | `sfmc_iam_did_show` | `InAppMessage` | A message was shown on screen |
 | `DidCloseMessage` | `sfmc_iam_did_close` | `InAppMessage & { action: InAppMessageCloseAction }` | A message was dismissed |
 
-The `InAppMessage` payload guarantees `id` on both platforms and surfaces the same set of JSON-safe scalar fields on each (`type`, `source`, `displayCount`, `displayLimit`, `displayLimitOverride`, `displayDuration`, `messageDelaySec`, `priority`, `backgroundColor`, `windowColor`, `displaySuppressionAction`, and `startDateUtc`/`endDateUtc`/`modifiedDateUtc` as epoch-ms). Every field other than `id` is best-effort (present only when the SDK supplied it); the nested object graph (title/body/media/buttons/styling) is not serialized.
+The `InAppMessage` payload guarantees `id` on both platforms and surfaces the same set of fields on each: the scalar fields (`type`, `source`, `displayCount`, `displayLimit`, `displayLimitOverride`, `displayDuration`, `messageDelaySec`, `priority`, `backgroundColor`, `windowColor`, `displaySuppressionAction`, and `startDateUtc`/`endDateUtc`/`modifiedDateUtc` as epoch-ms), plus the content fields `title`, `body`, `media` (`{ url, altText, aspectRatio }`), and `buttons` (`[{ id, index, text, action, backgroundColor }]`). Every field other than `id` is best-effort — present only when the SDK supplied it.
 
 The close action's `type` is normalized across platforms to `IamDismissReason`: `'AUTO' | 'BUTTON' | 'CLOSED' | 'UNKNOWN'`. (`UNKNOWN` originates from Android; iOS reports only the first three.)
 

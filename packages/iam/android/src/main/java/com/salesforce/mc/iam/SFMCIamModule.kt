@@ -214,10 +214,10 @@ class SFMCIamModule(reactContext: ReactApplicationContext) :
     // ── Serialization ─────────────────────────────────────────────────────────────
 
     private fun messageToWritableMap(message: InAppMessage): WritableMap {
-        // Surface the JSON-safe scalar fields, kept in sync with the iOS
-        // serializer so both platforms emit the same shape. `type`/`source` are
-        // normalized to their enum names (matching iOS). The nested object graph
-        // (title/body/media/buttons/styling) is intentionally skipped.
+        // Surface the JSON-safe fields, kept in sync with the iOS serializer so
+        // both platforms emit the same shape. `type`/`source` are normalized to
+        // their enum names (matching iOS); the nested content fields
+        // (title/body/media/buttons) use the same keys and shapes as iOS.
         val map = Arguments.createMap()
         map.putString("id", message.id)
         map.putString("type", message.type.name)
@@ -231,6 +231,10 @@ class SFMCIamModule(reactContext: ReactApplicationContext) :
         map.putDouble("displayDuration", message.displayDuration.toDouble())
         map.putInt("messageDelaySec", message.messageDelaySec)
         map.putInt("priority", message.priority)
+        message.title?.text?.let { map.putString("title", it) }
+        message.body?.text?.let { map.putString("body", it) }
+        mediaToWritableMap(message)?.let { map.putMap("media", it) }
+        buttonsToWritableArray(message)?.let { map.putArray("buttons", it) }
         message.windowColor?.let { map.putString("windowColor", it) }
         message.backgroundColor?.let { map.putString("backgroundColor", it) }
         message.displaySuppressionAction?.let {
@@ -241,6 +245,37 @@ class SFMCIamModule(reactContext: ReactApplicationContext) :
         message.endDateUtc?.let { map.putDouble("endDateUtc", it.time.toDouble()) }
         message.modifiedDateUtc?.let { map.putDouble("modifiedDateUtc", it.time.toDouble()) }
         return map
+    }
+
+    // Serializes a message's media into `{ url?, altText?, aspectRatio? }`,
+    // matching the iOS shape. Returns null when there is no media so the key is
+    // omitted entirely.
+    private fun mediaToWritableMap(message: InAppMessage): WritableMap? {
+        val media = message.media ?: return null
+        val map = Arguments.createMap()
+        media.url?.let { map.putString("url", it) }
+        media.altText?.let { map.putString("altText", it) }
+        media.aspectRatio?.let { map.putString("aspectRatio", it) }
+        return map
+    }
+
+    // Serializes a message's buttons into
+    // `[{ id?, index, text?, action?, backgroundColor? }]`, matching the iOS
+    // shape. Returns null when there are no buttons so the key is omitted.
+    private fun buttonsToWritableArray(message: InAppMessage): com.facebook.react.bridge.WritableArray? {
+        val buttons = message.buttons
+        if (buttons.isNullOrEmpty()) return null
+        val array = Arguments.createArray()
+        buttons.forEach { button ->
+            val map = Arguments.createMap()
+            button.id?.let { map.putString("id", it) }
+            map.putInt("index", button.index)
+            button.text?.let { map.putString("text", it) }
+            button.action?.let { map.putString("action", it) }
+            button.backgroundColor?.let { map.putString("backgroundColor", it) }
+            array.pushMap(map)
+        }
+        return array
     }
 
     private fun closeActionToWritableMap(action: InAppMessageCloseAction): WritableMap {

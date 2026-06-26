@@ -36,6 +36,8 @@ export type {
   IamDismissReason,
   IamEventName,
   InAppMessage,
+  InAppMessageButton,
   InAppMessageCloseAction,
   InAppMessageDecisionHandler,
+  InAppMessageMedia,
 } from "./types";

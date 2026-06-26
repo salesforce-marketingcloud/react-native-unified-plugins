@@ -44,18 +44,61 @@ export type IamMessageType =
   | "unknown";
 
 /**
+ * An image or video attached to an {@link InAppMessage}.
+ *
+ * Field names match the cross-platform shape used by the other SFMC unified
+ * plugins; every field is best-effort and present only when the SDK supplied
+ * it.
+ */
+export interface InAppMessageMedia {
+  /** The media's source URL. */
+  url?: string;
+  /** Alternate text describing the media. */
+  altText?: string;
+  /** The media's aspect ratio (e.g. `"16:9"`). */
+  aspectRatio?: string;
+}
+
+/**
+ * A tappable button rendered within an {@link InAppMessage}.
+ *
+ * Field names match the cross-platform shape used by the other SFMC unified
+ * plugins; every field is best-effort and present only when the SDK supplied
+ * it.
+ */
+export interface InAppMessageButton {
+  /** The button's identifier. */
+  id?: string;
+  /** The button's position within the message, starting at 0. */
+  index?: number;
+  /** The button's display label. */
+  text?: string;
+  /** The action invoked when the button is tapped (e.g. a URL). */
+  action?: string;
+  /** The button's background color, as a hex string. */
+  backgroundColor?: string;
+}
+
+/**
  * A serialized in-app message delivered with lifecycle events.
  *
  * Only `id` is guaranteed; every other field is best-effort and present only
- * when the native SDK supplied it. The JSON-safe scalar fields below are
- * serialized on both Android and iOS with matching shapes; the nested object
- * graph (title/body/media/buttons/styling) is intentionally not serialized.
+ * when the native SDK supplied it. All fields are serialized on both Android
+ * and iOS with matching shapes.
  */
 export interface InAppMessage {
   /** The unique identifier of the in-app message. Always present. */
   id: string;
   /** Message layout/template type, by its shared enum name. */
   type?: IamMessageType;
+  /** The message's title text. */
+  title?: string;
+  /** The message's body text. */
+  body?: string;
+  /** The message's media (image/video), when present. */
+  media?: InAppMessageMedia;
+  /** The message's buttons, in display order. */
+  buttons?: InAppMessageButton[];
   /**
    * Originating SDK module. Note the value set differs by platform: Android
    * reports the `Event.Producer` enum name (e.g. `MCE_MODULE`), iOS reports a

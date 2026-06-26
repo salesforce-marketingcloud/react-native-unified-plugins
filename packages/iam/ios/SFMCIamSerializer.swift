@@ -45,9 +45,10 @@ public final class SFMCIamSerializer: NSObject {
     /// dictionary the Objective-C++ module can forward as-is.
     ///
     /// `id` is always present; `type` is normalized to its string name (shared
-    /// with Android, e.g. `"modal"`). The nested object graph
-    /// (title/body/media/buttons/styling) is intentionally omitted — JS treats
-    /// anything beyond these scalars as out of scope.
+    /// with Android, e.g. `"modal"`). The nested content fields
+    /// (title/body/media/buttons) use the same keys and shapes as Android so the
+    /// JS contract is identical on both platforms; each is included only when
+    /// the SDK supplied it.
     @objc(serializeMessage:)
     public static func serialize(_ message: InAppMessageDetails) -> [String: Any] {
         var map: [String: Any] = [:]
@@ -63,6 +64,18 @@ public final class SFMCIamSerializer: NSObject {
 
         if let source = message.source {
             map["source"] = source
+        }
+        if let title = message.title?.text {
+            map["title"] = title
+        }
+        if let body = message.body?.text {
+            map["body"] = body
+        }
+        if let media = serializeMedia(message.media) {
+            map["media"] = media
+        }
+        if let buttons = message.buttons, !buttons.isEmpty {
+            map["buttons"] = buttons.map(serializeButton)
         }
         if let backgroundColor = message.backgroundColor {
             map["backgroundColor"] = backgroundColor
@@ -112,6 +125,45 @@ public final class SFMCIamSerializer: NSObject {
     }
 
     // MARK: - Helpers
+
+    /// Serializes a message's media into `{ url?, altText?, aspectRatio? }`,
+    /// matching the Android shape. Returns `nil` when there is no media or no
+    /// populated field, so the key is omitted entirely.
+    private static func serializeMedia(_ media: InAppMessageMedia?) -> [String: Any]? {
+        guard let media = media else { return nil }
+        var map: [String: Any] = [:]
+        if let url = media.url {
+            map["url"] = url
+        }
+        if let altText = media.altText {
+            map["altText"] = altText
+        }
+        if let aspectRatio = media.aspectRatio {
+            map["aspectRatio"] = aspectRatio
+        }
+        return map.isEmpty ? nil : map
+    }
+
+    /// Serializes a single button into
+    /// `{ id?, index?, text?, action?, backgroundColor? }`, matching the Android
+    /// shape.
+    private static func serializeButton(_ button: InAppMessageButton) -> [String: Any] {
+        var map: [String: Any] = [:]
+        if let id = button.id {
+            map["id"] = id
+        }
+        map["index"] = button.index
+        if let text = button.text {
+            map["text"] = text
+        }
+        if let action = button.action {
+            map["action"] = action
+        }
+        if let backgroundColor = button.backgroundColor {
+            map["backgroundColor"] = backgroundColor
+        }
+        return map
+    }
 
     /// Maps the `Int`-backed `InAppMessageType` to its string name, matching the
     /// Android `InAppMessage.Type` enum names so the JS contract is identical on
