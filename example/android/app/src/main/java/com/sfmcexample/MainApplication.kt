@@ -6,9 +6,10 @@ import android.app.NotificationManager as AndroidNotificationManager
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
-import android.net.Uri
 import android.os.Build
 import android.util.Log
+import androidx.core.net.toUri
+import java.util.Random
 import com.facebook.react.PackageList
 import com.facebook.react.ReactApplication
 import com.facebook.react.ReactHost
@@ -119,16 +120,24 @@ class MainApplication : Application(), ReactApplication {
         )
     }
 
-    // Tap intent for the notification body. For OpenDirect / CloudPage messages we dispatch
-    // through SfmcUrlHandler so the URL is opened (matches the SDK's default routing for
-    // those message types). For everything else we just open MainActivity. Either way the
-    // PendingIntent is wrapped via NotificationManager.redirectIntentForAnalytics so the
-    // SDK records the open event.
+    // Tap intent for the notification BODY, routed by message type:
+    //   • OPEN_DIRECT / CLOUD_PAGE — dispatch the URL through SfmcUrlHandler, which opens it
+    //     externally (ACTION_VIEW → browser / deep-link target).
+    //   • OTHER (or a URL-less OpenDirect/CloudPage) — open MainActivity, carrying any URL as
+    //     the EXTRA_PUSH_URL extra so the JS layer can route/deep-link in-app.
+    //
+    // IMPORTANT: do NOT wrap the returned PendingIntent in redirectIntentForAnalytics here.
+    // When a NotificationLaunchIntentProvider is supplied, NotificationCustomizer already wraps
+    // our returned PendingIntent in redirectIntentForAnalytics before setting it as the content
+    // intent. Wrapping it ourselves too produces a trampoline-pointing-at-a-trampoline: the tap
+    // fires NotificationOpenActivity, whose launchIntent.send() then fires a SECOND
+    // NotificationOpenActivity (delivered to the lingering singleInstance task) instead of the
+    // real target — so nothing opens.
     private fun buildLaunchIntent(
         context: Context,
         message: NotificationMessage,
     ): PendingIntent {
-        val base = when (message.type) {
+        return when (message.type) {
             MessageType.OPEN_DIRECT -> message.url
                 ?.let { SfmcUrlHandler.handleUrl(context, it, UrlHandler.URL) }
                 ?: defaultActivityIntent(context, message)
@@ -139,7 +148,6 @@ class MainApplication : Application(), ReactApplication {
 
             else -> defaultActivityIntent(context, message)
         }
-        return NotificationManager.redirectIntentForAnalytics(context, base, message, true)
     }
 
     private fun defaultActivityIntent(
@@ -147,11 +155,17 @@ class MainApplication : Application(), ReactApplication {
         message: NotificationMessage,
     ): PendingIntent {
         val launch = Intent(context, MainActivity::class.java).apply {
-            flags = Intent.FLAG_ACTIVITY_SINGLE_TOP or Intent.FLAG_ACTIVITY_CLEAR_TOP
+            // FLAG_ACTIVITY_NEW_TASK is REQUIRED here. The SDK's OpenedNotificationReceiver
+            // fires this PendingIntent via PendingIntent.send() from a BroadcastReceiver — a
+            // non-Activity context — and Android refuses to start an Activity from such a
+            // context without NEW_TASK (the launch is silently dropped).
+            flags = Intent.FLAG_ACTIVITY_NEW_TASK or
+                Intent.FLAG_ACTIVITY_SINGLE_TOP or
+                Intent.FLAG_ACTIVITY_CLEAR_TOP
             message.url?.let { putExtra(EXTRA_PUSH_URL, it) }
         }
-        // Android 12+ requires explicit mutability. The SDK rewrites the wrapping intent
-        // to insert analytics data, so the wrapped intent must be MUTABLE.
+        // Android 12+ requires explicit mutability. The SDK's analytics wrapper rewrites the
+        // wrapping intent, so the wrapped intent must be MUTABLE.
         val mutability = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
             PendingIntent.FLAG_MUTABLE
         } else {
@@ -190,32 +204,60 @@ class MainApplication : Application(), ReactApplication {
     // to that target; returning null lets the SDK silently drop the action.
     // urlSource is one of UrlHandler.ACTION / DEEPLINK / CLOUD_PAGE / URL / APP_OPEN.
     object SfmcUrlHandler : UrlHandler {
+
+        // URLs that open externally (URL / CLOUD_PAGE / ACTION) come straight from the push
+        // payload, so restrict them to web schemes. Without this an attacker-crafted payload
+        // carrying javascript:, file:, content: or intent: could be dispatched via ACTION_VIEW.
+        private val allowedExternalSchemes = setOf("http", "https")
+
         override fun handleUrl(context: Context, url: String, urlSource: String): PendingIntent? {
             Log.i("SFMCExample", "SfmcUrlHandler: handleUrl: url: $url, urlSource: $urlSource")
-            val uri = runCatching { Uri.parse(url) }.getOrNull() ?: return null
-            val intent = when (urlSource) {
-                UrlHandler.DEEPLINK -> Intent(Intent.ACTION_VIEW, uri).apply {
-                    setPackage(context.packageName)
+            val intent = Intent(Intent.ACTION_VIEW, url.toUri())
+            return when (urlSource) {
+                UrlHandler.DEEPLINK ->
+                    PendingIntent.getActivity(
+                        context,
+                        Random().nextInt(),
+                        if (intent.resolveActivity(context.packageManager) != null) intent
+                        else context.packageManager.getLaunchIntentForPackage(context.packageName),
+                        provideIntentFlags(),
+                    )
+
+                in listOf(UrlHandler.URL, UrlHandler.CLOUD_PAGE, UrlHandler.ACTION) -> {
+                    if (intent.data?.scheme?.lowercase() !in allowedExternalSchemes) {
+                        Log.w("SFMCExample", "Blocked URL with disallowed scheme: ${intent.data?.scheme}")
+                        return null
+                    }
+                    PendingIntent.getActivity(
+                        context,
+                        Random().nextInt(),
+                        intent,
+                        provideIntentFlags(),
+                    )
                 }
-                UrlHandler.URL, UrlHandler.CLOUD_PAGE -> Intent(Intent.ACTION_VIEW, uri)
-                else -> Intent(Intent.ACTION_VIEW, uri)
+
+                UrlHandler.APP_OPEN ->
+                    PendingIntent.getActivity(
+                        context,
+                        Random().nextInt(),
+                        context.packageManager.getLaunchIntentForPackage(context.packageName),
+                        provideIntentFlags(),
+                    )
+
+                else -> null // No intent
             }
-            intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
-            // ACTION_VIEW with a URL is an implicit intent. Targeting Android 14+ disallows
-            // FLAG_MUTABLE on PendingIntents that wrap implicit intents, so this MUST be
-            // FLAG_IMMUTABLE. redirectIntentForAnalytics wraps this PendingIntent rather
-            // than mutating its inner Intent, so immutable is correct.
+        }
+
+        // ACTION_VIEW with a URL is an implicit intent. Targeting Android 14+ disallows
+        // FLAG_MUTABLE on PendingIntents that wrap implicit intents, so this MUST be
+        // FLAG_IMMUTABLE on S+.
+        private fun provideIntentFlags(): Int {
             val mutability = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
                 PendingIntent.FLAG_IMMUTABLE
             } else {
                 0
             }
-            return PendingIntent.getActivity(
-                context,
-                url.hashCode(),
-                intent,
-                PendingIntent.FLAG_UPDATE_CURRENT or mutability,
-            )
+            return PendingIntent.FLAG_UPDATE_CURRENT or mutability
         }
     }
 
