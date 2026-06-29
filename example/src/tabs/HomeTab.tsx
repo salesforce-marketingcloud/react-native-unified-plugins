@@ -41,9 +41,13 @@ interface Props {
     iam: IamApi;
     loggingEnabled: boolean;
     onLoggingChange: (enabled: boolean) => void;
+    // Lifted to App so it survives tab switches (which unmount this tab) and is
+    // persisted across relaunches. See App.tsx.
+    iamDecisionMode: boolean;
+    onIamDecisionModeChange: (enabled: boolean) => void;
 }
 
-export default function HomeTab({ sfmc, push, mc, mam, iam, loggingEnabled, onLoggingChange }: Props) {
+export default function HomeTab({ sfmc, push, mc, mam, iam, loggingEnabled, onLoggingChange, iamDecisionMode, onIamDecisionModeChange }: Props) {
     const [pushToken, setPushToken] = useState<string | null>(null);
     const [mcDeviceId, setMcDeviceId] = useState<string | null>(null);
     const [mamDeviceId, setMamDeviceId] = useState<string | null>(null);
@@ -62,7 +66,6 @@ export default function HomeTab({ sfmc, push, mc, mam, iam, loggingEnabled, onLo
     const [iamMessageId, setIamMessageId] = useState('');
     const [iamFontName, setIamFontName] = useState('');
     const [iamLog, setIamLog] = useState('');
-    const [iamDecisionMode, setIamDecisionMode] = useState(true);
 
     const loadState = useCallback(async () => {
         const [token, mceId, mamId, pushOn, mcOn, mamOn] = await Promise.allSettled([
@@ -114,17 +117,21 @@ export default function HomeTab({ sfmc, push, mc, mam, iam, loggingEnabled, onLo
         return () => subs.forEach((sub) => sub.remove());
     }, [logEvent]);
 
-    // Decision mode defaults to on, so register the handler on mount. Clear it
-    // when this screen goes away so the SDK resumes default behavior.
+    // Register the decision handler whenever decision mode is on (the value is
+    // lifted to App and persisted, so it reflects the user's last choice on
+    // mount), and clear it when off or when this screen goes away so the SDK
+    // resumes default behavior.
     useEffect(() => {
-        IamModule.setInAppMessageDecisionHandler(shouldShowInAppMessage);
+        IamModule.setInAppMessageDecisionHandler(
+            iamDecisionMode ? shouldShowInAppMessage : null,
+        );
         return () => {
             IamModule.setInAppMessageDecisionHandler(null);
         };
         // shouldShowInAppMessage is a stable module-scope rule (reads only the
-        // const allow-list), so this runs once on mount/unmount.
+        // const allow-list), so this re-runs only when iamDecisionMode changes.
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, []);
+    }, [iamDecisionMode]);
 
     function copyToClipboard(label: string, value: string | null | undefined) {
         if (!value) return;
@@ -242,11 +249,10 @@ export default function HomeTab({ sfmc, push, mc, mam, iam, loggingEnabled, onLo
         return show;
     }
 
-    // Enabling registers the decision handler; disabling clears it so the SDK
-    // resumes showing every message by default.
+    // Update the lifted/persisted toggle; the effect above registers or clears
+    // the native decision handler in response to the new value.
     function onIamDecisionModeToggle(v: boolean) {
-        setIamDecisionMode(v);
-        IamModule.setInAppMessageDecisionHandler(v ? shouldShowInAppMessage : null);
+        onIamDecisionModeChange(v);
     }
 
     function applyIamFont() {
