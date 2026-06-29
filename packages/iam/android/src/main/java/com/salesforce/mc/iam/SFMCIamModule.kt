@@ -34,7 +34,7 @@ import com.facebook.react.bridge.ReactMethod
 import com.facebook.react.bridge.WritableMap
 import com.facebook.react.module.annotations.ReactModule
 import com.facebook.react.modules.core.DeviceEventManagerModule
-import com.salesforce.marketingcloud.inappmessagingfeature.InAppMessage
+import com.salesforce.marketingcloud.inappmessaging.models.InAppMessage
 import com.salesforce.marketingcloud.inappmessagingfeature.InAppMessageCloseAction
 import com.salesforce.marketingcloud.inappmessagingfeature.InAppMessageManager
 import com.salesforce.marketingcloud.inappmessagingfeature.InAppMessagingFeature
