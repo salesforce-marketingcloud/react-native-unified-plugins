@@ -297,7 +297,7 @@ export default function HomeTab({ sfmc, push, mc, mam, iam, loggingEnabled, onLo
             <Card>
                 <View style={s.switchRow}>
                     <Text style={s.switchLabel}>Push Enabled</Text>
-                    <Switch value={pushEnabled} onValueChange={onPushToggle} />
+                    <Switch value={pushEnabled} onValueChange={onPushToggle} accessibilityLabel="Push Enabled" />
                 </View>
             </Card>
 
@@ -306,11 +306,11 @@ export default function HomeTab({ sfmc, push, mc, mam, iam, loggingEnabled, onLo
             <Card>
                 <View style={s.switchRow}>
                     <Text style={s.switchLabel}>MCE Analytics</Text>
-                    <Switch value={mcAnalytics} onValueChange={onMcAnalyticsToggle} />
+                    <Switch value={mcAnalytics} onValueChange={onMcAnalyticsToggle} accessibilityLabel="MCE Analytics" />
                 </View>
                 <View style={[s.switchRow, s.noBorder]}>
                     <Text style={s.switchLabel}>MAM Analytics</Text>
-                    <Switch value={mamAnalytics} onValueChange={onMamAnalyticsToggle} />
+                    <Switch value={mamAnalytics} onValueChange={onMamAnalyticsToggle} accessibilityLabel="MAM Analytics" />
                 </View>
             </Card>
 
@@ -319,7 +319,7 @@ export default function HomeTab({ sfmc, push, mc, mam, iam, loggingEnabled, onLo
             <Card>
                 <View style={[s.switchRow, s.noBorder]}>
                     <Text style={s.switchLabel}>Debug Logging</Text>
-                    <Switch value={loggingEnabled} onValueChange={onLoggingToggle} />
+                    <Switch value={loggingEnabled} onValueChange={onLoggingToggle} accessibilityLabel="Debug Logging" />
                 </View>
             </Card>
 
@@ -354,7 +354,7 @@ export default function HomeTab({ sfmc, push, mc, mam, iam, loggingEnabled, onLo
                             Run a custom code rule per message instead of showing automatically.
                         </Text>
                     </View>
-                    <Switch value={iamDecisionMode} onValueChange={onIamDecisionModeToggle} />
+                    <Switch value={iamDecisionMode} onValueChange={onIamDecisionModeToggle} accessibilityLabel="App decides display" />
                 </View>
             </Card>
 
@@ -423,7 +423,7 @@ export default function HomeTab({ sfmc, push, mc, mam, iam, loggingEnabled, onLo
                     />
                     <View style={s.switchRow}>
                         <Text style={s.switchLabel}>Send Immediate</Text>
-                        <Switch value={sendImmediate} onValueChange={setSendImmediate} />
+                        <Switch value={sendImmediate} onValueChange={setSendImmediate} accessibilityLabel="Send Immediate" />
                     </View>
                     <PrimaryButton title="Send Event" onPress={sendEvent} />
                     <PrimaryButton title="Cancel" onPress={() => setEventModalVisible(false)} destructive />
