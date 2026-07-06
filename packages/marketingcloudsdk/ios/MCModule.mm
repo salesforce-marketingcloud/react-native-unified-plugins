@@ -201,15 +201,6 @@ RCT_EXPORT_METHOD(getTags:(RCTPromiseResolveBlock)resolve
     }];
 }
 
-// ── Attributes ──────────────────────────────────────────────────────────────────
-
-RCT_EXPORT_METHOD(getAttributes:(RCTPromiseResolveBlock)resolve
-                  rejecter:(RCTPromiseRejectBlock)reject) {
-    [SFMarketingCloudSdk requestSdk:^(id<MarketingCloudSdkInterface> _Nullable mc) {
-        resolve([mc attributes] ?: @{});
-    }];
-}
-
 // ── Analytics — PI ──────────────────────────────────────────────────────────────
 
 RCT_EXPORT_METHOD(enablePiAnalytics) {
@@ -252,20 +243,13 @@ RCT_EXPORT_METHOD(isAnalyticsEnabled:(RCTPromiseResolveBlock)resolve
     }];
 }
 
-// ── Device / contact ────────────────────────────────────────────────────────────
-// Discovered instance methods on MarketingCloudSdkInterface: deviceIdentifier, contactKey.
+// ── Device ──────────────────────────────────────────────────────────────────────
+// Discovered instance methods on MarketingCloudSdkInterface: deviceIdentifier.
 
 RCT_EXPORT_METHOD(getDeviceId:(RCTPromiseResolveBlock)resolve
                   rejecter:(RCTPromiseRejectBlock)reject) {
     [SFMarketingCloudSdk requestSdk:^(id<MarketingCloudSdkInterface> _Nullable mc) {
         resolve([mc deviceIdentifier]);
-    }];
-}
-
-RCT_EXPORT_METHOD(getContactKey:(RCTPromiseResolveBlock)resolve
-                  rejecter:(RCTPromiseRejectBlock)reject) {
-    [SFMarketingCloudSdk requestSdk:^(id<MarketingCloudSdkInterface> _Nullable mc) {
-        resolve([mc contactKey]);
     }];
 }
 

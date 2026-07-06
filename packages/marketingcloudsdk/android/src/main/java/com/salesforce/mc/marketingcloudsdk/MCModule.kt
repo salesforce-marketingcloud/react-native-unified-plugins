@@ -229,18 +229,6 @@ class MCModule(reactContext: ReactApplicationContext) :
         }
     }
 
-    @ReactMethod
-    override fun getAttributes(promise: Promise) {
-        MarketingCloudSdk.requestSdk { sdk ->
-            val attributes = sdk.getRegistrationManager().getAttributes().toMap()
-            BridgeQueue.runOnNativeModulesQueue(reactApplicationContext, promise) {
-                val map = Arguments.createMap()
-                attributes.forEach { (k, v) -> map.putString(k, v) }
-                promise.resolve(map)
-            }
-        }
-    }
-
     // Analytics methods
     @ReactMethod
     override fun enablePiAnalytics() {
@@ -288,13 +276,6 @@ class MCModule(reactContext: ReactApplicationContext) :
     override fun getDeviceId(promise: Promise) {
         MarketingCloudSdk.requestSdk { sdk ->
             promise.resolve(sdk.getRegistrationManager().getDeviceId())
-        }
-    }
-
-    @ReactMethod
-    override fun getContactKey(promise: Promise) {
-        MarketingCloudSdk.requestSdk { sdk ->
-            promise.resolve(sdk.getRegistrationManager().getContactKey())
         }
     }
 

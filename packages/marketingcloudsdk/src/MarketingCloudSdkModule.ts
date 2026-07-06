@@ -68,8 +68,6 @@ export const MarketingCloudSdkModule = {
       removeTag: (tag: string) => NativeModule.removeTag(tag),
       removeTags: (tags: string[]) => NativeModule.removeTags(tags),
       getTags: () => NativeModule.getTags() as Promise<string[]>,
-      getAttributes: () =>
-        NativeModule.getAttributes() as Promise<{ [key: string]: string }>,
       enablePiAnalytics: () => NativeModule.enablePiAnalytics(),
       disablePiAnalytics: () => NativeModule.disablePiAnalytics(),
       isPiAnalyticsEnabled: () => NativeModule.isPiAnalyticsEnabled(),
@@ -77,7 +75,6 @@ export const MarketingCloudSdkModule = {
       disableAnalytics: () => NativeModule.disableAnalytics(),
       isAnalyticsEnabled: () => NativeModule.isAnalyticsEnabled(),
       getDeviceId: () => NativeModule.getDeviceId(),
-      getContactKey: () => NativeModule.getContactKey(),
       setSignedString: (signedString: string | null) =>
         NativeModule.setSignedString(signedString),
       getSignedString: () => NativeModule.getSignedString(),

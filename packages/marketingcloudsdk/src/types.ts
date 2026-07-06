@@ -184,16 +184,6 @@ export interface MarketingCloudSdkApi {
   getTags(): Promise<string[]>;
 
   /**
-   * Returns the maps of attributes set in the registration.
-   * @returns {Promise<Object.<string, string>>} A promise to the key/value map of attributes set
-   *     in the registration.
-   * @deprecated Use {@link SFMCSdkApi.getAttributes} from `@sfmc/react-native-sfmc-core` instead.
-   * @see  {@link https://salesforce-marketingcloud.github.io/MarketingCloudSDK-Android/javadocs/SFMCSdk/11.0/sdk/com.salesforce.marketingcloud.registration/-registration-manager/get-attributes.html |Android Docs}
-   * @see  {@link https://salesforce-marketingcloud.github.io/MarketingCloudSDK-iOS/appledocs/MarketingCloudSdk/11.0/Classes/MarketingCloudSdk.html#/c:@CM@MarketingCloudSDK@objc(cs)SFMarketingCloudSdk(im)attributes |iOS Docs}
-   */
-  getAttributes(): Promise<{ [key: string]: string }>;
-
-  /**
    * Enables Predictive Intelligence analytics in the Marketing Cloud SDK.
    * @see  {@link https://salesforce-marketingcloud.github.io/MarketingCloudSDK-Android/javadocs/SFMCSdk/11.0/sdk/com.salesforce.marketingcloud.analytics/-analytics-manager/enable-pi-analytics.html |Android Docs}
    * @see  {@link https://salesforce-marketingcloud.github.io/MarketingCloudSDK-iOS/appledocs/MarketingCloudSdk/11.0/Classes/MarketingCloudSdk.html#/c:@CM@MarketingCloudSDK@objc(cs)SFMarketingCloudSdk(im)setPiAnalyticsEnabled: |iOS Docs}
@@ -246,15 +236,6 @@ export interface MarketingCloudSdkApi {
    * @see  {@link https://salesforce-marketingcloud.github.io/MarketingCloudSDK-iOS/appledocs/MarketingCloudSdk/11.0/Classes/MarketingCloudSdk.html#/c:@CM@MarketingCloudSDK@objc(cs)SFMarketingCloudSdk(im)deviceIdentifier |iOS Docs}
    */
   getDeviceId(): Promise<string | null>;
-
-  /**
-   * Returns the contact key currently set on the device.
-   * @returns {Promise<string | null>} A promise to the current contact key.
-   * @deprecated Use {@link SFMCSdkApi.getProfileId} from `@sfmc/react-native-sfmc-core` instead.
-   * @see  {@link https://salesforce-marketingcloud.github.io/MarketingCloudSDK-Android/javadocs/SFMCSdk/11.0/sdk/com.salesforce.marketingcloud.registration/-registration-manager/get-contact-key.html |Android Docs}
-   * @see  {@link https://salesforce-marketingcloud.github.io/MarketingCloudSDK-iOS/appledocs/MarketingCloudSdk/11.0/Classes/MarketingCloudSdk.html#/c:@CM@MarketingCloudSDK@objc(cs)SFMarketingCloudSdk(im)contactKey |iOS Docs}
-   */
-  getContactKey(): Promise<string | null>;
 
   /**
    * Sets the signed string security token used to verify registration. Pass `null`
