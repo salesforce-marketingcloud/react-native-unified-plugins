@@ -261,6 +261,10 @@ export interface MarketingCloudSdkApi {
    * to clear the previously stored value.
    * @param  {string | null} signedString - The signed string token, or `null` to clear it.
    * @returns {Promise<boolean>} A promise to whether the signed string was successfully set.
+   * @example
+   * const ok = await mc.setSignedString('<signed-token>');
+   * // Clear:
+   * await mc.setSignedString(null);
    * @see  {@link https://salesforce-marketingcloud.github.io/MarketingCloudSDK-Android/javadocs/SFMCSdk/11.0/sdk/com.salesforce.marketingcloud.registration/-registration-manager/-editor/set-signed-string.html |Android Docs}
    * @see  {@link https://salesforce-marketingcloud.github.io/MarketingCloudSDK-iOS/appledocs/MarketingCloudSdk/11.0/Classes/MarketingCloudSdk.html#/c:@CM@MarketingCloudSDK@objc(cs)SFMarketingCloudSdk(im)setSignedString: |iOS Docs}
    */
@@ -269,6 +273,8 @@ export interface MarketingCloudSdkApi {
   /**
    * Returns the value of the last stored signed string security token.
    * @returns {Promise<string | null>} A promise to the current signed string, or `null` if none is set.
+   * @example
+   * const token = await mc.getSignedString();
    * @see  {@link https://salesforce-marketingcloud.github.io/MarketingCloudSDK-Android/javadocs/SFMCSdk/11.0/sdk/com.salesforce.marketingcloud.registration/-registration-manager/get-signed-string.html |Android Docs}
    * @see  {@link https://salesforce-marketingcloud.github.io/MarketingCloudSDK-iOS/appledocs/MarketingCloudSdk/11.0/Classes/MarketingCloudSdk.html#/c:@CM@MarketingCloudSDK@objc(cs)SFMarketingCloudSdk(im)signedString |iOS Docs}
    */

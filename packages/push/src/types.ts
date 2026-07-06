@@ -87,10 +87,10 @@ export interface Region {
   latitude: number;
   longitude: number;
   radius: number;
-  proximity?: "enter" | "exit";
+  proximity?: 'enter' | 'exit';
 }
 
 export interface Action {
-  type: "OPEN_APP" | "DEEPLINK" | "URL" | "DISMISS" | "CLOUD_PAGE";
+  type: 'OPEN_APP' | 'DEEPLINK' | 'URL' | 'DISMISS' | 'CLOUD_PAGE';
   data?: string;
 }

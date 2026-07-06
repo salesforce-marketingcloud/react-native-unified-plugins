@@ -237,8 +237,12 @@ class SFMCIamModule(reactContext: ReactApplicationContext) :
         buttonsToWritableArray(message)?.let { map.putArray("buttons", it) }
         message.windowColor?.let { map.putString("windowColor", it) }
         message.backgroundColor?.let { map.putString("backgroundColor", it) }
-        message.displaySuppressionAction?.let {
-            map.putArray("displaySuppressionAction", Arguments.fromList(it))
+        message.displaySuppressionAction?.let { list ->
+            // Coerce to strings at the bridge boundary. iOS types this as
+            // [String]?; Arguments.fromList throws on any element that isn't a
+            // bridge-safe primitive, so filterIsInstance guarantees a String
+            // list regardless of the Android SDK's declared element type.
+            map.putArray("displaySuppressionAction", Arguments.fromList(list.filterIsInstance<String>()))
         }
         // Dates → epoch milliseconds (JSON-safe, locale-independent).
         message.startDateUtc?.let { map.putDouble("startDateUtc", it.time.toDouble()) }

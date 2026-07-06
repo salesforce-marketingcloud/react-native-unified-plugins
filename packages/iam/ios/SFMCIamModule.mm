@@ -32,6 +32,7 @@
 #import <UserNotifications/UserNotifications.h>
 #import <SFMCSDK/SFMCSDK-Swift.h>
 #import <InAppMessagingFeatureSDK/InAppMessagingFeatureSDK-Swift.h>
+#import <stdatomic.h>
 
 // Generated header for this pod's Swift sources (SFMCIamSerializer). The
 // message/close-action serialization lives in Swift so it can call the typed
@@ -62,7 +63,13 @@ static NSString *const kEventDecisionRequest = @"sfmc_iam_decision_request";
     // stays registered for the whole session, but JS subscriptions come and go
     // (e.g. a screen unmounts). Emitting with no listeners logs a warning, so we
     // gate emissions on this flag, set via start/stopObserving.
-    BOOL _hasListeners;
+    //
+    // Written on the bridge thread (start/stopObserving) and read on the SDK's
+    // background thread (emitEvent: via the delegate callbacks). Use an atomic
+    // flag so the read on the SDK thread observes the write from the bridge
+    // thread without a full lock, and without relying on ARM64's incidental
+    // word-sized-store atomicity.
+    atomic_bool _hasListeners;
 
     // Defer-then-reshow decision mode (mirrors the Flutter plugin). When JS
     // registers a decision handler, shouldShow can no longer answer from the
@@ -86,7 +93,7 @@ RCT_EXPORT_MODULE(SFMCIamModule);
 
 - (instancetype)init {
     if (self = [super init]) {
-        _hasListeners = NO;
+        atomic_init(&_hasListeners, false);
         _decisionEnabled = NO;
         _approvedIds = [NSMutableSet set];
         _decisionLock = [[NSLock alloc] init];
@@ -99,17 +106,17 @@ RCT_EXPORT_MODULE(SFMCIamModule);
 }
 
 - (void)startObserving {
-    _hasListeners = YES;
+    atomic_store(&_hasListeners, true);
 }
 
 - (void)stopObserving {
-    _hasListeners = NO;
+    atomic_store(&_hasListeners, false);
 }
 
 // Emit only when JS has listeners attached, avoiding the
 // "Sending `<event>` with no listeners registered" warning.
 - (void)emitEvent:(NSString *)name body:(id)body {
-    if (!_hasListeners) return;
+    if (!atomic_load(&_hasListeners)) return;
     [self sendEventWithName:name body:body];
 }
 

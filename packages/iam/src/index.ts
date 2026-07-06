@@ -29,15 +29,16 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-export { IamModule } from "./IamModule";
-export { IamEvent } from "./types";
+export { IamModule } from './IamModule';
+export { IamEvent } from './types';
 export type {
   IamApi,
   IamDismissReason,
   IamEventName,
+  IamMessageType,
   InAppMessage,
   InAppMessageButton,
   InAppMessageCloseAction,
   InAppMessageDecisionHandler,
   InAppMessageMedia,
-} from "./types";
+} from './types';

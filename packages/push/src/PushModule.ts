@@ -30,9 +30,9 @@
  * @class PushModule
  */
 
-import { NativeEventEmitter } from "react-native";
-import NativeModule from "./NativeSFMCPushModule";
-import type { PushApi } from "./types";
+import { NativeEventEmitter } from 'react-native';
+import NativeModule from './NativeSFMCPushModule';
+import type { PushApi } from './types';
 
 let _api: PushApi | null = null;
 let _emitter: NativeEventEmitter | null = null;

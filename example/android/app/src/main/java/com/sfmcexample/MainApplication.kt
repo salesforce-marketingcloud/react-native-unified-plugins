@@ -212,7 +212,11 @@ class MainApplication : Application(), ReactApplication {
 
         override fun handleUrl(context: Context, url: String, urlSource: String): PendingIntent? {
             Log.i("SFMCExample", "SfmcUrlHandler: handleUrl: url: $url, urlSource: $urlSource")
-            val intent = Intent(Intent.ACTION_VIEW, url.toUri())
+            // toUri() can throw on malformed input (e.g. embedded null bytes). Since the string
+            // arrives from a push payload we don't control, guard the parse so a hostile URL
+            // silently drops the action instead of crashing the SDK handler thread.
+            val uri = runCatching { url.toUri() }.getOrNull() ?: return null
+            val intent = Intent(Intent.ACTION_VIEW, uri)
             return when (urlSource) {
                 UrlHandler.DEEPLINK ->
                     PendingIntent.getActivity(
