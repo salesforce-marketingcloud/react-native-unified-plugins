@@ -30,19 +30,19 @@
  * @class IamModule
  */
 
-import { NativeEventEmitter } from "react-native";
-import type { EmitterSubscription } from "react-native";
-import NativeModule from "./NativeSFMCIamModule";
+import { NativeEventEmitter } from 'react-native';
+import type { EmitterSubscription } from 'react-native';
+import NativeModule from './NativeSFMCIamModule';
 import type {
   IamApi,
   InAppMessage,
   InAppMessageDecisionHandler,
-} from "./types";
+} from './types';
 
 // Internal event the native module emits (decision mode only) to ask JS whether
 // a message should display. Not part of the public IamEvent set — it is an
 // implementation detail of setInAppMessageDecisionHandler.
-const DECISION_REQUEST_EVENT = "sfmc_iam_decision_request";
+const DECISION_REQUEST_EVENT = 'sfmc_iam_decision_request';
 
 let _api: IamApi | null = null;
 let _emitter: NativeEventEmitter | null = null;
@@ -105,13 +105,31 @@ export const IamModule = {
             // Default to suppressing if the handler was cleared between the
             // native emit and this callback.
             Promise.resolve(current ? current(message) : false)
-              .then((show) =>
-                NativeModule.resolveInAppMessageDecision(message.id, !!show),
-              )
-              .catch(() =>
+              .then((show) => {
+                try {
+                  NativeModule.resolveInAppMessageDecision(message.id, !!show);
+                } catch (err) {
+                  console.warn(
+                    `[SFMCIam] Failed to resolve in-app message decision for ${message.id}:`,
+                    err,
+                  );
+                }
+              })
+              .catch((err) => {
                 // A throwing handler suppresses the message (fail closed).
-                NativeModule.resolveInAppMessageDecision(message.id, false),
-              );
+                console.warn(
+                  `[SFMCIam] Decision handler threw for message ${message.id}; suppressing:`,
+                  err,
+                );
+                try {
+                  NativeModule.resolveInAppMessageDecision(message.id, false);
+                } catch (nativeErr) {
+                  console.warn(
+                    `[SFMCIam] Failed to resolve in-app message decision for ${message.id}:`,
+                    nativeErr,
+                  );
+                }
+              });
           },
         );
       }
