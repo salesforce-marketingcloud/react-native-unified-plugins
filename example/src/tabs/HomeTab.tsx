@@ -67,21 +67,34 @@ export default function HomeTab({ sfmc, push, mc, mam, iam, loggingEnabled, onLo
     const [iamFontName, setIamFontName] = useState('');
     const [iamLog, setIamLog] = useState('');
 
+    // Location state
+    const [locationEnabled, setLocationEnabled] = useState(false);
+    const [watchingLocation, setWatchingLocation] = useState(false);
+    const [lastKnownLocation, setLastKnownLocation] = useState<string | null>(null);
+    const [proximityEnabled, setProximityEnabled] = useState(false);
+
     const loadState = useCallback(async () => {
-        const [token, mceId, mamId, pushOn, mcOn, mamOn] = await Promise.allSettled([
-            push.getPushToken(),
-            mc.getDeviceId(),
-            mam.getDeviceId(),
-            push.isPushEnabled(),
-            mc.isAnalyticsEnabled(),
-            mam.isAnalyticsEnabled(),
-        ]);
+        const [token, mceId, mamId, pushOn, mcOn, mamOn, locOn, watchOn, proxOn] =
+            await Promise.allSettled([
+                push.getPushToken(),
+                mc.getDeviceId(),
+                mam.getDeviceId(),
+                push.isPushEnabled(),
+                mc.isAnalyticsEnabled(),
+                mam.isAnalyticsEnabled(),
+                mc.isLocationEnabled(),
+                mc.isWatchingLocation(),
+                mc.isProximityMessagingEnabled(),
+            ]);
         if (token.status === 'fulfilled') setPushToken(token.value);
         if (mceId.status === 'fulfilled') setMcDeviceId(mceId.value);
         if (mamId.status === 'fulfilled') setMamDeviceId(mamId.value);
         if (pushOn.status === 'fulfilled') setPushEnabled(pushOn.value);
         if (mcOn.status === 'fulfilled') setMcAnalytics(mcOn.value);
         if (mamOn.status === 'fulfilled') setMamAnalytics(mamOn.value);
+        if (locOn.status === 'fulfilled') setLocationEnabled(locOn.value);
+        if (watchOn.status === 'fulfilled') setWatchingLocation(watchOn.value);
+        if (proxOn.status === 'fulfilled') setProximityEnabled(proxOn.value);
     }, [mc, mam, push]);
 
     // Prepend timestamped lines so the most recent event is on top; cap the log.
@@ -261,6 +274,38 @@ export default function HomeTab({ sfmc, push, mc, mam, iam, loggingEnabled, onLo
         iam.setFont(name);
     }
 
+    function onLocationEnabledToggle(v: boolean) {
+        setLocationEnabled(v);
+        mc.setLocationEnabled(v);
+        if (v) mc.setLocationDelegate(); else mc.unsetLocationDelegate();
+    }
+
+    function onWatchingLocationToggle(v: boolean) {
+        setWatchingLocation(v);
+        if (v) mc.startWatchingLocation(); else mc.stopWatchingLocation();
+    }
+
+    function onProximityToggle(v: boolean) {
+        setProximityEnabled(v);
+        if (v) mc.enableProximityMessaging(); else mc.disableProximityMessaging();
+    }
+
+    async function refreshLastKnownLocation() {
+        const loc = await mc.getLastKnownLocation();
+        if (!loc) {
+            setLastKnownLocation('none');
+            return;
+        }
+        const rec = loc as Record<string, unknown>;
+        const lat = rec.latitude;
+        const lon = rec.longitude;
+        if (lat != null && lon != null) {
+            setLastKnownLocation(`${String(lat)}, ${String(lon)}`);
+        } else {
+            setLastKnownLocation(JSON.stringify(loc));
+        }
+    }
+
     function applyIamStatusBarColor() {
         // SFMC blue (0xAARRGGBB). Android-only; no-op on iOS.
         iam.setStatusBarColor(0xff0a84ff);
@@ -321,6 +366,44 @@ export default function HomeTab({ sfmc, push, mc, mam, iam, loggingEnabled, onLo
                     <Text style={s.switchLabel}>Debug Logging</Text>
                     <Switch value={loggingEnabled} onValueChange={onLoggingToggle} accessibilityLabel="Debug Logging" />
                 </View>
+            </Card>
+
+            {/* Location */}
+            <SectionHeader title="Location" />
+            <Card>
+                <View style={s.switchRow}>
+                    <Text style={s.switchLabel}>Location Enabled</Text>
+                    <Switch
+                        value={locationEnabled}
+                        onValueChange={onLocationEnabledToggle}
+                        accessibilityLabel="Location Enabled"
+                    />
+                </View>
+                <View style={s.switchRow}>
+                    <Text style={s.switchLabel}>Watching Location (iOS only)</Text>
+                    <Switch
+                        value={watchingLocation}
+                        onValueChange={onWatchingLocationToggle}
+                        disabled={Platform.OS === 'android'}
+                        accessibilityLabel="Watching Location"
+                    />
+                </View>
+                <View style={[s.switchRow, s.noBorder]}>
+                    <Text style={s.switchLabel}>Proximity Messaging{Platform.OS === 'ios' ? ' (Android only)' : ''}</Text>
+                    <Switch
+                        value={proximityEnabled}
+                        onValueChange={onProximityToggle}
+                        disabled={Platform.OS === 'ios'}
+                        accessibilityLabel="Proximity Messaging"
+                    />
+                </View>
+            </Card>
+            <Card>
+                <Row
+                    label="Last Known Location"
+                    value={lastKnownLocation ?? 'tap to fetch'}
+                    onPress={refreshLastKnownLocation}
+                />
             </Card>
 
             {/* Events */}

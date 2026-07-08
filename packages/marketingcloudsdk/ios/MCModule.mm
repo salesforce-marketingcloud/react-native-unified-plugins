@@ -33,7 +33,11 @@
 #import <MarketingCloudSDK/MarketingCloudSDK-Swift.h>
 #import "InboxUtility.h"
 
-@interface MCModule : RCTEventEmitter <RCTBridgeModule, RCTTurboModule>
+static NSString *const kEventRegistration = @"sfmc_mc_registration";
+static NSString *const kEventLocationMessage = @"sfmc_mc_location_message";
+
+@interface MCModule : RCTEventEmitter <RCTBridgeModule, RCTTurboModule,
+                                       SFMCSdkLocationDelegate>
 @end
 
 @implementation MCModule
@@ -41,7 +45,7 @@
 RCT_EXPORT_MODULE(MCModule);
 
 - (NSArray<NSString *> *)supportedEvents {
-    return @[@"sfmc_mc_registration"];
+    return @[kEventRegistration, kEventLocationMessage];
 }
 
 - (std::shared_ptr<facebook::react::TurboModule>)getTurboModule:
@@ -290,7 +294,7 @@ RCT_EXPORT_METHOD(setRegistrationCallback) {
     __weak __typeof(self) weakSelf = self;
     [SFMarketingCloudSdk requestSdk:^(id<MarketingCloudSdkInterface> _Nullable mc) {
         [mc setRegistrationCallback:^(NSDictionary * _Nonnull registration) {
-            [weakSelf sendEventWithName:@"sfmc_mc_registration" body:registration];
+            [weakSelf sendEventWithName:kEventRegistration body:registration];
         }];
     }];
 }
@@ -301,12 +305,13 @@ RCT_EXPORT_METHOD(unsetRegistrationCallback) {
     }];
 }
 
-// Best-effort cleanup if JS never called unsetRegistrationCallback before bridge
-// teardown. The block uses weakSelf so ARC already releases the module, but the
-// SDK keeps invoking the dead block forever — clear it here.
+// Best-effort cleanup if JS never called unsetRegistrationCallback / unsetLocationDelegate
+// before bridge teardown. The blocks use weakSelf so ARC already releases the module, but
+// the SDK keeps invoking the dead block forever — clear it here.
 - (void)invalidate {
     [SFMarketingCloudSdk requestSdk:^(id<MarketingCloudSdkInterface> _Nullable mc) {
         [mc unsetRegistrationCallback];
+        [mc setLocationDelegate:nil];
     }];
     [super invalidate];
 }
@@ -321,6 +326,94 @@ RCT_EXPORT_METHOD(disableLogging) {
     [SFMarketingCloudSdk requestSdk:^(id<MarketingCloudSdkInterface> _Nullable mc) {
         [mc setDebugLoggingEnabled:NO];
     }];
+}
+
+// ── Location ────────────────────────────────────────────────────────────────────
+// Developer override on SFMarketingCloudSdk. Watch is a distinct API from the
+// enablement flag — keep them separate on the JS surface.
+
+RCT_EXPORT_METHOD(setLocationEnabled:(BOOL)enabled) {
+    [SFMarketingCloudSdk requestSdk:^(id<MarketingCloudSdkInterface> _Nullable mc) {
+        [mc setLocationEnabled:enabled];
+    }];
+}
+
+RCT_EXPORT_METHOD(isLocationEnabled:(RCTPromiseResolveBlock)resolve
+                  rejecter:(RCTPromiseRejectBlock)reject) {
+    [SFMarketingCloudSdk requestSdk:^(id<MarketingCloudSdkInterface> _Nullable mc) {
+        resolve(@([mc isLocationEnabled]));
+    }];
+}
+
+RCT_EXPORT_METHOD(startWatchingLocation) {
+    [SFMarketingCloudSdk requestSdk:^(id<MarketingCloudSdkInterface> _Nullable mc) {
+        [mc startWatchingLocation];
+    }];
+}
+
+RCT_EXPORT_METHOD(stopWatchingLocation) {
+    [SFMarketingCloudSdk requestSdk:^(id<MarketingCloudSdkInterface> _Nullable mc) {
+        [mc stopWatchingLocation];
+    }];
+}
+
+RCT_EXPORT_METHOD(isWatchingLocation:(RCTPromiseResolveBlock)resolve
+                  rejecter:(RCTPromiseRejectBlock)reject) {
+    [SFMarketingCloudSdk requestSdk:^(id<MarketingCloudSdkInterface> _Nullable mc) {
+        resolve(@([mc watchingLocation]));
+    }];
+}
+
+RCT_EXPORT_METHOD(getLastKnownLocation:(RCTPromiseResolveBlock)resolve
+                  rejecter:(RCTPromiseRejectBlock)reject) {
+    [SFMarketingCloudSdk requestSdk:^(id<MarketingCloudSdkInterface> _Nullable mc) {
+        resolve([mc lastKnownLocation]);
+    }];
+}
+
+RCT_EXPORT_METHOD(setLocationDelegate) {
+    __weak __typeof(self) weakSelf = self;
+    [SFMarketingCloudSdk requestSdk:^(id<MarketingCloudSdkInterface> _Nullable mc) {
+        [mc setLocationDelegate:weakSelf];
+    }];
+}
+
+RCT_EXPORT_METHOD(unsetLocationDelegate) {
+    [SFMarketingCloudSdk requestSdk:^(id<MarketingCloudSdkInterface> _Nullable mc) {
+        [mc setLocationDelegate:nil];
+    }];
+}
+
+// SFMCSdkLocationDelegate. Always allow the SDK to display the message — this
+// plugin exposes the callback as an observational event and does not surface a
+// JS-side veto hook (parity with the Android side, which has no equivalent
+// "should show" gate).
+- (BOOL)sfmc_shouldShowLocationMessage:(NSDictionary *)message
+                             forRegion:(NSDictionary *)region {
+    NSMutableDictionary *body = [NSMutableDictionary dictionaryWithCapacity:2];
+    if (message) body[@"message"] = message;
+    if (region) body[@"region"] = region;
+    [self sendEventWithName:kEventLocationMessage body:body];
+    return YES;
+}
+
+// ── Proximity ───────────────────────────────────────────────────────────────────
+// Stubs only. iOS has no separate proximity enable/disable API — proximity
+// (beacon) messaging is governed by the shared location enablement flag and
+// the app's Bluetooth permission. Exposed here for JS-surface parity with
+// Android's RegionMessageManager.
+
+RCT_EXPORT_METHOD(enableProximityMessaging) {
+    // no-op on iOS
+}
+
+RCT_EXPORT_METHOD(disableProximityMessaging) {
+    // no-op on iOS
+}
+
+RCT_EXPORT_METHOD(isProximityMessagingEnabled:(RCTPromiseResolveBlock)resolve
+                  rejecter:(RCTPromiseRejectBlock)reject) {
+    resolve(@NO);
 }
 
 @end

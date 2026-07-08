@@ -389,6 +389,79 @@ class MCModule(reactContext: ReactApplicationContext) :
         super.invalidate()
     }
 
+    // ── Location ────────────────────────────────────────────────────────────
+    // Android drives geofence messaging through RegionMessageManager. iOS-only
+    // watch APIs are no-ops here; getLastKnownLocation resolves null.
+
+    @ReactMethod
+    override fun setLocationEnabled(enabled: Boolean) {
+        MarketingCloudSdk.requestSdk { sdk ->
+            val rmm = sdk.getRegionMessageManager()
+            if (enabled) rmm.enableGeofenceMessaging() else rmm.disableGeofenceMessaging()
+        }
+    }
+
+    @ReactMethod
+    override fun isLocationEnabled(promise: Promise) {
+        MarketingCloudSdk.requestSdk { sdk ->
+            promise.resolve(sdk.getRegionMessageManager().isGeofenceMessagingEnabled())
+        }
+    }
+
+    @ReactMethod
+    override fun startWatchingLocation() {
+        // iOS-only; no direct equivalent on Android (geofence transitions
+        // are driven by setLocationEnabled).
+    }
+
+    @ReactMethod
+    override fun stopWatchingLocation() {
+        // iOS-only; no direct equivalent on Android.
+    }
+
+    @ReactMethod
+    override fun isWatchingLocation(promise: Promise) {
+        promise.resolve(false)
+    }
+
+    @ReactMethod
+    override fun getLastKnownLocation(promise: Promise) {
+        promise.resolve(null)
+    }
+
+    @ReactMethod
+    override fun setLocationDelegate() {
+        // iOS-only delegate pattern; no equivalent on Android.
+    }
+
+    @ReactMethod
+    override fun unsetLocationDelegate() {
+        // iOS-only delegate pattern; no equivalent on Android.
+    }
+
+    // ── Proximity ───────────────────────────────────────────────────────────
+
+    @ReactMethod
+    override fun enableProximityMessaging() {
+        MarketingCloudSdk.requestSdk { sdk ->
+            sdk.getRegionMessageManager().enableProximityMessaging()
+        }
+    }
+
+    @ReactMethod
+    override fun disableProximityMessaging() {
+        MarketingCloudSdk.requestSdk { sdk ->
+            sdk.getRegionMessageManager().disableProximityMessaging()
+        }
+    }
+
+    @ReactMethod
+    override fun isProximityMessagingEnabled(promise: Promise) {
+        MarketingCloudSdk.requestSdk { sdk ->
+            promise.resolve(sdk.getRegionMessageManager().isProximityMessagingEnabled())
+        }
+    }
+
     @ReactMethod
     override fun addListener(eventName: String) {}
 

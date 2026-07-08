@@ -288,6 +288,94 @@ export interface MarketingCloudSdkApi {
    * @see  {@link https://salesforce-marketingcloud.github.io/MarketingCloudSDK-iOS/appledocs/MarketingCloudSdk/11.0/Classes/MarketingCloudSdk.html#/c:@CM@MarketingCloudSDK@objc(cs)SFMarketingCloudSdk(im)unsetRegistrationCallback |iOS Docs}
    */
   unsetRegistrationCallback(): void;
+
+  /**
+   * Enables or disables the Location (geofence) feature at runtime. On iOS this
+   * flips the developer override on `MarketingCloudSdk`; on Android it toggles
+   * geofence messaging via `RegionMessageManager`.
+   * @param {boolean} enabled - `true` to enable, `false` to disable.
+   * @see  {@link https://salesforce-marketingcloud.github.io/MarketingCloudSDK-Android/javadocs/SFMCSdk/11.0/sdk/com.salesforce.marketingcloud.messages/-region-message-manager/enable-geofence-messaging.html |Android Docs}
+   * @see  {@link https://salesforce-marketingcloud.github.io/MarketingCloudSDK-iOS/appledocs/MarketingCloudSdk/11.0/Classes/MarketingCloudSdk.html |iOS Docs}
+   */
+  setLocationEnabled(enabled: boolean): void;
+
+  /**
+   * Reports whether the Location (geofence) feature is enabled.
+   * @returns {Promise<boolean>} A promise to the enabled state.
+   * @see  {@link https://salesforce-marketingcloud.github.io/MarketingCloudSDK-Android/javadocs/SFMCSdk/11.0/sdk/com.salesforce.marketingcloud.messages/-region-message-manager/is-geofence-messaging-enabled.html |Android Docs}
+   * @see  {@link https://salesforce-marketingcloud.github.io/MarketingCloudSDK-iOS/appledocs/MarketingCloudSdk/11.0/Classes/MarketingCloudSdk.html |iOS Docs}
+   */
+  isLocationEnabled(): Promise<boolean>;
+
+  /**
+   * Starts location watching (coordinate tracking) via the Marketing Cloud SDK.
+   * iOS only — no-op on Android (geofence transitions are driven by
+   * `setLocationEnabled` on Android).
+   * @see  {@link https://salesforce-marketingcloud.github.io/MarketingCloudSDK-iOS/appledocs/MarketingCloudSdk/11.0/Classes/MarketingCloudSdk.html |iOS Docs}
+   */
+  startWatchingLocation(): void;
+
+  /**
+   * Stops location watching. iOS only — no-op on Android.
+   * @see  {@link https://salesforce-marketingcloud.github.io/MarketingCloudSDK-iOS/appledocs/MarketingCloudSdk/11.0/Classes/MarketingCloudSdk.html |iOS Docs}
+   */
+  stopWatchingLocation(): void;
+
+  /**
+   * Reports whether the SDK is actively watching location. iOS only —
+   * resolves `false` on Android.
+   * @returns {Promise<boolean>} A promise to the watching state.
+   * @see  {@link https://salesforce-marketingcloud.github.io/MarketingCloudSDK-iOS/appledocs/MarketingCloudSdk/11.0/Classes/MarketingCloudSdk.html |iOS Docs}
+   */
+  isWatchingLocation(): Promise<boolean>;
+
+  /**
+   * Returns the last known device location as reported by the native SDK.
+   * iOS surfaces the raw `[String: String]` dictionary (typically with
+   * `latitude` and `longitude` keys). Resolves `null` on Android.
+   * @returns {Promise<Object | null>} A promise to the last known location, or `null`.
+   * @see  {@link https://salesforce-marketingcloud.github.io/MarketingCloudSDK-iOS/appledocs/MarketingCloudSdk/11.0/Classes/MarketingCloudSdk.html |iOS Docs}
+   */
+  getLastKnownLocation(): Promise<Object | null>;
+
+  /**
+   * Registers the SDK's location delegate. iOS only — no-op on Android.
+   * With the delegate registered the SDK invokes its `shouldShowLocationMessage`
+   * callback for every region-triggered message; this plugin always allows the
+   * message to display and does not surface a JS-side veto hook.
+   * @see  {@link https://salesforce-marketingcloud.github.io/MarketingCloudSDK-iOS/appledocs/MarketingCloudSdk/11.0/Classes/MarketingCloudSdk.html |iOS Docs}
+   */
+  setLocationDelegate(): void;
+
+  /**
+   * Clears the SDK's location delegate. iOS only — no-op on Android.
+   * @see  {@link https://salesforce-marketingcloud.github.io/MarketingCloudSDK-iOS/appledocs/MarketingCloudSdk/11.0/Classes/MarketingCloudSdk.html |iOS Docs}
+   */
+  unsetLocationDelegate(): void;
+
+  /**
+   * Enables proximity (beacon) messaging. Android-only capability — on iOS
+   * this is a stub (there is no separate proximity toggle; iOS proximity is
+   * governed by the shared location enablement flag). Requires
+   * `ACCESS_FINE_LOCATION` and `ACCESS_BACKGROUND_LOCATION` on Android.
+   * @see  {@link https://salesforce-marketingcloud.github.io/MarketingCloudSDK-Android/javadocs/SFMCSdk/11.0/sdk/com.salesforce.marketingcloud.messages/-region-message-manager/enable-proximity-messaging.html |Android Docs}
+   */
+  enableProximityMessaging(): void;
+
+  /**
+   * Disables proximity (beacon) messaging. Android-only capability — stub on
+   * iOS.
+   * @see  {@link https://salesforce-marketingcloud.github.io/MarketingCloudSDK-Android/javadocs/SFMCSdk/11.0/sdk/com.salesforce.marketingcloud.messages/-region-message-manager/disable-proximity-messaging.html |Android Docs}
+   */
+  disableProximityMessaging(): void;
+
+  /**
+   * Reports whether proximity (beacon) messaging is enabled. Android-only
+   * capability — resolves `false` on iOS.
+   * @returns {Promise<boolean>} A promise to the enabled state.
+   * @see  {@link https://salesforce-marketingcloud.github.io/MarketingCloudSDK-Android/javadocs/SFMCSdk/11.0/sdk/com.salesforce.marketingcloud.messages/-region-message-manager/is-proximity-messaging-enabled.html |Android Docs}
+   */
+  isProximityMessagingEnabled(): Promise<boolean>;
 }
 
 export interface InboxMessage {

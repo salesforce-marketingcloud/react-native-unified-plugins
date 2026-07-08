@@ -66,6 +66,17 @@ export interface Spec extends TurboModule {
   disableLogging(): void;
   setRegistrationCallback(): void;
   unsetRegistrationCallback(): void;
+  setLocationEnabled(enabled: boolean): void;
+  isLocationEnabled(): Promise<boolean>;
+  startWatchingLocation(): void;
+  stopWatchingLocation(): void;
+  isWatchingLocation(): Promise<boolean>;
+  getLastKnownLocation(): Promise<Object | null>;
+  setLocationDelegate(): void;
+  unsetLocationDelegate(): void;
+  enableProximityMessaging(): void;
+  disableProximityMessaging(): void;
+  isProximityMessagingEnabled(): Promise<boolean>;
   addListener(eventName: string): void;
   removeListeners(count: number): void;
 }

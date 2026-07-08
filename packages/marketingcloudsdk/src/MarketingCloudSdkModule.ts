@@ -82,6 +82,19 @@ export const MarketingCloudSdkModule = {
       disableLogging: () => NativeModule.disableLogging(),
       setRegistrationCallback: () => NativeModule.setRegistrationCallback(),
       unsetRegistrationCallback: () => NativeModule.unsetRegistrationCallback(),
+      setLocationEnabled: (enabled: boolean) =>
+        NativeModule.setLocationEnabled(enabled),
+      isLocationEnabled: () => NativeModule.isLocationEnabled(),
+      startWatchingLocation: () => NativeModule.startWatchingLocation(),
+      stopWatchingLocation: () => NativeModule.stopWatchingLocation(),
+      isWatchingLocation: () => NativeModule.isWatchingLocation(),
+      getLastKnownLocation: () => NativeModule.getLastKnownLocation(),
+      setLocationDelegate: () => NativeModule.setLocationDelegate(),
+      unsetLocationDelegate: () => NativeModule.unsetLocationDelegate(),
+      enableProximityMessaging: () => NativeModule.enableProximityMessaging(),
+      disableProximityMessaging: () => NativeModule.disableProximityMessaging(),
+      isProximityMessagingEnabled: () =>
+        NativeModule.isProximityMessagingEnabled(),
     };
     return _api;
   },
