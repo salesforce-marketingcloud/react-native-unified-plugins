@@ -94,12 +94,18 @@ class MAMModule(reactContext: ReactApplicationContext) :
     @ReactMethod
     override fun setRegistrationCallback() {
         MobileAppMessaging.requestSdk { mam ->
+            // JS only needs one bridge to the native event stream — repeat
+            // setRegistrationCallback() calls reuse the existing listener
+            // instead of stacking duplicates on the SDK's manager.
+            //
             // Defense in depth against bridge teardown races: WeakRegistrationListener
             // does not capture `this`, so if invalidate() is skipped (process death,
             // framework bug) the module + ReactApplicationContext can still be GC'd.
-            val listener = WeakRegistrationListener(this)
-            registrationListener = listener
-            mam.getRegistrationManager().registerForRegistrationEvents(listener)
+            if (registrationListener == null) {
+                val listener = WeakRegistrationListener(this)
+                registrationListener = listener
+                mam.getRegistrationManager().registerForRegistrationEvents(listener)
+            }
         }
     }
 

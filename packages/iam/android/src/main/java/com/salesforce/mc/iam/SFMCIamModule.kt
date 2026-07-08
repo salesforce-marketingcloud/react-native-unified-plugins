@@ -38,6 +38,7 @@ import com.salesforce.marketingcloud.inappmessaging.models.InAppMessage
 import com.salesforce.marketingcloud.inappmessagingfeature.InAppMessageCloseAction
 import com.salesforce.marketingcloud.inappmessagingfeature.InAppMessageManager
 import com.salesforce.marketingcloud.inappmessagingfeature.InAppMessagingFeature
+import com.salesforce.mc.sfmccore.BridgeQueue
 import java.lang.ref.WeakReference
 
 @ReactModule(name = SFMCIamModule.NAME)
@@ -167,30 +168,39 @@ class SFMCIamModule(reactContext: ReactApplicationContext) :
     // ── Lifecycle callbacks (invoked on the SDK thread) ─────────────────────────
 
     internal fun onShouldShowMessage(message: InAppMessage): Boolean {
-        // Re-show pass for a message JS already approved: allow it through once,
-        // skipping the observational will-show event (it already fired on the
-        // first pass).
+        // The SDK invokes this listener on its own worker thread and needs the
+        // Boolean return synchronously. WritableMap construction + bridge emit
+        // are hopped to the Native Modules queue so they happen on a
+        // React-managed thread (matching the pattern in MCModule).
         if (decisionEnabled) {
             if (approvedIds.remove(message.id)) return true
             // First pass: defer to JS.
-            sendEvent(EVENT_WILL_SHOW, messageToWritableMap(message))
-            sendEvent(EVENT_DECISION_REQUEST, messageToWritableMap(message))
+            BridgeQueue.runOnNativeModulesQueue(reactApplicationContext) {
+                sendEvent(EVENT_WILL_SHOW, messageToWritableMap(message))
+                sendEvent(EVENT_DECISION_REQUEST, messageToWritableMap(message))
+            }
             return false
         }
         // No decision handler registered: emit the observational will-show event
         // and let the SDK display the message (default behavior).
-        sendEvent(EVENT_WILL_SHOW, messageToWritableMap(message))
+        BridgeQueue.runOnNativeModulesQueue(reactApplicationContext) {
+            sendEvent(EVENT_WILL_SHOW, messageToWritableMap(message))
+        }
         return true
     }
 
     internal fun onDidShowMessage(message: InAppMessage) {
-        sendEvent(EVENT_DID_SHOW, messageToWritableMap(message))
+        BridgeQueue.runOnNativeModulesQueue(reactApplicationContext) {
+            sendEvent(EVENT_DID_SHOW, messageToWritableMap(message))
+        }
     }
 
     internal fun onDidCloseMessage(message: InAppMessage, action: InAppMessageCloseAction) {
-        val params = messageToWritableMap(message)
-        params.putMap("action", closeActionToWritableMap(action))
-        sendEvent(EVENT_DID_CLOSE, params)
+        BridgeQueue.runOnNativeModulesQueue(reactApplicationContext) {
+            val params = messageToWritableMap(message)
+            params.putMap("action", closeActionToWritableMap(action))
+            sendEvent(EVENT_DID_CLOSE, params)
+        }
     }
 
     // ── Event emission ──────────────────────────────────────────────────────────

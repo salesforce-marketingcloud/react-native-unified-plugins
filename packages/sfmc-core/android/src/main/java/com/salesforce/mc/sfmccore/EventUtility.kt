@@ -42,18 +42,13 @@ object EventUtility {
         val objType = if (map.hasKey("objType")) map.getString("objType") else null
         if (objType == null) return null
 
+        // Keep this switch aligned with the TS SFMCEvent union (packages/sfmc-core/src/events.ts)
+        // and the iOS EventUtility (packages/sfmc-core/ios/EventUtility.mm). Adding an objType
+        // here that isn't in both other places creates a silent platform-parity gap.
         return when (objType) {
-            "EventManager" -> {
-                val name = map.getString("name") ?: return null
-                val attributes = readAnyAttributes(map, "attributes")
-                EventManager.customEvent(name, attributes)
-            }
-            "ApplicationEvent" -> buildCategoryEvent(map, Event.Category.APPLICATION)
-            "EngagementEvent" -> buildCategoryEvent(map, Event.Category.ENGAGEMENT)
-            "IdentityEvent" -> buildCategoryEvent(map, Event.Category.IDENTITY)
-            "SystemEvent" -> buildCategoryEvent(map, Event.Category.SYSTEM)
-            "BillingEvent" -> buildCategoryEvent(map, Event.Category.BILLING)
             "CustomEvent" -> buildCategoryEvent(map, Event.Category.CUSTOM)
+            "EngagementEvent" -> buildCategoryEvent(map, Event.Category.ENGAGEMENT)
+            "SystemEvent" -> buildCategoryEvent(map, Event.Category.SYSTEM)
             "CartEvent" -> {
                 val subtype = if (map.hasKey("subtype")) map.getString("subtype") else null
                 when (subtype) {

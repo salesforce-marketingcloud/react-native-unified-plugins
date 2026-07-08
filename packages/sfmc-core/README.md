@@ -71,6 +71,8 @@ sfmc.track({
 
 `sfmc-core` is the dependency root for every SFMC RN plugin. Other packages depend on it transitively — installing a product package (`marketingcloudsdk` or `mobileappmessaging`) auto-resolves this.
 
+`SFMCSdkModule.requestSdk()` memoizes the returned `SFMCSdkApi` for the lifetime of the JS bundle so repeated callers get the same handle without re-hitting the bridge. In production this is invisible. During development, React Native's Fast Refresh / Hot Reload preserves module state and does **not** re-run the module, so an edit that changes the surface won't rebuild the memo — trigger a bundle reload (⌘R / RR) to see it. A full app relaunch or bridge reload always re-runs the bundle and resets the memo alongside the native module.
+
 ## Versions
 
 - React Native: 0.85.1 (New Architecture mandatory)
