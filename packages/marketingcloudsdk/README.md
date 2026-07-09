@@ -92,7 +92,8 @@ mc.unsetRegistrationCallback();
 | `disableLogging()` | `void` | Disable debug logging |
 | `setRegistrationCallback()` | `void` | Start receiving registration change events |
 | `unsetRegistrationCallback()` | `void` | Stop receiving registration change events |
-| `setLocationEnabled(enabled)` | `void` | Enable/disable Location (geofence) messaging |
+| `enableLocation()` | `void` | Enable Location (geofence) messaging |
+| `disableLocation()` | `void` | Disable Location (geofence) messaging |
 | `isLocationEnabled()` | `Promise<boolean>` | Check whether Location (geofence) messaging is enabled |
 | `startWatchingLocation()` | `void` | Start location watching (iOS only — no-op on Android) |
 | `stopWatchingLocation()` | `void` | Stop location watching (iOS only — no-op on Android) |

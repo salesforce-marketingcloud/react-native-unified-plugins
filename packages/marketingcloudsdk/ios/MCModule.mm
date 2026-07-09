@@ -329,9 +329,15 @@ RCT_EXPORT_METHOD(disableLogging) {
 // Developer override on SFMarketingCloudSdk. Watch is a distinct API from the
 // enablement flag — keep them separate on the JS surface.
 
-RCT_EXPORT_METHOD(setLocationEnabled:(BOOL)enabled) {
+RCT_EXPORT_METHOD(enableLocation) {
     [SFMarketingCloudSdk requestSdk:^(id<MarketingCloudSdkInterface> _Nullable mc) {
-        [mc setLocationEnabled:enabled];
+        [mc setLocationEnabled:YES];
+    }];
+}
+
+RCT_EXPORT_METHOD(disableLocation) {
+    [SFMarketingCloudSdk requestSdk:^(id<MarketingCloudSdkInterface> _Nullable mc) {
+        [mc setLocationEnabled:NO];
     }];
 }
 

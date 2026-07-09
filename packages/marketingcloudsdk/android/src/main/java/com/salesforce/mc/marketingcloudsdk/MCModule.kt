@@ -394,10 +394,16 @@ class MCModule(reactContext: ReactApplicationContext) :
     // watch APIs are no-ops here; getLastKnownLocation resolves null.
 
     @ReactMethod
-    override fun setLocationEnabled(enabled: Boolean) {
+    override fun enableLocation() {
         MarketingCloudSdk.requestSdk { sdk ->
-            val rmm = sdk.getRegionMessageManager()
-            if (enabled) rmm.enableGeofenceMessaging() else rmm.disableGeofenceMessaging()
+            sdk.getRegionMessageManager().enableGeofenceMessaging()
+        }
+    }
+
+    @ReactMethod
+    override fun disableLocation() {
+        MarketingCloudSdk.requestSdk { sdk ->
+            sdk.getRegionMessageManager().disableGeofenceMessaging()
         }
     }
 
@@ -411,7 +417,7 @@ class MCModule(reactContext: ReactApplicationContext) :
     @ReactMethod
     override fun startWatchingLocation() {
         // iOS-only; no direct equivalent on Android (geofence transitions
-        // are driven by setLocationEnabled).
+        // are driven by enableLocation / disableLocation).
     }
 
     @ReactMethod

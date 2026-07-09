@@ -290,14 +290,22 @@ export interface MarketingCloudSdkApi {
   unsetRegistrationCallback(): void;
 
   /**
-   * Enables or disables the Location (geofence) feature at runtime. On iOS this
-   * flips the developer override on `MarketingCloudSdk`; on Android it toggles
-   * geofence messaging via `RegionMessageManager`.
-   * @param {boolean} enabled - `true` to enable, `false` to disable.
+   * Enables the Location (geofence) feature at runtime. On iOS this flips the
+   * developer override on `MarketingCloudSdk`; on Android it enables geofence
+   * messaging via `RegionMessageManager`.
    * @see  {@link https://salesforce-marketingcloud.github.io/MarketingCloudSDK-Android/javadocs/SFMCSdk/11.0/sdk/com.salesforce.marketingcloud.messages/-region-message-manager/enable-geofence-messaging.html |Android Docs}
    * @see  {@link https://salesforce-marketingcloud.github.io/MarketingCloudSDK-iOS/appledocs/MarketingCloudSdk/11.0/Classes/MarketingCloudSdk.html#/c:@CM@MarketingCloudSDK@objc(cs)SFMarketingCloudSdk(im)setLocationEnabled: |iOS Docs}
    */
-  setLocationEnabled(enabled: boolean): void;
+  enableLocation(): void;
+
+  /**
+   * Disables the Location (geofence) feature at runtime. On iOS this flips the
+   * developer override on `MarketingCloudSdk`; on Android it disables geofence
+   * messaging via `RegionMessageManager`.
+   * @see  {@link https://salesforce-marketingcloud.github.io/MarketingCloudSDK-Android/javadocs/SFMCSdk/11.0/sdk/com.salesforce.marketingcloud.messages/-region-message-manager/disable-geofence-messaging.html |Android Docs}
+   * @see  {@link https://salesforce-marketingcloud.github.io/MarketingCloudSDK-iOS/appledocs/MarketingCloudSdk/11.0/Classes/MarketingCloudSdk.html#/c:@CM@MarketingCloudSDK@objc(cs)SFMarketingCloudSdk(im)setLocationEnabled: |iOS Docs}
+   */
+  disableLocation(): void;
 
   /**
    * Reports whether the Location (geofence) feature is enabled.
@@ -310,7 +318,7 @@ export interface MarketingCloudSdkApi {
   /**
    * Starts location watching (coordinate tracking) via the Marketing Cloud SDK.
    * iOS only — no-op on Android (geofence transitions are driven by
-   * `setLocationEnabled` on Android).
+   * `enableLocation` / `disableLocation` on Android).
    * @see  {@link https://salesforce-marketingcloud.github.io/MarketingCloudSDK-iOS/appledocs/MarketingCloudSdk/11.0/Classes/MarketingCloudSdk.html#/c:@CM@MarketingCloudSDK@objc(cs)SFMarketingCloudSdk(im)startWatchingLocation |iOS Docs}
    */
   startWatchingLocation(): void;
