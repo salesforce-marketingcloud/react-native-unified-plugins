@@ -30,10 +30,10 @@
  * @class SFMCSdkModule
  */
 
-import { NativeEventEmitter } from 'react-native';
-import NativeModule from './NativeSFMCSdkCoreModule';
-import type { SFMCSdkApi } from './types';
-import type { SFMCEvent } from './events';
+import { NativeEventEmitter } from "react-native";
+import NativeModule from "./NativeSFMCSdkCoreModule";
+import type { SFMCSdkApi } from "./types";
+import type { SFMCEvent } from "./events";
 
 let _api: SFMCSdkApi | null = null;
 let _emitter: NativeEventEmitter | null = null;
@@ -69,7 +69,7 @@ export const SFMCSdkModule = {
         NativeModule.setPartyIdentificationType(type),
       track: (event: SFMCEvent) =>
         NativeModule.track(event as unknown as Object),
-      setLogging: (level: 'DEBUG' | 'WARN' | 'ERROR' | 'NONE') =>
+      setLogging: (level: "DEBUG" | "WARN" | "ERROR" | "NONE") =>
         NativeModule.setLogging(level),
       getSdkState: () =>
         NativeModule.getSdkState() as Promise<{ [key: string]: any }>,
