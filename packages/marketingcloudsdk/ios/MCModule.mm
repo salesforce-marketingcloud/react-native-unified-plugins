@@ -34,10 +34,8 @@
 #import "InboxUtility.h"
 
 static NSString *const kEventRegistration = @"sfmc_mc_registration";
-static NSString *const kEventLocationMessage = @"sfmc_mc_location_message";
 
-@interface MCModule : RCTEventEmitter <RCTBridgeModule, RCTTurboModule,
-                                       SFMCSdkLocationDelegate>
+@interface MCModule : RCTEventEmitter <RCTBridgeModule, RCTTurboModule>
 @end
 
 @implementation MCModule
@@ -45,7 +43,7 @@ static NSString *const kEventLocationMessage = @"sfmc_mc_location_message";
 RCT_EXPORT_MODULE(MCModule);
 
 - (NSArray<NSString *> *)supportedEvents {
-    return @[kEventRegistration, kEventLocationMessage];
+    return @[kEventRegistration];
 }
 
 - (std::shared_ptr<facebook::react::TurboModule>)getTurboModule:
@@ -305,13 +303,12 @@ RCT_EXPORT_METHOD(unsetRegistrationCallback) {
     }];
 }
 
-// Best-effort cleanup if JS never called unsetRegistrationCallback / unsetLocationDelegate
-// before bridge teardown. The blocks use weakSelf so ARC already releases the module, but
+// Best-effort cleanup if JS never called unsetRegistrationCallback before bridge
+// teardown. The block uses weakSelf so ARC already releases the module, but
 // the SDK keeps invoking the dead block forever — clear it here.
 - (void)invalidate {
     [SFMarketingCloudSdk requestSdk:^(id<MarketingCloudSdkInterface> _Nullable mc) {
         [mc unsetRegistrationCallback];
-        [mc setLocationDelegate:nil];
     }];
     [super invalidate];
 }
@@ -369,32 +366,6 @@ RCT_EXPORT_METHOD(getLastKnownLocation:(RCTPromiseResolveBlock)resolve
     [SFMarketingCloudSdk requestSdk:^(id<MarketingCloudSdkInterface> _Nullable mc) {
         resolve([mc lastKnownLocation]);
     }];
-}
-
-RCT_EXPORT_METHOD(setLocationDelegate) {
-    __weak __typeof(self) weakSelf = self;
-    [SFMarketingCloudSdk requestSdk:^(id<MarketingCloudSdkInterface> _Nullable mc) {
-        [mc setLocationDelegate:weakSelf];
-    }];
-}
-
-RCT_EXPORT_METHOD(unsetLocationDelegate) {
-    [SFMarketingCloudSdk requestSdk:^(id<MarketingCloudSdkInterface> _Nullable mc) {
-        [mc setLocationDelegate:nil];
-    }];
-}
-
-// SFMCSdkLocationDelegate. Always allow the SDK to display the message — this
-// plugin exposes the callback as an observational event and does not surface a
-// JS-side veto hook (parity with the Android side, which has no equivalent
-// "should show" gate).
-- (BOOL)sfmc_shouldShowLocationMessage:(NSDictionary *)message
-                             forRegion:(NSDictionary *)region {
-    NSMutableDictionary *body = [NSMutableDictionary dictionaryWithCapacity:2];
-    if (message) body[@"message"] = message;
-    if (region) body[@"region"] = region;
-    [self sendEventWithName:kEventLocationMessage body:body];
-    return YES;
 }
 
 // ── Proximity ───────────────────────────────────────────────────────────────────

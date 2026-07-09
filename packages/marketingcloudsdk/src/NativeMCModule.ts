@@ -72,8 +72,6 @@ export interface Spec extends TurboModule {
   stopWatchingLocation(): void;
   isWatchingLocation(): Promise<boolean>;
   getLastKnownLocation(): Promise<Object | null>;
-  setLocationDelegate(): void;
-  unsetLocationDelegate(): void;
   enableProximityMessaging(): void;
   disableProximityMessaging(): void;
   isProximityMessagingEnabled(): Promise<boolean>;

@@ -429,16 +429,6 @@ class MCModule(reactContext: ReactApplicationContext) :
         promise.resolve(null)
     }
 
-    @ReactMethod
-    override fun setLocationDelegate() {
-        // iOS-only delegate pattern; no equivalent on Android.
-    }
-
-    @ReactMethod
-    override fun unsetLocationDelegate() {
-        // iOS-only delegate pattern; no equivalent on Android.
-    }
-
     // ── Proximity ───────────────────────────────────────────────────────────
 
     @ReactMethod

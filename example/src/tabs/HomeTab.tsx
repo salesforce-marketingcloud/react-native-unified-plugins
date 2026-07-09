@@ -277,7 +277,6 @@ export default function HomeTab({ sfmc, push, mc, mam, iam, loggingEnabled, onLo
     function onLocationEnabledToggle(v: boolean) {
         setLocationEnabled(v);
         mc.setLocationEnabled(v);
-        if (v) mc.setLocationDelegate(); else mc.unsetLocationDelegate();
     }
 
     function onWatchingLocationToggle(v: boolean) {
