@@ -32,7 +32,11 @@
 
 import { NativeEventEmitter } from "react-native";
 import NativeModule from "./NativeMCModule";
-import type { MarketingCloudSdkApi, InboxMessage } from "./types";
+import type {
+  MarketingCloudSdkApi,
+  InboxMessage,
+  LastKnownLocation,
+} from "./types";
 
 let _api: MarketingCloudSdkApi | null = null;
 let _emitter: NativeEventEmitter | null = null;
@@ -88,7 +92,8 @@ export const MarketingCloudSdkModule = {
       startWatchingLocation: () => NativeModule.startWatchingLocation(),
       stopWatchingLocation: () => NativeModule.stopWatchingLocation(),
       isWatchingLocation: () => NativeModule.isWatchingLocation(),
-      getLastKnownLocation: () => NativeModule.getLastKnownLocation(),
+      getLastKnownLocation: () =>
+        NativeModule.getLastKnownLocation() as Promise<LastKnownLocation | null>,
       enableProximityMessaging: () => NativeModule.enableProximityMessaging(),
       disableProximityMessaging: () => NativeModule.disableProximityMessaging(),
       isProximityMessagingEnabled: () =>

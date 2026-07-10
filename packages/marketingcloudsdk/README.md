@@ -92,16 +92,21 @@ mc.unsetRegistrationCallback();
 | `disableLogging()` | `void` | Disable debug logging |
 | `setRegistrationCallback()` | `void` | Start receiving registration change events |
 | `unsetRegistrationCallback()` | `void` | Stop receiving registration change events |
-| `enableLocation()` | `void` | Enable Location (geofence) messaging |
-| `disableLocation()` | `void` | Disable Location (geofence) messaging |
-| `isLocationEnabled()` | `Promise<boolean>` | Check whether Location (geofence) messaging is enabled |
+| `enableLocation()` | `void` | Enable Location (iOS: master location override; Android: geofence messaging — requires `ACCESS_FINE_LOCATION` + `ACCESS_BACKGROUND_LOCATION` runtime permissions) |
+| `disableLocation()` | `void` | Disable Location (iOS: master location override; Android: geofence messaging) |
+| `isLocationEnabled()` | `Promise<boolean>` | Check whether Location is enabled |
 | `startWatchingLocation()` | `void` | Start location watching (iOS only — no-op on Android) |
 | `stopWatchingLocation()` | `void` | Stop location watching (iOS only — no-op on Android) |
 | `isWatchingLocation()` | `Promise<boolean>` | Check whether SDK is watching location (iOS only — always `false` on Android) |
-| `getLastKnownLocation()` | `Promise<Object \| null>` | Last known device location (iOS only — always `null` on Android) |
-| `enableProximityMessaging()` | `void` | Enable proximity (beacon) messaging (Android only — no-op on iOS) |
+| `getLastKnownLocation()` | `Promise<LastKnownLocation \| null>` | Last known device location as `{ latitude?, longitude? }` string values (iOS only — always `null` on Android) |
+| `enableProximityMessaging()` | `void` | Enable proximity (beacon) messaging (Android only — no-op on iOS; requires `ACCESS_FINE_LOCATION` + `ACCESS_BACKGROUND_LOCATION` runtime permissions) |
 | `disableProximityMessaging()` | `void` | Disable proximity (beacon) messaging (Android only — no-op on iOS) |
 | `isProximityMessagingEnabled()` | `Promise<boolean>` | Check whether proximity messaging is enabled (Android only — always `false` on iOS) |
+
+#### Location & proximity — platform notes
+
+- **iOS:** `enableLocation()` is the master location toggle — it governs geofence messaging, coordinate watching (`startWatchingLocation`), and proximity (beacon) messaging as a single switch. There is no separate proximity call on iOS; `enableProximityMessaging()` is a no-op.
+- **Android:** `enableLocation()` enables **geofence messaging only**. Proximity (beacon) messaging is a separate switch — call `enableProximityMessaging()` to enable it. Both APIs require the `ACCESS_FINE_LOCATION` and `ACCESS_BACKGROUND_LOCATION` runtime permissions; request and grant them before calling either enable method.
 
 ### Events
 
