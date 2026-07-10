@@ -9,6 +9,7 @@
     "test": "echo \"Error: no test specified\" && exit 0"
   },
   "dependencies": {
+    "@react-native-async-storage/async-storage": "2.2.0",
     "@react-native-clipboard/clipboard": "^1.16.3",
     "@sfmc/react-native-iam": "*",
     "@sfmc/react-native-marketingcloudsdk": "*",
@@ -17,7 +18,8 @@
     "@sfmc/react-native-sfmc-core": "*",
     "react": "19.2.3",
     "react-native": "0.85.1",
-    "react-native-safe-area-context": "^5.8.0"
+    "react-native-safe-area-context": "^5.8.0",
+    "react-native-vector-icons": "^10.2.0"
   },
   "devDependencies": {
     "@babel/core": "^7.20.0",

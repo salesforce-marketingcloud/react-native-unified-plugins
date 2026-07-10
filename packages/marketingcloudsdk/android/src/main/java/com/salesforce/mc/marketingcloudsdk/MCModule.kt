@@ -229,18 +229,6 @@ class MCModule(reactContext: ReactApplicationContext) :
         }
     }
 
-    @ReactMethod
-    override fun getAttributes(promise: Promise) {
-        MarketingCloudSdk.requestSdk { sdk ->
-            val attributes = sdk.getRegistrationManager().getAttributes().toMap()
-            BridgeQueue.runOnNativeModulesQueue(reactApplicationContext, promise) {
-                val map = Arguments.createMap()
-                attributes.forEach { (k, v) -> map.putString(k, v) }
-                promise.resolve(map)
-            }
-        }
-    }
-
     // Analytics methods
     @ReactMethod
     override fun enablePiAnalytics() {
@@ -292,9 +280,17 @@ class MCModule(reactContext: ReactApplicationContext) :
     }
 
     @ReactMethod
-    override fun getContactKey(promise: Promise) {
+    override fun setSignedString(signedString: String?, promise: Promise) {
         MarketingCloudSdk.requestSdk { sdk ->
-            promise.resolve(sdk.getRegistrationManager().getContactKey())
+            val committed = sdk.getRegistrationManager().edit().setSignedString(signedString).commit()
+            promise.resolve(committed)
+        }
+    }
+
+    @ReactMethod
+    override fun getSignedString(promise: Promise) {
+        MarketingCloudSdk.requestSdk { sdk ->
+            promise.resolve(sdk.getRegistrationManager().getSignedString())
         }
     }
 

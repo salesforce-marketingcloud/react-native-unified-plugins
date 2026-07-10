@@ -31,18 +31,35 @@
  */
 
 import { NativeEventEmitter } from 'react-native';
+import type { EmitterSubscription } from 'react-native';
 import NativeModule from './NativeSFMCIamModule';
-import type { IamApi } from './types';
+import type {
+  IamApi,
+  InAppMessage,
+  InAppMessageDecisionHandler,
+} from './types';
+
+// Internal event the native module emits (decision mode only) to ask JS whether
+// a message should display. Not part of the public IamEvent set — it is an
+// implementation detail of setInAppMessageDecisionHandler.
+const DECISION_REQUEST_EVENT = 'sfmc_iam_decision_request';
 
 let _api: IamApi | null = null;
 let _emitter: NativeEventEmitter | null = null;
+
+let _decisionHandler: InAppMessageDecisionHandler | null = null;
+let _decisionSub: EmitterSubscription | null = null;
 
 export const IamModule = {
   async requestSdk(): Promise<IamApi> {
     if (_api) return _api;
     await NativeModule.requestIamSdk();
     _api = {
-      showInAppMessage: (messageId: string) => NativeModule.showInAppMessage(messageId),
+      showInAppMessage: (messageId: string) =>
+        NativeModule.showInAppMessage(messageId),
+      setFont: (name: string) => NativeModule.setFont(name),
+      setStatusBarColor: (color: number) =>
+        NativeModule.setStatusBarColor(color),
     };
     return _api;
   },
@@ -50,5 +67,77 @@ export const IamModule = {
   getEmitter(): NativeEventEmitter {
     if (!_emitter) _emitter = new NativeEventEmitter(NativeModule);
     return _emitter;
+  },
+
+  /**
+   * Registers a handler that decides, per message, whether the SDK should
+   * display an in-app message — giving the app the final say over the native
+   * `shouldShowMessage`/`shouldShow` gate.
+   *
+   * The native gate is synchronous and cannot block on an async JS reply, so
+   * this uses a defer-then-reshow model: when a handler is registered the SDK
+   * is told *not* to show the message immediately; instead {@link handler} is
+   * invoked with the full message, and if it resolves `true` the message is
+   * re-displayed via the same path as {@link IamApi.showInAppMessage}. The
+   * visible effect is that an approved message appears a few milliseconds later
+   * than it would natively.
+   *
+   * Pass `null` to clear the handler and restore default SDK behavior (every
+   * message displays). Requires the SDK to have been requested via
+   * {@link IamModule.requestSdk}.
+   *
+   * @param {InAppMessageDecisionHandler | null} handler - The per-message
+   *     decision callback, or `null` to clear it.
+   */
+  setInAppMessageDecisionHandler(
+    handler: InAppMessageDecisionHandler | null,
+  ): void {
+    _decisionHandler = handler;
+
+    if (handler) {
+      // Subscribe once; the listener reads the latest _decisionHandler so a
+      // handler swap does not need to re-subscribe.
+      if (!_decisionSub) {
+        _decisionSub = this.getEmitter().addListener(
+          DECISION_REQUEST_EVENT,
+          (message: InAppMessage) => {
+            const current = _decisionHandler;
+            // Default to suppressing if the handler was cleared between the
+            // native emit and this callback.
+            Promise.resolve(current ? current(message) : false)
+              .then((show) => {
+                try {
+                  NativeModule.resolveInAppMessageDecision(message.id, !!show);
+                } catch (err) {
+                  console.warn(
+                    `[SFMCIam] Failed to resolve in-app message decision for ${message.id}:`,
+                    err,
+                  );
+                }
+              })
+              .catch((err) => {
+                // A throwing handler suppresses the message (fail closed).
+                console.warn(
+                  `[SFMCIam] Decision handler threw for message ${message.id}; suppressing:`,
+                  err,
+                );
+                try {
+                  NativeModule.resolveInAppMessageDecision(message.id, false);
+                } catch (nativeErr) {
+                  console.warn(
+                    `[SFMCIam] Failed to resolve in-app message decision for ${message.id}:`,
+                    nativeErr,
+                  );
+                }
+              });
+          },
+        );
+      }
+      NativeModule.setDecisionHandlerEnabled(true);
+    } else {
+      NativeModule.setDecisionHandlerEnabled(false);
+      _decisionSub?.remove();
+      _decisionSub = null;
+    }
   },
 };

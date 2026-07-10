@@ -9,7 +9,10 @@ def safeExtGet(prop, fallback) {
 android {
     namespace "com.salesforce.mc.iam"
     compileSdk safeExtGet('compileSdkVersion', 36)
-    defaultConfig { minSdk safeExtGet('minSdkVersion', 26) }
+    defaultConfig {
+        minSdk safeExtGet('minSdkVersion', 26)
+        consumerProguardFiles 'consumer-rules.pro'
+    }
     sourceSets { main { java.srcDirs += 'src/main/java' } }
     buildFeatures { buildConfig true }
 }
@@ -19,6 +22,10 @@ react {
 }
 
 dependencies {
+    // Shared bridge plumbing (BridgeQueue) lives in sfmc-core. The npm dep graph
+    // already requires sfmc-core for any consumer of this product package, so
+    // the Android project dep is free beyond the wiring.
+    implementation project(':sfmc_react-native-sfmc-core')
     api "com.salesforce.marketingcloud:sfmcsdk:${safeExtGet('sfmcSdkVersion', '3.1.+')}"
     api "com.salesforce.marketingcloud:inappmessagingfeaturemodule:${safeExtGet('inAppMessagingFeatureVersion', '1.0.+')}"
     implementation "com.facebook.react:react-android"

@@ -79,7 +79,6 @@ mc.unsetRegistrationCallback();
 | `removeTag(tag)` | `void` | Remove a tag |
 | `removeTags(tags)` | `void` | Remove multiple tags |
 | `getTags()` | `Promise<string[]>` | Get all tags |
-| `getAttributes()` | `Promise<object>` | Get all attributes |
 | `enablePiAnalytics()` | `void` | Enable PI analytics |
 | `disablePiAnalytics()` | `void` | Disable PI analytics |
 | `isPiAnalyticsEnabled()` | `Promise<boolean>` | Check PI analytics state |
@@ -87,7 +86,8 @@ mc.unsetRegistrationCallback();
 | `disableAnalytics()` | `void` | Disable analytics |
 | `isAnalyticsEnabled()` | `Promise<boolean>` | Check analytics state |
 | `getDeviceId()` | `Promise<string \| null>` | Get device identifier |
-| `getContactKey()` | `Promise<string \| null>` | Get contact key |
+| `setSignedString(signedString)` | `Promise<boolean>` | Set the signed string security token (pass `null` to clear) |
+| `getSignedString()` | `Promise<string \| null>` | Get the last stored signed string |
 | `enableLogging()` | `void` | Enable debug logging |
 | `disableLogging()` | `void` | Disable debug logging |
 | `setRegistrationCallback()` | `void` | Start receiving registration change events |
@@ -114,3 +114,4 @@ Installing this package auto-resolves the shared `sfmc-core`, `push`, and `iam` 
 ## License
 
 BSD 3-Clause. See [LICENSE](../../LICENSE) for details.
+

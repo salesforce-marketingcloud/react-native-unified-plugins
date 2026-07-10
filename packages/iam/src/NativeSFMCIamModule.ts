@@ -35,6 +35,10 @@ import { TurboModuleRegistry } from 'react-native';
 export interface Spec extends TurboModule {
   requestIamSdk(): Promise<void>;
   showInAppMessage(messageId: string): void;
+  setDecisionHandlerEnabled(enabled: boolean): void;
+  resolveInAppMessageDecision(messageId: string, show: boolean): void;
+  setFont(name: string): void;
+  setStatusBarColor(color: number): void;
   addListener(eventName: string): void;
   removeListeners(count: number): void;
 }

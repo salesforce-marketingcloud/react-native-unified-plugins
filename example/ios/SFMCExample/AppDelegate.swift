@@ -14,20 +14,20 @@ import MobileAppMessagingSDK
 class AppDelegate: RCTAppDelegate {
 
 
-    let appID = "{MC_APP_ID}"
-    let accessToken = "{MC_ACCESS_TOKEN}"
-    let appEndpointURL = "{MC_SERVER_URL}"
-    let mid = "{MC_MID}"
+    let appID = "YOUR_MC_APP_ID"
+    let accessToken = "YOUR_MC_ACCESS_TOKEN"
+    let appEndpointURL = "YOUR_MC_SERVER_URL"
+    let mid = "YOUR_MC_MID"
 
     let inbox = true
     let location = true
     let pushAnalytics = true
     let markMessageReadOnInboxNotificationOpen = true
 
-    let mamAppID = "{MAM_APP_ID}"
-    let mamAccessToken = "{MAM_ACCESS_TOKEN}"
-    let mamServerURL = "{MAM_ENDPOINT_URL}"
-    let mamTenantId = "{MAM_TENANT_ID}"
+    let mamAppID = "YOUR_MAM_APP_ID"
+    let mamAccessToken = "YOUR_MAM_ACCESS_TOKEN"
+    let mamServerURL = "YOUR_MAM_SERVER_URL"
+    let mamTenantId = "YOUR_MAM_TENANT_ID"
     let mamAnalyticsEnabled = true
 
     // MARK: - UIApplicationDelegate
@@ -168,7 +168,6 @@ class AppDelegate: RCTAppDelegate {
 
     func setupInAppMessaging() {
         InAppMessagingFeature.requestSdk { iamFeature in
-            iamFeature?.setEventDelegate(self)
             iamFeature?.setURLHandlingDelegate(self)
         }
     }
@@ -247,17 +246,4 @@ extension AppDelegate: UNUserNotificationCenterDelegate {
     ) {
         completionHandler([.banner, .sound, .badge])
     }
-}
-
-// MARK: - InAppMessageEventDelegate
-
-extension AppDelegate: InAppMessageEventDelegate {
-
-    func shouldShow(inAppMessage message: any InAppMessageDetails) -> Bool {
-        return true
-    }
-
-    func didShow(inAppMessage message: any InAppMessageDetails) {}
-
-    func didClose(inAppMessage message: any InAppMessageDetails, action: InAppMessageCloseAction) {}
 }

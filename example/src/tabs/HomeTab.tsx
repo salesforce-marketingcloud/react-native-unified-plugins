@@ -19,8 +19,19 @@ import type { SFMCSdkApi } from '@sfmc/react-native-sfmc-core';
 import type { PushApi } from '@sfmc/react-native-push';
 import type { MCApi } from '@sfmc/react-native-marketingcloudsdk';
 import type { MAMApi } from '@sfmc/react-native-mobileappmessaging';
-import type { IamApi } from '@sfmc/react-native-iam';
+import { IamModule, IamEvent } from '@sfmc/react-native-iam';
+import type {
+    IamApi,
+    InAppMessage,
+    InAppMessageCloseAction,
+} from '@sfmc/react-native-iam';
 import { SectionHeader, Card, Row, PrimaryButton } from '../components';
+
+// Message ids the example is willing to display while the decision handler is
+// active. An empty set means "show everything". This is just a code-defined
+// allow-list to demonstrate setInAppMessageDecisionHandler — a real app could
+// run any logic here (feature flags, current screen, quiet hours, A/B bucket).
+const IAM_ALLOWED_MESSAGE_IDS = new Set<string>();
 
 interface Props {
     sfmc: SFMCSdkApi;
@@ -30,9 +41,13 @@ interface Props {
     iam: IamApi;
     loggingEnabled: boolean;
     onLoggingChange: (enabled: boolean) => void;
+    // Lifted to App so it survives tab switches (which unmount this tab) and is
+    // persisted across relaunches. See App.tsx.
+    iamDecisionMode: boolean;
+    onIamDecisionModeChange: (enabled: boolean) => void;
 }
 
-export default function HomeTab({ sfmc, push, mc, mam, iam, loggingEnabled, onLoggingChange }: Props) {
+export default function HomeTab({ sfmc, push, mc, mam, iam, loggingEnabled, onLoggingChange, iamDecisionMode, onIamDecisionModeChange }: Props) {
     const [pushToken, setPushToken] = useState<string | null>(null);
     const [mcDeviceId, setMcDeviceId] = useState<string | null>(null);
     const [mamDeviceId, setMamDeviceId] = useState<string | null>(null);
@@ -49,11 +64,8 @@ export default function HomeTab({ sfmc, push, mc, mam, iam, loggingEnabled, onLo
 
     // IAM state
     const [iamMessageId, setIamMessageId] = useState('');
+    const [iamFontName, setIamFontName] = useState('');
     const [iamLog, setIamLog] = useState('');
-
-    useEffect(() => {
-        loadState();
-    }, []);
 
     const loadState = useCallback(async () => {
         const [token, mceId, mamId, pushOn, mcOn, mamOn] = await Promise.allSettled([
@@ -71,6 +83,55 @@ export default function HomeTab({ sfmc, push, mc, mam, iam, loggingEnabled, onLo
         if (mcOn.status === 'fulfilled') setMcAnalytics(mcOn.value);
         if (mamOn.status === 'fulfilled') setMamAnalytics(mamOn.value);
     }, [mc, mam, push]);
+
+    // Prepend timestamped lines so the most recent event is on top; cap the log.
+    // Stable identity (functional updater, no captured state) so effects that use
+    // it don't need to re-subscribe.
+    const logEvent = useCallback((line: string) => {
+        const ts = new Date().toLocaleTimeString();
+        setIamLog((prev) => [`[${ts}] ${line}`, ...prev.split('\n')].slice(0, 8).join('\n'));
+    }, []);
+
+    useEffect(() => {
+        loadState();
+    }, [loadState]);
+
+    // Subscribe to IAM lifecycle events for the whole session and surface them in
+    // the log. The native listener is registered automatically when the SDK is
+    // requested, so we only add an emitter listener here.
+    useEffect(() => {
+        const emitter = IamModule.getEmitter();
+        const subs = [
+            emitter.addListener(IamEvent.WillShowMessage, (m: InAppMessage) =>
+                logEvent(`willShow: ${m.id}`),
+            ),
+            emitter.addListener(IamEvent.DidShowMessage, (m: InAppMessage) =>
+                logEvent(`didShow: ${m.id}`),
+            ),
+            emitter.addListener(
+                IamEvent.DidCloseMessage,
+                (m: InAppMessage & { action: InAppMessageCloseAction }) =>
+                    logEvent(`didClose: ${m.id} (${m.action?.type ?? 'n/a'})`),
+            ),
+        ];
+        return () => subs.forEach((sub) => sub.remove());
+    }, [logEvent]);
+
+    // Register the decision handler whenever decision mode is on (the value is
+    // lifted to App and persisted, so it reflects the user's last choice on
+    // mount), and clear it when off or when this screen goes away so the SDK
+    // resumes default behavior.
+    useEffect(() => {
+        IamModule.setInAppMessageDecisionHandler(
+            iamDecisionMode ? shouldShowInAppMessage : null,
+        );
+        return () => {
+            IamModule.setInAppMessageDecisionHandler(null);
+        };
+        // shouldShowInAppMessage is a stable module-scope rule (reads only the
+        // const allow-list), so this re-runs only when iamDecisionMode changes.
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [iamDecisionMode]);
 
     function copyToClipboard(label: string, value: string | null | undefined) {
         if (!value) return;
@@ -171,12 +232,38 @@ export default function HomeTab({ sfmc, push, mc, mam, iam, loggingEnabled, onLo
     }
 
     function triggerIam() {
-        if (!iamMessageId.trim()) {
-            setIamLog('Enter a message ID first.');
-            return;
-        }
+        if (!iamMessageId.trim()) return;
         iam.showInAppMessage(iamMessageId.trim());
-        setIamLog(`Showing in-app message: "${iamMessageId.trim()}"`);
+    }
+
+    // The app's custom display rule, invoked (via the native bridge) for every
+    // message the SDK wants to show while decision mode is on. Returning true
+    // shows the message, false suppresses it. Here it consults the code-defined
+    // allow-list; an approved message is re-shown a moment later by the native
+    // defer-then-reshow path.
+    function shouldShowInAppMessage(message: InAppMessage): boolean {
+        const show =
+            IAM_ALLOWED_MESSAGE_IDS.size === 0 ||
+            IAM_ALLOWED_MESSAGE_IDS.has(message.id);
+        logEvent(`decision: ${message.id} → ${show ? 'show' : 'hide'}`);
+        return show;
+    }
+
+    // Update the lifted/persisted toggle; the effect above registers or clears
+    // the native decision handler in response to the new value.
+    function onIamDecisionModeToggle(v: boolean) {
+        onIamDecisionModeChange(v);
+    }
+
+    function applyIamFont() {
+        const name = iamFontName.trim();
+        if (!name) return;
+        iam.setFont(name);
+    }
+
+    function applyIamStatusBarColor() {
+        // SFMC blue (0xAARRGGBB). Android-only; no-op on iOS.
+        iam.setStatusBarColor(0xff0a84ff);
     }
 
     return (
@@ -210,7 +297,7 @@ export default function HomeTab({ sfmc, push, mc, mam, iam, loggingEnabled, onLo
             <Card>
                 <View style={s.switchRow}>
                     <Text style={s.switchLabel}>Push Enabled</Text>
-                    <Switch value={pushEnabled} onValueChange={onPushToggle} />
+                    <Switch value={pushEnabled} onValueChange={onPushToggle} accessibilityLabel="Push Enabled" />
                 </View>
             </Card>
 
@@ -219,11 +306,11 @@ export default function HomeTab({ sfmc, push, mc, mam, iam, loggingEnabled, onLo
             <Card>
                 <View style={s.switchRow}>
                     <Text style={s.switchLabel}>MCE Analytics</Text>
-                    <Switch value={mcAnalytics} onValueChange={onMcAnalyticsToggle} />
+                    <Switch value={mcAnalytics} onValueChange={onMcAnalyticsToggle} accessibilityLabel="MCE Analytics" />
                 </View>
                 <View style={[s.switchRow, s.noBorder]}>
                     <Text style={s.switchLabel}>MAM Analytics</Text>
-                    <Switch value={mamAnalytics} onValueChange={onMamAnalyticsToggle} />
+                    <Switch value={mamAnalytics} onValueChange={onMamAnalyticsToggle} accessibilityLabel="MAM Analytics" />
                 </View>
             </Card>
 
@@ -232,7 +319,7 @@ export default function HomeTab({ sfmc, push, mc, mam, iam, loggingEnabled, onLo
             <Card>
                 <View style={[s.switchRow, s.noBorder]}>
                     <Text style={s.switchLabel}>Debug Logging</Text>
-                    <Switch value={loggingEnabled} onValueChange={onLoggingToggle} />
+                    <Switch value={loggingEnabled} onValueChange={onLoggingToggle} accessibilityLabel="Debug Logging" />
                 </View>
             </Card>
 
@@ -255,9 +342,46 @@ export default function HomeTab({ sfmc, push, mc, mam, iam, loggingEnabled, onLo
                         autoCapitalize="none"
                     />
                 </View>
-                {iamLog ? <Text style={s.iamLog}>{iamLog}</Text> : null}
             </Card>
             <PrimaryButton title="Show In-App Message" onPress={triggerIam} />
+
+            {/* IAM behavior toggles */}
+            <Card>
+                <View style={[s.switchRow, s.noBorder]}>
+                    <View style={s.switchLabelColumn}>
+                        <Text style={s.switchLabel}>App decides display</Text>
+                        <Text style={s.switchSubLabel}>
+                            Run a custom code rule per message instead of showing automatically.
+                        </Text>
+                    </View>
+                    <Switch value={iamDecisionMode} onValueChange={onIamDecisionModeToggle} accessibilityLabel="App decides display" />
+                </View>
+            </Card>
+
+            {/* IAM styling */}
+            <Card>
+                <View style={s.inputRow}>
+                    <Text style={s.inputLabel}>Font name</Text>
+                    <TextInput
+                        style={s.textInput}
+                        accessibilityLabel="Font name"
+                        placeholder="Font name (e.g. Helvetica-Bold)"
+                        placeholderTextColor={color('placeholderText')}
+                        value={iamFontName}
+                        onChangeText={setIamFontName}
+                        autoCorrect={false}
+                        autoCapitalize="none"
+                    />
+                </View>
+            </Card>
+            <PrimaryButton title="Set Message Font" onPress={applyIamFont} />
+            <PrimaryButton title="Set Status Bar Color (Android)" onPress={applyIamStatusBarColor} />
+
+            {iamLog ? (
+                <Card>
+                    <Text style={s.iamLog}>{iamLog}</Text>
+                </Card>
+            ) : null}
 
             <View style={{ height: 32 }} />
 
@@ -299,7 +423,7 @@ export default function HomeTab({ sfmc, push, mc, mam, iam, loggingEnabled, onLo
                     />
                     <View style={s.switchRow}>
                         <Text style={s.switchLabel}>Send Immediate</Text>
-                        <Switch value={sendImmediate} onValueChange={setSendImmediate} />
+                        <Switch value={sendImmediate} onValueChange={setSendImmediate} accessibilityLabel="Send Immediate" />
                     </View>
                     <PrimaryButton title="Send Event" onPress={sendEvent} />
                     <PrimaryButton title="Cancel" onPress={() => setEventModalVisible(false)} destructive />
@@ -322,13 +446,27 @@ const s = StyleSheet.create({
         borderBottomColor: color('separator'),
     },
     noBorder: { borderBottomWidth: 0 },
+    switchLabelColumn: {
+        flex: 1,
+        paddingRight: 12,
+    },
     switchLabel: {
         fontSize: 15,
         color: color('label'),
     },
+    switchSubLabel: {
+        fontSize: 13,
+        color: color('secondaryLabel'),
+        marginTop: 2,
+    },
     inputRow: {
         paddingHorizontal: 16,
         paddingVertical: 8,
+    },
+    inputLabel: {
+        fontSize: 13,
+        color: color('secondaryLabel'),
+        marginBottom: 4,
     },
     textInput: {
         fontSize: 15,
@@ -338,8 +476,7 @@ const s = StyleSheet.create({
     iamLog: {
         fontSize: 12,
         color: color('secondaryLabel'),
-        paddingHorizontal: 16,
-        paddingBottom: 8,
+        padding: 12,
         fontFamily: 'Menlo',
     },
     modal: {

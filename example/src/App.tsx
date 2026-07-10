@@ -8,6 +8,8 @@ import {
     StyleSheet,
 } from 'react-native';
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import Ionicons from 'react-native-vector-icons/Ionicons';
 import { color, brand } from './colors';
 import { SFMCSdkModule } from '@sfmc/react-native-sfmc-core';
 import type { SFMCSdkApi } from '@sfmc/react-native-sfmc-core';
@@ -61,11 +63,15 @@ const eb = StyleSheet.create({
 type Tab = 'home' | 'identity' | 'inbox' | 'debug';
 
 const TABS: { key: Tab; icon: string; label: string }[] = [
-    { key: 'home',     icon: '⌂', label: 'Home' },
-    { key: 'identity', icon: '✎', label: 'Identity' },
-    { key: 'inbox',    icon: '✉', label: 'Inbox' },
-    { key: 'debug',    icon: '⚙', label: 'Debug' },
+    { key: 'home',     icon: 'home-outline',          label: 'Home' },
+    { key: 'identity', icon: 'person-circle-outline', label: 'Identity' },
+    { key: 'inbox',    icon: 'mail-outline',          label: 'Inbox' },
+    { key: 'debug',    icon: 'settings-outline',      label: 'Debug' },
 ];
+
+// AsyncStorage key for the IAM "app decides display" toggle. Persisted so the
+// choice survives both tab switches (which unmount HomeTab) and full relaunches.
+const IAM_DECISION_MODE_KEY = 'sfmc.example.iamDecisionMode';
 
 const TITLES: Record<Tab, string> = {
     home:     'SFMC SDK',
@@ -95,6 +101,10 @@ function AppInner() {
     const [activeTab, setActiveTab] = useState<Tab>('home');
     // Lifted out of HomeTab so it survives tab switches that unmount the tab.
     const [loggingEnabled, setLoggingEnabled] = useState(true);
+    // IAM "app decides display" toggle. Lifted here (survives tab switches) and
+    // persisted to AsyncStorage (survives relaunches). Defaults to true; the
+    // stored value, if any, is hydrated on mount.
+    const [iamDecisionMode, setIamDecisionMode] = useState(true);
 
     // Inbox nav bar actions — ref to avoid re-renders, state flag to trigger nav bar render
     const inboxActionsRef = useRef<InboxActions | null>(null);
@@ -103,6 +113,28 @@ function AppInner() {
     useEffect(() => {
         initAll();
     }, []);
+
+    // Hydrate the persisted IAM decision-mode choice on mount. Absent/invalid
+    // values leave the default (true) in place.
+    useEffect(() => {
+        AsyncStorage.getItem(IAM_DECISION_MODE_KEY)
+            .then((stored) => {
+                if (stored !== null) setIamDecisionMode(stored === 'true');
+            })
+            .catch(() => {
+                // Storage read failed; keep the default. Not fatal.
+            });
+    }, []);
+
+    // Persist on every change so the choice survives a relaunch. Mirrors the
+    // local state into AsyncStorage; the write is fire-and-forget.
+    function changeIamDecisionMode(enabled: boolean) {
+        setIamDecisionMode(enabled);
+        AsyncStorage.setItem(IAM_DECISION_MODE_KEY, String(enabled)).catch(() => {
+            // Storage write failed; in-memory state is still correct for this
+            // session. Not fatal.
+        });
+    }
 
     async function initAll() {
         const results = await Promise.allSettled([
@@ -186,6 +218,8 @@ function AppInner() {
                         iam={sdks.iam}
                         loggingEnabled={loggingEnabled}
                         onLoggingChange={setLoggingEnabled}
+                        iamDecisionMode={iamDecisionMode}
+                        onIamDecisionModeChange={changeIamDecisionMode}
                     />
                 )}
                 {activeTab === 'identity' && sdks.sfmc && sdks.mc && (
@@ -220,7 +254,11 @@ function AppInner() {
                         onPress={() => setActiveTab(t.key)}
                         activeOpacity={0.7}
                     >
-                        <Text style={[s.tabIcon, activeTab === t.key && s.tabIconActive]}>{t.icon}</Text>
+                        <Ionicons
+                            name={t.icon}
+                            size={22}
+                            color={activeTab === t.key ? brand.primary : '#8A95A5'}
+                        />
                         <Text style={[s.tabLabel, activeTab === t.key && s.tabLabelActive]}>{t.label}</Text>
                     </TouchableOpacity>
                 ))}
@@ -353,13 +391,6 @@ const s = StyleSheet.create({
         alignItems: 'center',
         paddingVertical: 6,
         gap: 3,
-    },
-    tabIcon: {
-        fontSize: 20,
-        color: '#8A95A5',
-    },
-    tabIconActive: {
-        color: brand.primary,
     },
     tabLabel: {
         fontSize: 11,

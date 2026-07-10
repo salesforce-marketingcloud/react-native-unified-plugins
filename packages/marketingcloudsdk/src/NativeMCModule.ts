@@ -53,7 +53,6 @@ export interface Spec extends TurboModule {
   removeTag(tag: string): void;
   removeTags(tags: string[]): void;
   getTags(): Promise<string[]>;
-  getAttributes(): Promise<Object>;
   enablePiAnalytics(): void;
   disablePiAnalytics(): void;
   isPiAnalyticsEnabled(): Promise<boolean>;
@@ -61,7 +60,8 @@ export interface Spec extends TurboModule {
   disableAnalytics(): void;
   isAnalyticsEnabled(): Promise<boolean>;
   getDeviceId(): Promise<string | null>;
-  getContactKey(): Promise<string | null>;
+  setSignedString(signedString: string | null): Promise<boolean>;
+  getSignedString(): Promise<string | null>;
   enableLogging(): void;
   disableLogging(): void;
   setRegistrationCallback(): void;

@@ -70,3 +70,4 @@ Push registration requires Firebase configuration on Android (`google-services.j
 ## License
 
 BSD 3-Clause. See [LICENSE](../../LICENSE) for details.
+

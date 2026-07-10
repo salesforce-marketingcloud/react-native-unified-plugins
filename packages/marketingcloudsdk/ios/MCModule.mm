@@ -201,15 +201,6 @@ RCT_EXPORT_METHOD(getTags:(RCTPromiseResolveBlock)resolve
     }];
 }
 
-// ── Attributes ──────────────────────────────────────────────────────────────────
-
-RCT_EXPORT_METHOD(getAttributes:(RCTPromiseResolveBlock)resolve
-                  rejecter:(RCTPromiseRejectBlock)reject) {
-    [SFMarketingCloudSdk requestSdk:^(id<MarketingCloudSdkInterface> _Nullable mc) {
-        resolve([mc attributes] ?: @{});
-    }];
-}
-
 // ── Analytics — PI ──────────────────────────────────────────────────────────────
 
 RCT_EXPORT_METHOD(enablePiAnalytics) {
@@ -252,8 +243,8 @@ RCT_EXPORT_METHOD(isAnalyticsEnabled:(RCTPromiseResolveBlock)resolve
     }];
 }
 
-// ── Device / contact ────────────────────────────────────────────────────────────
-// Discovered instance methods on MarketingCloudSdkInterface: deviceIdentifier, contactKey.
+// ── Device ──────────────────────────────────────────────────────────────────────
+// Discovered instance methods on MarketingCloudSdkInterface: deviceIdentifier.
 
 RCT_EXPORT_METHOD(getDeviceId:(RCTPromiseResolveBlock)resolve
                   rejecter:(RCTPromiseRejectBlock)reject) {
@@ -262,10 +253,33 @@ RCT_EXPORT_METHOD(getDeviceId:(RCTPromiseResolveBlock)resolve
     }];
 }
 
-RCT_EXPORT_METHOD(getContactKey:(RCTPromiseResolveBlock)resolve
+// ── Signed string ───────────────────────────────────────────────────────────────
+// Discovered selectors: setSignedString: (BOOL return), signedString.
+// nil signedString clears the stored token.
+// Both methods explicitly reject when mc is nil — ObjC messages to nil return 0/nil
+// silently, which would make SDK-unavailable indistinguishable from a legitimate
+// `false`/`null` result.
+
+RCT_EXPORT_METHOD(setSignedString:(NSString *)signedString
+                  resolver:(RCTPromiseResolveBlock)resolve
                   rejecter:(RCTPromiseRejectBlock)reject) {
     [SFMarketingCloudSdk requestSdk:^(id<MarketingCloudSdkInterface> _Nullable mc) {
-        resolve([mc contactKey]);
+        if (!mc) {
+            reject(@"sdk_unavailable", @"MarketingCloud SDK is not initialized", nil);
+            return;
+        }
+        resolve(@([mc setSignedString:signedString]));
+    }];
+}
+
+RCT_EXPORT_METHOD(getSignedString:(RCTPromiseResolveBlock)resolve
+                  rejecter:(RCTPromiseRejectBlock)reject) {
+    [SFMarketingCloudSdk requestSdk:^(id<MarketingCloudSdkInterface> _Nullable mc) {
+        if (!mc) {
+            reject(@"sdk_unavailable", @"MarketingCloud SDK is not initialized", nil);
+            return;
+        }
+        resolve([mc signedString]);
     }];
 }
 
