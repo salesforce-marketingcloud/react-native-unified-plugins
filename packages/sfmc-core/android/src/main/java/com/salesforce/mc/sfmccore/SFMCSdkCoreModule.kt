@@ -51,7 +51,11 @@ class SFMCSdkCoreModule(reactContext: ReactApplicationContext) :
 
     @ReactMethod
     override fun requestSfmcSdk(promise: Promise) {
-        SFMCSdk.requestSdk { _ -> promise.resolve(null) }
+        SFMCSdk.requestSdk { _ ->
+            BridgeQueue.runOnNativeModulesQueue(reactApplicationContext, promise) {
+                promise.resolve(null)
+            }
+        }
     }
 
     @ReactMethod
@@ -115,14 +119,20 @@ class SFMCSdkCoreModule(reactContext: ReactApplicationContext) :
     @ReactMethod
     override fun getProfileId(promise: Promise) {
         SFMCSdk.requestSdk { sdk ->
-            promise.resolve(sdk.identity.profileId)
+            val profileId = sdk.identity.profileId
+            BridgeQueue.runOnNativeModulesQueue(reactApplicationContext, promise) {
+                promise.resolve(profileId)
+            }
         }
     }
 
     @ReactMethod
     override fun getPartyIdentificationName(promise: Promise) {
         SFMCSdk.requestSdk { sdk ->
-            promise.resolve(sdk.identity.partyIdentificationName)
+            val name = sdk.identity.partyIdentificationName
+            BridgeQueue.runOnNativeModulesQueue(reactApplicationContext, promise) {
+                promise.resolve(name)
+            }
         }
     }
 
@@ -136,7 +146,10 @@ class SFMCSdkCoreModule(reactContext: ReactApplicationContext) :
     @ReactMethod
     override fun getPartyIdentificationNumber(promise: Promise) {
         SFMCSdk.requestSdk { sdk ->
-            promise.resolve(sdk.identity.partyIdentificationNumber)
+            val number = sdk.identity.partyIdentificationNumber
+            BridgeQueue.runOnNativeModulesQueue(reactApplicationContext, promise) {
+                promise.resolve(number)
+            }
         }
     }
 
@@ -150,7 +163,10 @@ class SFMCSdkCoreModule(reactContext: ReactApplicationContext) :
     @ReactMethod
     override fun getPartyIdentificationType(promise: Promise) {
         SFMCSdk.requestSdk { sdk ->
-            promise.resolve(sdk.identity.partyIdentificationType)
+            val type = sdk.identity.partyIdentificationType
+            BridgeQueue.runOnNativeModulesQueue(reactApplicationContext, promise) {
+                promise.resolve(type)
+            }
         }
     }
 
