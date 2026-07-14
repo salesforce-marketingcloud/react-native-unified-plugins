@@ -40,7 +40,27 @@ class AppDelegate: RCTAppDelegate {
         self.initialProps = [:]
         self.dependencyProvider = RCTAppDependencyProvider()
         configureSFMCSdk()
+
+        // Lets iOS wake the app via performFetchWithCompletionHandler so the
+        // MarketingCloudSDK can refresh location/proximity messages in the
+        // background (at most once per day). Only meaningful when location is
+        // enabled in the SDK config; also requires UIBackgroundModes → fetch.
+        if UIApplication.shared.backgroundRefreshStatus == .available {
+            UIApplication.shared.setMinimumBackgroundFetchInterval(
+                UIApplication.backgroundFetchIntervalMinimum
+            )
+        }
+
         return super.application(application, didFinishLaunchingWithOptions: launchOptions)
+    }
+
+    override func application(
+        _ application: UIApplication,
+        performFetchWithCompletionHandler completionHandler: @escaping (UIBackgroundFetchResult) -> Void
+    ) {
+        MarketingCloudSdk.requestSdk { mp in
+            completionHandler(mp == nil ? .failed : .newData)
+        }
     }
 
     // MobilePush SDK: OPTIONAL IMPLEMENTATION (if using Data Protection)

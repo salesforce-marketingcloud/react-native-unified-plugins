@@ -4,9 +4,9 @@
  * BSD-3-Clause
  */
 
-import type { InboxMessage } from '../types';
+import type { InboxMessage } from "../types";
 
-jest.mock('../NativeMCModule', () => ({
+jest.mock("../NativeMCModule", () => ({
   __esModule: true,
   default: {
     requestMcSdk: jest.fn().mockResolvedValue(undefined),
@@ -42,6 +42,16 @@ jest.mock('../NativeMCModule', () => ({
     disableLogging: jest.fn(),
     setRegistrationCallback: jest.fn(),
     unsetRegistrationCallback: jest.fn(),
+    enableLocation: jest.fn(),
+    disableLocation: jest.fn(),
+    isLocationEnabled: jest.fn(),
+    startWatchingLocation: jest.fn(),
+    stopWatchingLocation: jest.fn(),
+    isWatchingLocation: jest.fn(),
+    getLastKnownLocation: jest.fn(),
+    enableProximityMessaging: jest.fn(),
+    disableProximityMessaging: jest.fn(),
+    isProximityMessagingEnabled: jest.fn(),
     addListener: jest.fn(),
     removeListeners: jest.fn(),
   },
@@ -50,14 +60,14 @@ jest.mock('../NativeMCModule', () => ({
 type MockedNative = { [key: string]: jest.Mock };
 
 const loadModule = (): {
-  MarketingCloudSdkModule: typeof import('../MarketingCloudSdkModule').MarketingCloudSdkModule;
+  MarketingCloudSdkModule: typeof import("../MarketingCloudSdkModule").MarketingCloudSdkModule;
   Native: MockedNative;
 } => {
-  let mod!: typeof import('../MarketingCloudSdkModule');
+  let mod!: typeof import("../MarketingCloudSdkModule");
   let native!: MockedNative;
   jest.isolateModules(() => {
-    mod = require('../MarketingCloudSdkModule');
-    native = require('../NativeMCModule').default;
+    mod = require("../MarketingCloudSdkModule");
+    native = require("../NativeMCModule").default;
   });
   return {
     MarketingCloudSdkModule: mod.MarketingCloudSdkModule,
@@ -66,17 +76,17 @@ const loadModule = (): {
 };
 
 const stubMessage = (overrides: Partial<InboxMessage> = {}): InboxMessage =>
-  ({ id: 'm-1', ...overrides }) as InboxMessage;
+  ({ id: "m-1", ...overrides }) as InboxMessage;
 
-describe('MarketingCloudSdkModule', () => {
-  describe('requestSdk', () => {
-    it('awaits requestMcSdk on first invocation', async () => {
+describe("MarketingCloudSdkModule", () => {
+  describe("requestSdk", () => {
+    it("awaits requestMcSdk on first invocation", async () => {
       const { MarketingCloudSdkModule, Native } = loadModule();
       await MarketingCloudSdkModule.requestSdk();
       expect(Native.requestMcSdk).toHaveBeenCalledTimes(1);
     });
 
-    it('caches the api on subsequent calls', async () => {
+    it("caches the api on subsequent calls", async () => {
       const { MarketingCloudSdkModule, Native } = loadModule();
       const a = await MarketingCloudSdkModule.requestSdk();
       const b = await MarketingCloudSdkModule.requestSdk();
@@ -85,8 +95,8 @@ describe('MarketingCloudSdkModule', () => {
     });
   });
 
-  describe('inbox retrieval', () => {
-    it('forwards refreshInbox and returns its resolved value', async () => {
+  describe("inbox retrieval", () => {
+    it("forwards refreshInbox and returns its resolved value", async () => {
       const { MarketingCloudSdkModule, Native } = loadModule();
       Native.refreshInbox.mockResolvedValue(true);
       const api = await MarketingCloudSdkModule.requestSdk();
@@ -94,9 +104,9 @@ describe('MarketingCloudSdkModule', () => {
       expect(Native.refreshInbox).toHaveBeenCalledTimes(1);
     });
 
-    it('routes the four inbox getters to the matching native calls', async () => {
+    it("routes the four inbox getters to the matching native calls", async () => {
       const { MarketingCloudSdkModule, Native } = loadModule();
-      const msgs = [stubMessage({ id: 'a' }), stubMessage({ id: 'b' })];
+      const msgs = [stubMessage({ id: "a" }), stubMessage({ id: "b" })];
       Native.getAllMessages.mockResolvedValue(msgs);
       Native.getUnreadMessages.mockResolvedValue([msgs[0]]);
       Native.getReadMessages.mockResolvedValue([msgs[1]]);
@@ -109,7 +119,7 @@ describe('MarketingCloudSdkModule', () => {
       await expect(api.getDeletedMessages()).resolves.toEqual([]);
     });
 
-    it('routes the four count getters to the matching native calls', async () => {
+    it("routes the four count getters to the matching native calls", async () => {
       const { MarketingCloudSdkModule, Native } = loadModule();
       Native.getMessageCount.mockResolvedValue(4);
       Native.getUnreadMessageCount.mockResolvedValue(2);
@@ -124,17 +134,17 @@ describe('MarketingCloudSdkModule', () => {
     });
   });
 
-  describe('inbox mutations', () => {
-    it('forwards single-message read/delete with the given id', async () => {
+  describe("inbox mutations", () => {
+    it("forwards single-message read/delete with the given id", async () => {
       const { MarketingCloudSdkModule, Native } = loadModule();
       const api = await MarketingCloudSdkModule.requestSdk();
-      api.markMessageRead('id-1');
-      api.markMessageDeleted('id-2');
-      expect(Native.markMessageRead).toHaveBeenCalledWith('id-1');
-      expect(Native.markMessageDeleted).toHaveBeenCalledWith('id-2');
+      api.markMessageRead("id-1");
+      api.markMessageDeleted("id-2");
+      expect(Native.markMessageRead).toHaveBeenCalledWith("id-1");
+      expect(Native.markMessageDeleted).toHaveBeenCalledWith("id-2");
     });
 
-    it('routes markAllMessagesRead to the read native call only', async () => {
+    it("routes markAllMessagesRead to the read native call only", async () => {
       const { MarketingCloudSdkModule, Native } = loadModule();
       const api = await MarketingCloudSdkModule.requestSdk();
       api.markAllMessagesRead();
@@ -142,7 +152,7 @@ describe('MarketingCloudSdkModule', () => {
       expect(Native.markAllMessagesDeleted).not.toHaveBeenCalled();
     });
 
-    it('routes markAllMessagesDeleted to the delete native call only', async () => {
+    it("routes markAllMessagesDeleted to the delete native call only", async () => {
       const { MarketingCloudSdkModule, Native } = loadModule();
       const api = await MarketingCloudSdkModule.requestSdk();
       api.markAllMessagesDeleted();
@@ -150,39 +160,39 @@ describe('MarketingCloudSdkModule', () => {
       expect(Native.markAllMessagesRead).not.toHaveBeenCalled();
     });
 
-    it('forwards trackInboxMessageOpened with the full message payload', async () => {
+    it("forwards trackInboxMessageOpened with the full message payload", async () => {
       const { MarketingCloudSdkModule, Native } = loadModule();
       const api = await MarketingCloudSdkModule.requestSdk();
-      const msg = stubMessage({ id: 'trk-1' });
+      const msg = stubMessage({ id: "trk-1" });
       api.trackInboxMessageOpened(msg);
       expect(Native.trackInboxMessageOpened).toHaveBeenCalledWith(msg);
     });
   });
 
-  describe('tags', () => {
-    it('forwards add/remove for single and multi-tag variants', async () => {
+  describe("tags", () => {
+    it("forwards add/remove for single and multi-tag variants", async () => {
       const { MarketingCloudSdkModule, Native } = loadModule();
       const api = await MarketingCloudSdkModule.requestSdk();
-      api.addTag('t1');
-      api.addTags(['t2', 't3']);
-      api.removeTag('t1');
-      api.removeTags(['t2']);
-      expect(Native.addTag).toHaveBeenCalledWith('t1');
-      expect(Native.addTags).toHaveBeenCalledWith(['t2', 't3']);
-      expect(Native.removeTag).toHaveBeenCalledWith('t1');
-      expect(Native.removeTags).toHaveBeenCalledWith(['t2']);
+      api.addTag("t1");
+      api.addTags(["t2", "t3"]);
+      api.removeTag("t1");
+      api.removeTags(["t2"]);
+      expect(Native.addTag).toHaveBeenCalledWith("t1");
+      expect(Native.addTags).toHaveBeenCalledWith(["t2", "t3"]);
+      expect(Native.removeTag).toHaveBeenCalledWith("t1");
+      expect(Native.removeTags).toHaveBeenCalledWith(["t2"]);
     });
 
-    it('returns the native tags array', async () => {
+    it("returns the native tags array", async () => {
       const { MarketingCloudSdkModule, Native } = loadModule();
-      Native.getTags.mockResolvedValue(['a', 'b']);
+      Native.getTags.mockResolvedValue(["a", "b"]);
       const api = await MarketingCloudSdkModule.requestSdk();
-      await expect(api.getTags()).resolves.toEqual(['a', 'b']);
+      await expect(api.getTags()).resolves.toEqual(["a", "b"]);
     });
   });
 
-  describe('analytics toggles', () => {
-    it('routes enablePiAnalytics to the enable native call only', async () => {
+  describe("analytics toggles", () => {
+    it("routes enablePiAnalytics to the enable native call only", async () => {
       const { MarketingCloudSdkModule, Native } = loadModule();
       const api = await MarketingCloudSdkModule.requestSdk();
       api.enablePiAnalytics();
@@ -190,7 +200,7 @@ describe('MarketingCloudSdkModule', () => {
       expect(Native.disablePiAnalytics).not.toHaveBeenCalled();
     });
 
-    it('routes disablePiAnalytics to the disable native call only', async () => {
+    it("routes disablePiAnalytics to the disable native call only", async () => {
       const { MarketingCloudSdkModule, Native } = loadModule();
       const api = await MarketingCloudSdkModule.requestSdk();
       api.disablePiAnalytics();
@@ -198,7 +208,7 @@ describe('MarketingCloudSdkModule', () => {
       expect(Native.enablePiAnalytics).not.toHaveBeenCalled();
     });
 
-    it('returns true from isPiAnalyticsEnabled via the native call', async () => {
+    it("returns true from isPiAnalyticsEnabled via the native call", async () => {
       const { MarketingCloudSdkModule, Native } = loadModule();
       Native.isPiAnalyticsEnabled.mockResolvedValue(true);
       const api = await MarketingCloudSdkModule.requestSdk();
@@ -206,7 +216,7 @@ describe('MarketingCloudSdkModule', () => {
       expect(Native.isPiAnalyticsEnabled).toHaveBeenCalledTimes(1);
     });
 
-    it('returns false from isPiAnalyticsEnabled via the native call', async () => {
+    it("returns false from isPiAnalyticsEnabled via the native call", async () => {
       const { MarketingCloudSdkModule, Native } = loadModule();
       Native.isPiAnalyticsEnabled.mockResolvedValue(false);
       const api = await MarketingCloudSdkModule.requestSdk();
@@ -214,7 +224,7 @@ describe('MarketingCloudSdkModule', () => {
       expect(Native.isPiAnalyticsEnabled).toHaveBeenCalledTimes(1);
     });
 
-    it('routes enableAnalytics to the enable native call only', async () => {
+    it("routes enableAnalytics to the enable native call only", async () => {
       const { MarketingCloudSdkModule, Native } = loadModule();
       const api = await MarketingCloudSdkModule.requestSdk();
       api.enableAnalytics();
@@ -222,7 +232,7 @@ describe('MarketingCloudSdkModule', () => {
       expect(Native.disableAnalytics).not.toHaveBeenCalled();
     });
 
-    it('routes disableAnalytics to the disable native call only', async () => {
+    it("routes disableAnalytics to the disable native call only", async () => {
       const { MarketingCloudSdkModule, Native } = loadModule();
       const api = await MarketingCloudSdkModule.requestSdk();
       api.disableAnalytics();
@@ -230,7 +240,7 @@ describe('MarketingCloudSdkModule', () => {
       expect(Native.enableAnalytics).not.toHaveBeenCalled();
     });
 
-    it('returns false from isAnalyticsEnabled via the native call', async () => {
+    it("returns false from isAnalyticsEnabled via the native call", async () => {
       const { MarketingCloudSdkModule, Native } = loadModule();
       Native.isAnalyticsEnabled.mockResolvedValue(false);
       const api = await MarketingCloudSdkModule.requestSdk();
@@ -238,7 +248,7 @@ describe('MarketingCloudSdkModule', () => {
       expect(Native.isAnalyticsEnabled).toHaveBeenCalledTimes(1);
     });
 
-    it('returns true from isAnalyticsEnabled via the native call', async () => {
+    it("returns true from isAnalyticsEnabled via the native call", async () => {
       const { MarketingCloudSdkModule, Native } = loadModule();
       Native.isAnalyticsEnabled.mockResolvedValue(true);
       const api = await MarketingCloudSdkModule.requestSdk();
@@ -247,23 +257,23 @@ describe('MarketingCloudSdkModule', () => {
     });
   });
 
-  describe('device and signed string', () => {
-    it('returns getDeviceId from the native call', async () => {
+  describe("device and signed string", () => {
+    it("returns getDeviceId from the native call", async () => {
       const { MarketingCloudSdkModule, Native } = loadModule();
-      Native.getDeviceId.mockResolvedValue('device-1');
+      Native.getDeviceId.mockResolvedValue("device-1");
       const api = await MarketingCloudSdkModule.requestSdk();
-      await expect(api.getDeviceId()).resolves.toBe('device-1');
+      await expect(api.getDeviceId()).resolves.toBe("device-1");
     });
 
-    it('forwards setSignedString with a string and returns the resolved value', async () => {
+    it("forwards setSignedString with a string and returns the resolved value", async () => {
       const { MarketingCloudSdkModule, Native } = loadModule();
       Native.setSignedString.mockResolvedValue(true);
       const api = await MarketingCloudSdkModule.requestSdk();
-      await expect(api.setSignedString('signed')).resolves.toBe(true);
-      expect(Native.setSignedString).toHaveBeenCalledWith('signed');
+      await expect(api.setSignedString("signed")).resolves.toBe(true);
+      expect(Native.setSignedString).toHaveBeenCalledWith("signed");
     });
 
-    it('forwards setSignedString with null to clear and returns the resolved value', async () => {
+    it("forwards setSignedString with null to clear and returns the resolved value", async () => {
       const { MarketingCloudSdkModule, Native } = loadModule();
       Native.setSignedString.mockResolvedValue(false);
       const api = await MarketingCloudSdkModule.requestSdk();
@@ -271,16 +281,16 @@ describe('MarketingCloudSdkModule', () => {
       expect(Native.setSignedString).toHaveBeenCalledWith(null);
     });
 
-    it('returns the native signed string', async () => {
+    it("returns the native signed string", async () => {
       const { MarketingCloudSdkModule, Native } = loadModule();
-      Native.getSignedString.mockResolvedValue('signed');
+      Native.getSignedString.mockResolvedValue("signed");
       const api = await MarketingCloudSdkModule.requestSdk();
-      await expect(api.getSignedString()).resolves.toBe('signed');
+      await expect(api.getSignedString()).resolves.toBe("signed");
     });
   });
 
-  describe('logging and registration', () => {
-    it('routes enableLogging to the enable native call only', async () => {
+  describe("logging and registration", () => {
+    it("routes enableLogging to the enable native call only", async () => {
       const { MarketingCloudSdkModule, Native } = loadModule();
       const api = await MarketingCloudSdkModule.requestSdk();
       api.enableLogging();
@@ -288,7 +298,7 @@ describe('MarketingCloudSdkModule', () => {
       expect(Native.disableLogging).not.toHaveBeenCalled();
     });
 
-    it('routes disableLogging to the disable native call only', async () => {
+    it("routes disableLogging to the disable native call only", async () => {
       const { MarketingCloudSdkModule, Native } = loadModule();
       const api = await MarketingCloudSdkModule.requestSdk();
       api.disableLogging();
@@ -296,7 +306,7 @@ describe('MarketingCloudSdkModule', () => {
       expect(Native.enableLogging).not.toHaveBeenCalled();
     });
 
-    it('routes setRegistrationCallback to the set native call only', async () => {
+    it("routes setRegistrationCallback to the set native call only", async () => {
       const { MarketingCloudSdkModule, Native } = loadModule();
       const api = await MarketingCloudSdkModule.requestSdk();
       api.setRegistrationCallback();
@@ -304,7 +314,7 @@ describe('MarketingCloudSdkModule', () => {
       expect(Native.unsetRegistrationCallback).not.toHaveBeenCalled();
     });
 
-    it('routes unsetRegistrationCallback to the unset native call only', async () => {
+    it("routes unsetRegistrationCallback to the unset native call only", async () => {
       const { MarketingCloudSdkModule, Native } = loadModule();
       const api = await MarketingCloudSdkModule.requestSdk();
       api.unsetRegistrationCallback();
@@ -313,12 +323,12 @@ describe('MarketingCloudSdkModule', () => {
     });
   });
 
-  describe('cache resilience', () => {
-    it('propagates rejections from requestMcSdk without caching', async () => {
+  describe("cache resilience", () => {
+    it("propagates rejections from requestMcSdk without caching", async () => {
       const { MarketingCloudSdkModule, Native } = loadModule();
-      Native.requestMcSdk.mockRejectedValueOnce(new Error('nope'));
+      Native.requestMcSdk.mockRejectedValueOnce(new Error("nope"));
       await expect(MarketingCloudSdkModule.requestSdk()).rejects.toThrow(
-        'nope',
+        "nope",
       );
       Native.requestMcSdk.mockResolvedValue(undefined);
       await MarketingCloudSdkModule.requestSdk();
@@ -326,18 +336,18 @@ describe('MarketingCloudSdkModule', () => {
     });
   });
 
-  describe('getEmitter', () => {
-    it('returns an event emitter bound to the native module', () => {
+  describe("getEmitter", () => {
+    it("returns an event emitter bound to the native module", () => {
       const { MarketingCloudSdkModule, Native } = loadModule();
       const emitter = MarketingCloudSdkModule.getEmitter() as unknown as {
         nativeModule: unknown;
         addListener: unknown;
       };
-      expect(typeof emitter.addListener).toBe('function');
+      expect(typeof emitter.addListener).toBe("function");
       expect(emitter.nativeModule).toBe(Native);
     });
 
-    it('caches the emitter', () => {
+    it("caches the emitter", () => {
       const { MarketingCloudSdkModule } = loadModule();
       expect(MarketingCloudSdkModule.getEmitter()).toBe(
         MarketingCloudSdkModule.getEmitter(),
