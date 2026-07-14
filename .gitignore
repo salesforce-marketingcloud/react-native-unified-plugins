@@ -32,6 +32,9 @@ node_modules/
 # TypeScript build output
 *.tsbuildinfo
 
+# Test output
+coverage/
+
 # Android (match at any depth)
 .gradle/
 .kotlin/

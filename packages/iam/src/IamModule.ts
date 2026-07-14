@@ -103,8 +103,12 @@ export const IamModule = {
           (message: InAppMessage) => {
             const current = _decisionHandler;
             // Default to suppressing if the handler was cleared between the
-            // native emit and this callback.
-            Promise.resolve(current ? current(message) : false)
+            // native emit and this callback. Wrap the invocation in a
+            // Promise so a synchronously-throwing handler routes through the
+            // same fail-closed path as a rejecting one.
+            new Promise<boolean>((resolve) => {
+              resolve(current ? current(message) : false);
+            })
               .then((show) => {
                 try {
                   NativeModule.resolveInAppMessageDecision(message.id, !!show);
