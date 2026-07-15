@@ -201,6 +201,67 @@ export default function HomeTab({
     return false;
   }
 
+  // ACCESS_FINE_LOCATION is required for both geofence and proximity messaging;
+  // ACCESS_BACKGROUND_LOCATION unlocks background triggers. Proximity also
+  // needs BLUETOOTH_CONNECT — request it when the caller asks for `bluetooth`.
+  async function ensureLocationPermission({
+    bluetooth = false,
+  }: { bluetooth?: boolean } = {}): Promise<boolean> {
+    if (Platform.OS !== "android") return true;
+
+    const fine = PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION;
+    if (!(await PermissionsAndroid.check(fine))) {
+      const result = await PermissionsAndroid.request(fine, {
+        title: "Allow location",
+        message:
+          "Enable location to receive geofence and proximity messages from Marketing Cloud.",
+        buttonPositive: "Allow",
+        buttonNegative: "Not now",
+      });
+      if (result === PermissionsAndroid.RESULTS.NEVER_ASK_AGAIN) {
+        Alert.alert(
+          "Location blocked",
+          "Location is blocked. Enable it in system settings to receive geofence and proximity messages.",
+          [
+            { text: "Cancel", style: "cancel" },
+            { text: "Open Settings", onPress: () => Linking.openSettings() },
+          ],
+        );
+        return false;
+      }
+      if (result !== PermissionsAndroid.RESULTS.GRANTED) return false;
+    }
+
+    // Best-effort on Android 11+: the OS routes ACCESS_BACKGROUND_LOCATION and
+    // BLUETOOTH_CONNECT to system settings rather than an in-app dialog. Don't
+    // block the toggle if the user declines — foreground grant is enough for
+    // the SDK to enable messaging.
+    const bgLoc = PermissionsAndroid.PERMISSIONS.ACCESS_BACKGROUND_LOCATION;
+    if (!(await PermissionsAndroid.check(bgLoc))) {
+      await PermissionsAndroid.request(bgLoc, {
+        title: "Allow background location",
+        message:
+          "Allow location access all the time so geofence and proximity messages work in the background.",
+        buttonPositive: "Allow",
+        buttonNegative: "Not now",
+      });
+    }
+
+    if (bluetooth) {
+      const bt = PermissionsAndroid.PERMISSIONS.BLUETOOTH_CONNECT;
+      if (bt && !(await PermissionsAndroid.check(bt))) {
+        await PermissionsAndroid.request(bt, {
+          title: "Allow Bluetooth",
+          message: "Bluetooth is required to detect proximity beacons.",
+          buttonPositive: "Allow",
+          buttonNegative: "Not now",
+        });
+      }
+    }
+
+    return true;
+  }
+
   async function onPushToggle(v: boolean) {
     if (v) {
       const granted = await ensureNotificationPermission();
@@ -296,10 +357,18 @@ export default function HomeTab({
     iam.setFont(name);
   }
 
-  function onLocationEnabledToggle(v: boolean) {
-    setLocationEnabled(v);
-    if (v) mc.enableLocation();
-    else mc.disableLocation();
+  async function onLocationEnabledToggle(v: boolean) {
+    if (v) {
+      if (!(await ensureLocationPermission())) {
+        setLocationEnabled(false);
+        return;
+      }
+      setLocationEnabled(true);
+      mc.enableLocation();
+    } else {
+      setLocationEnabled(false);
+      mc.disableLocation();
+    }
   }
 
   function onWatchingLocationToggle(v: boolean) {
@@ -308,10 +377,18 @@ export default function HomeTab({
     else mc.stopWatchingLocation();
   }
 
-  function onProximityToggle(v: boolean) {
-    setProximityEnabled(v);
-    if (v) mc.enableProximityMessaging();
-    else mc.disableProximityMessaging();
+  async function onProximityToggle(v: boolean) {
+    if (v) {
+      if (!(await ensureLocationPermission({ bluetooth: true }))) {
+        setProximityEnabled(false);
+        return;
+      }
+      setProximityEnabled(true);
+      mc.enableProximityMessaging();
+    } else {
+      setProximityEnabled(false);
+      mc.disableProximityMessaging();
+    }
   }
 
   async function refreshLastKnownLocation() {

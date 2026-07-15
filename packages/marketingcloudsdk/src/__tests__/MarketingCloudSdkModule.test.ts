@@ -323,6 +323,119 @@ describe("MarketingCloudSdkModule", () => {
     });
   });
 
+  describe("location", () => {
+    it("routes enableLocation to the enable native call only", async () => {
+      const { MarketingCloudSdkModule, Native } = loadModule();
+      const api = await MarketingCloudSdkModule.requestSdk();
+      api.enableLocation();
+      expect(Native.enableLocation).toHaveBeenCalledTimes(1);
+      expect(Native.disableLocation).not.toHaveBeenCalled();
+    });
+
+    it("routes disableLocation to the disable native call only", async () => {
+      const { MarketingCloudSdkModule, Native } = loadModule();
+      const api = await MarketingCloudSdkModule.requestSdk();
+      api.disableLocation();
+      expect(Native.disableLocation).toHaveBeenCalledTimes(1);
+      expect(Native.enableLocation).not.toHaveBeenCalled();
+    });
+
+    it("returns true from isLocationEnabled via the native call", async () => {
+      const { MarketingCloudSdkModule, Native } = loadModule();
+      Native.isLocationEnabled.mockResolvedValue(true);
+      const api = await MarketingCloudSdkModule.requestSdk();
+      await expect(api.isLocationEnabled()).resolves.toBe(true);
+      expect(Native.isLocationEnabled).toHaveBeenCalledTimes(1);
+    });
+
+    it("returns false from isLocationEnabled via the native call", async () => {
+      const { MarketingCloudSdkModule, Native } = loadModule();
+      Native.isLocationEnabled.mockResolvedValue(false);
+      const api = await MarketingCloudSdkModule.requestSdk();
+      await expect(api.isLocationEnabled()).resolves.toBe(false);
+    });
+
+    it("routes startWatchingLocation to the start native call only", async () => {
+      const { MarketingCloudSdkModule, Native } = loadModule();
+      const api = await MarketingCloudSdkModule.requestSdk();
+      api.startWatchingLocation();
+      expect(Native.startWatchingLocation).toHaveBeenCalledTimes(1);
+      expect(Native.stopWatchingLocation).not.toHaveBeenCalled();
+    });
+
+    it("routes stopWatchingLocation to the stop native call only", async () => {
+      const { MarketingCloudSdkModule, Native } = loadModule();
+      const api = await MarketingCloudSdkModule.requestSdk();
+      api.stopWatchingLocation();
+      expect(Native.stopWatchingLocation).toHaveBeenCalledTimes(1);
+      expect(Native.startWatchingLocation).not.toHaveBeenCalled();
+    });
+
+    it("returns true from isWatchingLocation via the native call", async () => {
+      const { MarketingCloudSdkModule, Native } = loadModule();
+      Native.isWatchingLocation.mockResolvedValue(true);
+      const api = await MarketingCloudSdkModule.requestSdk();
+      await expect(api.isWatchingLocation()).resolves.toBe(true);
+      expect(Native.isWatchingLocation).toHaveBeenCalledTimes(1);
+    });
+
+    it("returns false from isWatchingLocation via the native call", async () => {
+      const { MarketingCloudSdkModule, Native } = loadModule();
+      Native.isWatchingLocation.mockResolvedValue(false);
+      const api = await MarketingCloudSdkModule.requestSdk();
+      await expect(api.isWatchingLocation()).resolves.toBe(false);
+    });
+
+    it("passes getLastKnownLocation dictionary through unchanged", async () => {
+      const { MarketingCloudSdkModule, Native } = loadModule();
+      const loc = { latitude: "37.7749", longitude: "-122.4194" };
+      Native.getLastKnownLocation.mockResolvedValue(loc);
+      const api = await MarketingCloudSdkModule.requestSdk();
+      await expect(api.getLastKnownLocation()).resolves.toEqual(loc);
+      expect(Native.getLastKnownLocation).toHaveBeenCalledTimes(1);
+    });
+
+    it("returns null from getLastKnownLocation when native resolves null", async () => {
+      const { MarketingCloudSdkModule, Native } = loadModule();
+      Native.getLastKnownLocation.mockResolvedValue(null);
+      const api = await MarketingCloudSdkModule.requestSdk();
+      await expect(api.getLastKnownLocation()).resolves.toBeNull();
+    });
+  });
+
+  describe("proximity", () => {
+    it("routes enableProximityMessaging to the enable native call only", async () => {
+      const { MarketingCloudSdkModule, Native } = loadModule();
+      const api = await MarketingCloudSdkModule.requestSdk();
+      api.enableProximityMessaging();
+      expect(Native.enableProximityMessaging).toHaveBeenCalledTimes(1);
+      expect(Native.disableProximityMessaging).not.toHaveBeenCalled();
+    });
+
+    it("routes disableProximityMessaging to the disable native call only", async () => {
+      const { MarketingCloudSdkModule, Native } = loadModule();
+      const api = await MarketingCloudSdkModule.requestSdk();
+      api.disableProximityMessaging();
+      expect(Native.disableProximityMessaging).toHaveBeenCalledTimes(1);
+      expect(Native.enableProximityMessaging).not.toHaveBeenCalled();
+    });
+
+    it("returns true from isProximityMessagingEnabled via the native call", async () => {
+      const { MarketingCloudSdkModule, Native } = loadModule();
+      Native.isProximityMessagingEnabled.mockResolvedValue(true);
+      const api = await MarketingCloudSdkModule.requestSdk();
+      await expect(api.isProximityMessagingEnabled()).resolves.toBe(true);
+      expect(Native.isProximityMessagingEnabled).toHaveBeenCalledTimes(1);
+    });
+
+    it("returns false from isProximityMessagingEnabled via the native call", async () => {
+      const { MarketingCloudSdkModule, Native } = loadModule();
+      Native.isProximityMessagingEnabled.mockResolvedValue(false);
+      const api = await MarketingCloudSdkModule.requestSdk();
+      await expect(api.isProximityMessagingEnabled()).resolves.toBe(false);
+    });
+  });
+
   describe("cache resilience", () => {
     it("propagates rejections from requestMcSdk without caching", async () => {
       const { MarketingCloudSdkModule, Native } = loadModule();

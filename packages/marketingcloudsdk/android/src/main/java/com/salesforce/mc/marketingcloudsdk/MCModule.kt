@@ -410,7 +410,10 @@ class MCModule(reactContext: ReactApplicationContext) :
     @ReactMethod
     override fun isLocationEnabled(promise: Promise) {
         MarketingCloudSdk.requestSdk { sdk ->
-            promise.resolve(sdk.getRegionMessageManager().isGeofenceMessagingEnabled())
+            val enabled = sdk.getRegionMessageManager().isGeofenceMessagingEnabled()
+            BridgeQueue.runOnNativeModulesQueue(reactApplicationContext, promise) {
+                promise.resolve(enabled)
+            }
         }
     }
 
@@ -454,7 +457,10 @@ class MCModule(reactContext: ReactApplicationContext) :
     @ReactMethod
     override fun isProximityMessagingEnabled(promise: Promise) {
         MarketingCloudSdk.requestSdk { sdk ->
-            promise.resolve(sdk.getRegionMessageManager().isProximityMessagingEnabled())
+            val enabled = sdk.getRegionMessageManager().isProximityMessagingEnabled()
+            BridgeQueue.runOnNativeModulesQueue(reactApplicationContext, promise) {
+                promise.resolve(enabled)
+            }
         }
     }
 

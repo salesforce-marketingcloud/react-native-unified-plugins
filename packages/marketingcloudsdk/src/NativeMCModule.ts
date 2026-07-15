@@ -72,7 +72,7 @@ export interface Spec extends TurboModule {
   startWatchingLocation(): void;
   stopWatchingLocation(): void;
   isWatchingLocation(): Promise<boolean>;
-  getLastKnownLocation(): Promise<Object | null>;
+  getLastKnownLocation(): Promise<{ [key: string]: string } | null>;
   enableProximityMessaging(): void;
   disableProximityMessaging(): void;
   isProximityMessagingEnabled(): Promise<boolean>;
