@@ -30,9 +30,9 @@
  * @class MarketingCloudSdkModule
  */
 
-import { NativeEventEmitter } from 'react-native';
-import NativeModule from './NativeMCModule';
-import type { MarketingCloudSdkApi, InboxMessage } from './types';
+import { NativeEventEmitter } from "react-native";
+import NativeModule from "./NativeMCModule";
+import type { MarketingCloudSdkApi, InboxMessage } from "./types";
 
 let _api: MarketingCloudSdkApi | null = null;
 let _emitter: NativeEventEmitter | null = null;
@@ -82,6 +82,17 @@ export const MarketingCloudSdkModule = {
       disableLogging: () => NativeModule.disableLogging(),
       setRegistrationCallback: () => NativeModule.setRegistrationCallback(),
       unsetRegistrationCallback: () => NativeModule.unsetRegistrationCallback(),
+      enableLocation: () => NativeModule.enableLocation(),
+      disableLocation: () => NativeModule.disableLocation(),
+      isLocationEnabled: () => NativeModule.isLocationEnabled(),
+      startWatchingLocation: () => NativeModule.startWatchingLocation(),
+      stopWatchingLocation: () => NativeModule.stopWatchingLocation(),
+      isWatchingLocation: () => NativeModule.isWatchingLocation(),
+      getLastKnownLocation: () => NativeModule.getLastKnownLocation(),
+      enableProximityMessaging: () => NativeModule.enableProximityMessaging(),
+      disableProximityMessaging: () => NativeModule.disableProximityMessaging(),
+      isProximityMessagingEnabled: () =>
+        NativeModule.isProximityMessagingEnabled(),
     };
     return _api;
   },

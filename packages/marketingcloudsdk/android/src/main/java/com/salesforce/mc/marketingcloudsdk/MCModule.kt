@@ -389,6 +389,81 @@ class MCModule(reactContext: ReactApplicationContext) :
         super.invalidate()
     }
 
+    // ── Location ────────────────────────────────────────────────────────────
+    // Android drives geofence messaging through RegionMessageManager. iOS-only
+    // watch APIs are no-ops here; getLastKnownLocation resolves null.
+
+    @ReactMethod
+    override fun enableLocation() {
+        MarketingCloudSdk.requestSdk { sdk ->
+            sdk.getRegionMessageManager().enableGeofenceMessaging()
+        }
+    }
+
+    @ReactMethod
+    override fun disableLocation() {
+        MarketingCloudSdk.requestSdk { sdk ->
+            sdk.getRegionMessageManager().disableGeofenceMessaging()
+        }
+    }
+
+    @ReactMethod
+    override fun isLocationEnabled(promise: Promise) {
+        MarketingCloudSdk.requestSdk { sdk ->
+            val enabled = sdk.getRegionMessageManager().isGeofenceMessagingEnabled()
+            BridgeQueue.runOnNativeModulesQueue(reactApplicationContext, promise) {
+                promise.resolve(enabled)
+            }
+        }
+    }
+
+    @ReactMethod
+    override fun startWatchingLocation() {
+        // iOS-only; no direct equivalent on Android (geofence transitions
+        // are driven by enableLocation / disableLocation).
+    }
+
+    @ReactMethod
+    override fun stopWatchingLocation() {
+        // iOS-only; no direct equivalent on Android.
+    }
+
+    @ReactMethod
+    override fun isWatchingLocation(promise: Promise) {
+        promise.resolve(false)
+    }
+
+    @ReactMethod
+    override fun getLastKnownLocation(promise: Promise) {
+        promise.resolve(null)
+    }
+
+    // ── Proximity ───────────────────────────────────────────────────────────
+
+    @ReactMethod
+    override fun enableProximityMessaging() {
+        MarketingCloudSdk.requestSdk { sdk ->
+            sdk.getRegionMessageManager().enableProximityMessaging()
+        }
+    }
+
+    @ReactMethod
+    override fun disableProximityMessaging() {
+        MarketingCloudSdk.requestSdk { sdk ->
+            sdk.getRegionMessageManager().disableProximityMessaging()
+        }
+    }
+
+    @ReactMethod
+    override fun isProximityMessagingEnabled(promise: Promise) {
+        MarketingCloudSdk.requestSdk { sdk ->
+            val enabled = sdk.getRegionMessageManager().isProximityMessagingEnabled()
+            BridgeQueue.runOnNativeModulesQueue(reactApplicationContext, promise) {
+                promise.resolve(enabled)
+            }
+        }
+    }
+
     @ReactMethod
     override fun addListener(eventName: String) {}
 

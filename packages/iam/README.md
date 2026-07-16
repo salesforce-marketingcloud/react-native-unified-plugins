@@ -78,6 +78,54 @@ The `InAppMessage` payload guarantees `id` on both platforms and surfaces the sa
 
 The close action's `type` is normalized across platforms to `IamDismissReason`: `'AUTO' | 'BUTTON' | 'CLOSED' | 'UNKNOWN'`. (`UNKNOWN` originates from Android; iOS reports only the first three.)
 
+## Deciding whether a message should display
+
+You have two ways to control whether an in-app message renders:
+
+1. **`showInAppMessage(id)`** — programmatically request that a specific message be displayed. Useful when you have already decided elsewhere (e.g. after a route change or a user action).
+2. **`IamModule.setInAppMessageDecisionHandler(handler)`** — register a global gate that runs for **every** message the SDK is about to show, letting you approve or suppress each one.
+
+### What to expect from `setInAppMessageDecisionHandler`
+
+- **Timing.** Your handler runs *before* the message is drawn. Approved messages appear a few milliseconds later than they would without a handler — the SDK asks natively, waits for your async reply, and only then displays. In practice this is imperceptible unless your handler awaits network I/O.
+- **Payload.** Your handler receives the full `InAppMessage` — you can branch on `id`, `type`, `priority`, `buttons`, dates, etc. — not just the id.
+- **Return type.** Return a `boolean` or a `Promise<boolean>`. Anything else is coerced to `Boolean`.
+- **Fail-closed.** If your handler throws (or the promise rejects), the message is **suppressed** and a warning is logged. Design the happy path to return `true` and only return `false` when you're sure.
+- **One handler at a time.** Calling `setInAppMessageDecisionHandler` again replaces the previous handler. Pass `null` to remove it entirely and let all messages display.
+- **Lifetime.** The handler is registered globally on the module — it stays active for the entire session (across screens, navigation, foreground/background). Register it once, near your SDK bootstrap.
+- **`willShow` still fires.** The `sfmc_iam_will_show` event is emitted for every candidate message regardless of your decision — it is observational only. To *block* display, return `false` from the handler; do not try to intercept from the emitter.
+
+### Example — gate on a customer flag
+
+```ts
+import { IamModule } from '@sfmc/react-native-iam';
+
+IamModule.setInAppMessageDecisionHandler(async (message) => {
+  // Suppress marketing messages while onboarding is in progress.
+  if (userIsOnboarding()) return false;
+
+  // Ask a remote policy service for anything with a "critical" tag.
+  if (message.type === 'modal' && message.priority >= 8) {
+    return await policyService.allow(message.id);
+  }
+
+  // Default to showing everything else.
+  return true;
+});
+
+// Later, e.g. on sign-out:
+IamModule.setInAppMessageDecisionHandler(null);
+```
+
+### What *not* to do
+
+- Don't rely on JS-side filtering to hide messages you never want delivered — configure the campaign to not target these users instead. The decision handler is a per-app runtime gate, not a targeting mechanism.
+- Don't run long-blocking work in the handler. Every millisecond delays the message display and, if your handler is running when the user backgrounds the app, the SDK may never get the chance to render it. Cache decisions where you can.
+- Don't call `showInAppMessage(id)` from inside the handler for the same id — the SDK will re-invoke your handler in a loop.
+- Don't register the handler before `IamModule.requestSdk()` resolves — the internal event subscription is set up when the emitter is first used. Handlers registered before `requestSdk()` still work, but if you call `setInAppMessageDecisionHandler(null)` before the SDK is requested, there is nothing to clear.
+
+> Curious how this is wired up under the hood (SDK's synchronous `shouldShow` gate, the defer-then-reshow pattern, threading model)? See [`docs/show-message-internals.md`](./docs/show-message-internals.md). That's a contributor reference, not a customer guide.
+
 ## Notes
 
 - The native `shouldShowMessage` gate is synchronous and cannot block on an async JS reply, so `setInAppMessageDecisionHandler` uses a defer-then-reshow model: the SDK is told *not* to show the message immediately, the handler is invoked with the full message, and if it resolves `true` the message is re-displayed (the same path as `showInAppMessage`). The visible effect is that an approved message appears a few milliseconds later than it would natively. The `willShow` event is still emitted on every gate decision so JS can observe it.

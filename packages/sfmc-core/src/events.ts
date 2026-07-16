@@ -58,19 +58,19 @@ export interface Order {
  * @see  {@link https://salesforce-marketingcloud.github.io/MarketingCloudSDK-iOS/appledocs/SFMCSdk/11.0/Classes/CustomEvent.html |iOS Docs}
  */
 export interface CustomEvent {
-  objType: 'CustomEvent';
+  objType: "CustomEvent";
   name: string;
   attributes?: Record<string, string | number | boolean>;
 }
 
 export interface EngagementEvent {
-  objType: 'EngagementEvent';
+  objType: "EngagementEvent";
   name: string;
   attributes?: Record<string, string | number | boolean>;
 }
 
 export interface SystemEvent {
-  objType: 'SystemEvent';
+  objType: "SystemEvent";
   name: string;
   attributes?: Record<string, string | number | boolean>;
 }
@@ -79,8 +79,8 @@ export interface SystemEvent {
  * @deprecated Use {@link CustomEvent} instead with an appropriate event name and attributes.
  */
 export interface CartEvent {
-  objType: 'CartEvent';
-  subtype: 'add' | 'remove' | 'replace';
+  objType: "CartEvent";
+  subtype: "add" | "remove" | "replace";
   lineItems: LineItem[];
 }
 
@@ -88,15 +88,15 @@ export interface CartEvent {
  * @deprecated Use {@link CustomEvent} instead with an appropriate event name and attributes.
  */
 export interface OrderEvent {
-  objType: 'OrderEvent';
+  objType: "OrderEvent";
   subtype:
-    | 'purchase'
-    | 'preorder'
-    | 'cancel'
-    | 'ship'
-    | 'deliver'
-    | 'return'
-    | 'exchange';
+    | "purchase"
+    | "preorder"
+    | "cancel"
+    | "ship"
+    | "deliver"
+    | "return"
+    | "exchange";
   order: Order;
 }
 
@@ -104,15 +104,15 @@ export interface OrderEvent {
  * @deprecated Use {@link CustomEvent} instead with an appropriate event name and attributes.
  */
 export interface CatalogObjectEvent {
-  objType: 'CatalogEvent';
+  objType: "CatalogEvent";
   subtype:
-    | 'comment'
-    | 'view'
-    | 'quickView'
-    | 'viewDetail'
-    | 'favorite'
-    | 'share'
-    | 'review';
+    | "comment"
+    | "view"
+    | "quickView"
+    | "viewDetail"
+    | "favorite"
+    | "share"
+    | "review";
   catalogObject: CatalogObject;
 }
 

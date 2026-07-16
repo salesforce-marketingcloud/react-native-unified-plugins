@@ -30,9 +30,9 @@
  * @class MobileAppMessagingModule
  */
 
-import { NativeEventEmitter } from 'react-native';
-import NativeModule from './NativeMAMModule';
-import type { MobileAppMessagingApi } from './types';
+import { NativeEventEmitter } from "react-native";
+import NativeModule from "./NativeMAMModule";
+import type { MobileAppMessagingApi } from "./types";
 
 let _api: MobileAppMessagingApi | null = null;
 let _emitter: NativeEventEmitter | null = null;

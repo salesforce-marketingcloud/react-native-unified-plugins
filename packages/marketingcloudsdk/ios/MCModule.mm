@@ -33,6 +33,8 @@
 #import <MarketingCloudSDK/MarketingCloudSDK-Swift.h>
 #import "InboxUtility.h"
 
+static NSString *const kEventRegistration = @"sfmc_mc_registration";
+
 @interface MCModule : RCTEventEmitter <RCTBridgeModule, RCTTurboModule>
 @end
 
@@ -41,7 +43,7 @@
 RCT_EXPORT_MODULE(MCModule);
 
 - (NSArray<NSString *> *)supportedEvents {
-    return @[@"sfmc_mc_registration"];
+    return @[kEventRegistration];
 }
 
 - (std::shared_ptr<facebook::react::TurboModule>)getTurboModule:
@@ -290,7 +292,7 @@ RCT_EXPORT_METHOD(setRegistrationCallback) {
     __weak __typeof(self) weakSelf = self;
     [SFMarketingCloudSdk requestSdk:^(id<MarketingCloudSdkInterface> _Nullable mc) {
         [mc setRegistrationCallback:^(NSDictionary * _Nonnull registration) {
-            [weakSelf sendEventWithName:@"sfmc_mc_registration" body:registration];
+            [weakSelf sendEventWithName:kEventRegistration body:registration];
         }];
     }];
 }
@@ -302,8 +304,8 @@ RCT_EXPORT_METHOD(unsetRegistrationCallback) {
 }
 
 // Best-effort cleanup if JS never called unsetRegistrationCallback before bridge
-// teardown. The block uses weakSelf so ARC already releases the module, but the
-// SDK keeps invoking the dead block forever — clear it here.
+// teardown. The block uses weakSelf so ARC already releases the module, but
+// the SDK keeps invoking the dead block forever — clear it here.
 - (void)invalidate {
     [SFMarketingCloudSdk requestSdk:^(id<MarketingCloudSdkInterface> _Nullable mc) {
         [mc unsetRegistrationCallback];
@@ -321,6 +323,74 @@ RCT_EXPORT_METHOD(disableLogging) {
     [SFMarketingCloudSdk requestSdk:^(id<MarketingCloudSdkInterface> _Nullable mc) {
         [mc setDebugLoggingEnabled:NO];
     }];
+}
+
+// ── Location ────────────────────────────────────────────────────────────────────
+// Developer override on SFMarketingCloudSdk. Watch is a distinct API from the
+// enablement flag — keep them separate on the JS surface.
+
+RCT_EXPORT_METHOD(enableLocation) {
+    [SFMarketingCloudSdk requestSdk:^(id<MarketingCloudSdkInterface> _Nullable mc) {
+        [mc setLocationEnabled:YES];
+    }];
+}
+
+RCT_EXPORT_METHOD(disableLocation) {
+    [SFMarketingCloudSdk requestSdk:^(id<MarketingCloudSdkInterface> _Nullable mc) {
+        [mc setLocationEnabled:NO];
+    }];
+}
+
+RCT_EXPORT_METHOD(isLocationEnabled:(RCTPromiseResolveBlock)resolve
+                  rejecter:(RCTPromiseRejectBlock)reject) {
+    [SFMarketingCloudSdk requestSdk:^(id<MarketingCloudSdkInterface> _Nullable mc) {
+        resolve(@([mc isLocationEnabled]));
+    }];
+}
+
+RCT_EXPORT_METHOD(startWatchingLocation) {
+    [SFMarketingCloudSdk requestSdk:^(id<MarketingCloudSdkInterface> _Nullable mc) {
+        [mc startWatchingLocation];
+    }];
+}
+
+RCT_EXPORT_METHOD(stopWatchingLocation) {
+    [SFMarketingCloudSdk requestSdk:^(id<MarketingCloudSdkInterface> _Nullable mc) {
+        [mc stopWatchingLocation];
+    }];
+}
+
+RCT_EXPORT_METHOD(isWatchingLocation:(RCTPromiseResolveBlock)resolve
+                  rejecter:(RCTPromiseRejectBlock)reject) {
+    [SFMarketingCloudSdk requestSdk:^(id<MarketingCloudSdkInterface> _Nullable mc) {
+        resolve(@([mc watchingLocation]));
+    }];
+}
+
+RCT_EXPORT_METHOD(getLastKnownLocation:(RCTPromiseResolveBlock)resolve
+                  rejecter:(RCTPromiseRejectBlock)reject) {
+    [SFMarketingCloudSdk requestSdk:^(id<MarketingCloudSdkInterface> _Nullable mc) {
+        resolve([mc lastKnownLocation]);
+    }];
+}
+
+// ── Proximity ───────────────────────────────────────────────────────────────────
+// Stubs only. iOS has no separate proximity enable/disable API — proximity
+// (beacon) messaging is governed by the shared location enablement flag and
+// the app's Bluetooth permission. Exposed here for JS-surface parity with
+// Android's RegionMessageManager.
+
+RCT_EXPORT_METHOD(enableProximityMessaging) {
+    // no-op on iOS
+}
+
+RCT_EXPORT_METHOD(disableProximityMessaging) {
+    // no-op on iOS
+}
+
+RCT_EXPORT_METHOD(isProximityMessagingEnabled:(RCTPromiseResolveBlock)resolve
+                  rejecter:(RCTPromiseRejectBlock)reject) {
+    resolve(@NO);
 }
 
 @end

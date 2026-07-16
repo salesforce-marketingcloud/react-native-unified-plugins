@@ -29,8 +29,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-import type { TurboModule } from 'react-native';
-import { TurboModuleRegistry } from 'react-native';
+import type { TurboModule } from "react-native";
+import { TurboModuleRegistry } from "react-native";
 
 export interface Spec extends TurboModule {
   requestMcSdk(): Promise<void>;
@@ -66,8 +66,18 @@ export interface Spec extends TurboModule {
   disableLogging(): void;
   setRegistrationCallback(): void;
   unsetRegistrationCallback(): void;
+  enableLocation(): void;
+  disableLocation(): void;
+  isLocationEnabled(): Promise<boolean>;
+  startWatchingLocation(): void;
+  stopWatchingLocation(): void;
+  isWatchingLocation(): Promise<boolean>;
+  getLastKnownLocation(): Promise<{ [key: string]: string } | null>;
+  enableProximityMessaging(): void;
+  disableProximityMessaging(): void;
+  isProximityMessagingEnabled(): Promise<boolean>;
   addListener(eventName: string): void;
   removeListeners(count: number): void;
 }
 
-export default TurboModuleRegistry.getEnforcing<Spec>('MCModule');
+export default TurboModuleRegistry.getEnforcing<Spec>("MCModule");

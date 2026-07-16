@@ -13,7 +13,7 @@ Historically, integrating Marketing Cloud features into a React Native app requi
 | [`@sfmc/react-native-sfmc-core`](./packages/sfmc-core) | Foundation: identity, custom attributes, structured events, logging |
 | [`@sfmc/react-native-push`](./packages/push) | Push registration & notifications |
 | [`@sfmc/react-native-iam`](./packages/iam) | In-App Messaging SDK readiness & programmatic display |
-| [`@sfmc/react-native-marketingcloudsdk`](./packages/marketingcloudsdk) | MarketingCloud Engagement: inbox, tags, attributes, analytics, registration |
+| [`@sfmc/react-native-marketingcloudsdk`](./packages/marketingcloudsdk) | MarketingCloud Engagement: inbox, tags, attributes, analytics, registration, location (geofence), proximity |
 | [`@sfmc/react-native-mobileappmessaging`](./packages/mobileappmessaging) | MobileAppMessaging: analytics, registration |
 
 `marketingcloudsdk` and `mobileappmessaging` are **product** packages — they transitively depend on `sfmc-core` only. Add `push` and `iam` separately if you need those features.

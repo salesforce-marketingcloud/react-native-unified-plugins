@@ -288,6 +288,105 @@ export interface MarketingCloudSdkApi {
    * @see  {@link https://salesforce-marketingcloud.github.io/MarketingCloudSDK-iOS/appledocs/MarketingCloudSdk/11.0/Classes/MarketingCloudSdk.html#/c:@CM@MarketingCloudSDK@objc(cs)SFMarketingCloudSdk(im)unsetRegistrationCallback |iOS Docs}
    */
   unsetRegistrationCallback(): void;
+
+  /**
+   * Enables the SDK's Location capability. On iOS this flips the master
+   * location override on `MarketingCloudSdk` — the enablement flag governs both
+   * geofence and coordinate watching. On Android it enables geofence messaging
+   * via `RegionMessageManager` (proximity is toggled separately, see
+   * `enableProximityMessaging`).
+   * @see  {@link https://salesforce-marketingcloud.github.io/MarketingCloudSDK-Android/javadocs/SFMCSdk/11.0/sdk/com.salesforce.marketingcloud.messages/-region-message-manager/enable-geofence-messaging.html |Android Docs}
+   * @see  {@link https://salesforce-marketingcloud.github.io/MarketingCloudSDK-iOS/appledocs/MarketingCloudSdk/11.0/Classes/MarketingCloudSdk.html#/c:@CM@MarketingCloudSDK@objc(cs)SFMarketingCloudSdk(im)setLocationEnabled: |iOS Docs}
+   */
+  enableLocation(): void;
+
+  /**
+   * Disables the SDK's Location capability. On iOS this flips the master
+   * location override on `MarketingCloudSdk` — the SDK stops monitoring
+   * location for both geofence and coordinate watching. On Android it disables
+   * geofence messaging via `RegionMessageManager`.
+   * @see  {@link https://salesforce-marketingcloud.github.io/MarketingCloudSDK-Android/javadocs/SFMCSdk/11.0/sdk/com.salesforce.marketingcloud.messages/-region-message-manager/disable-geofence-messaging.html |Android Docs}
+   * @see  {@link https://salesforce-marketingcloud.github.io/MarketingCloudSDK-iOS/appledocs/MarketingCloudSdk/11.0/Classes/MarketingCloudSdk.html#/c:@CM@MarketingCloudSDK@objc(cs)SFMarketingCloudSdk(im)setLocationEnabled: |iOS Docs}
+   */
+  disableLocation(): void;
+
+  /**
+   * Reports whether Location is enabled. iOS reflects the master location
+   * override; Android reflects geofence messaging state.
+   * @returns {Promise<boolean>} A promise to the enabled state.
+   * @see  {@link https://salesforce-marketingcloud.github.io/MarketingCloudSDK-Android/javadocs/SFMCSdk/11.0/sdk/com.salesforce.marketingcloud.messages/-region-message-manager/is-geofence-messaging-enabled.html |Android Docs}
+   * @see  {@link https://salesforce-marketingcloud.github.io/MarketingCloudSDK-iOS/appledocs/MarketingCloudSdk/11.0/Classes/MarketingCloudSdk.html#/c:@CM@MarketingCloudSDK@objc(cs)SFMarketingCloudSdk(im)isLocationEnabled |iOS Docs}
+   */
+  isLocationEnabled(): Promise<boolean>;
+
+  /**
+   * Starts location watching (coordinate tracking) via the Marketing Cloud SDK.
+   * iOS only — no-op on Android (geofence transitions are driven by
+   * `enableLocation` / `disableLocation` on Android).
+   * @see  {@link https://salesforce-marketingcloud.github.io/MarketingCloudSDK-iOS/appledocs/MarketingCloudSdk/11.0/Classes/MarketingCloudSdk.html#/c:@CM@MarketingCloudSDK@objc(cs)SFMarketingCloudSdk(im)startWatchingLocation |iOS Docs}
+   */
+  startWatchingLocation(): void;
+
+  /**
+   * Stops location watching. iOS only — no-op on Android.
+   * @see  {@link https://salesforce-marketingcloud.github.io/MarketingCloudSDK-iOS/appledocs/MarketingCloudSdk/11.0/Classes/MarketingCloudSdk.html#/c:@CM@MarketingCloudSDK@objc(cs)SFMarketingCloudSdk(im)stopWatchingLocation |iOS Docs}
+   */
+  stopWatchingLocation(): void;
+
+  /**
+   * Reports whether the SDK is actively watching location. iOS only —
+   * resolves `false` on Android.
+   * @returns {Promise<boolean>} A promise to the watching state.
+   * @see  {@link https://salesforce-marketingcloud.github.io/MarketingCloudSDK-iOS/appledocs/MarketingCloudSdk/11.0/Classes/MarketingCloudSdk.html#/c:@CM@MarketingCloudSDK@objc(cs)SFMarketingCloudSdk(im)watchingLocation |iOS Docs}
+   */
+  isWatchingLocation(): Promise<boolean>;
+
+  /**
+   * Returns the last known device location as reported by the native SDK.
+   * iOS surfaces the raw `[String: String]` dictionary — values are strings,
+   * not numbers; parse at the call site (`Number(loc.latitude)`). The iOS SDK
+   * documents the return type as `[String: String]?` without guaranteeing
+   * which keys are present, but `latitude` / `longitude` are the observed
+   * ones. Resolves `null` on Android.
+   * @returns {Promise<LastKnownLocation | null>} A promise to the last known location, or `null`.
+   * @see  {@link https://salesforce-marketingcloud.github.io/MarketingCloudSDK-iOS/appledocs/MarketingCloudSdk/11.0/Classes/MarketingCloudSdk.html#/c:@CM@MarketingCloudSDK@objc(cs)SFMarketingCloudSdk(im)lastKnownLocation |iOS Docs}
+   */
+  getLastKnownLocation(): Promise<LastKnownLocation | null>;
+
+  /**
+   * Enables proximity (beacon) messaging. Android-only capability — on iOS
+   * this is a stub (there is no separate proximity toggle; iOS proximity is
+   * governed by the shared location enablement flag). Requires
+   * `ACCESS_FINE_LOCATION` and `ACCESS_BACKGROUND_LOCATION` on Android.
+   * @see  {@link https://salesforce-marketingcloud.github.io/MarketingCloudSDK-Android/javadocs/SFMCSdk/11.0/sdk/com.salesforce.marketingcloud.messages/-region-message-manager/enable-proximity-messaging.html |Android Docs}
+   */
+  enableProximityMessaging(): void;
+
+  /**
+   * Disables proximity (beacon) messaging. Android-only capability — stub on
+   * iOS.
+   * @see  {@link https://salesforce-marketingcloud.github.io/MarketingCloudSDK-Android/javadocs/SFMCSdk/11.0/sdk/com.salesforce.marketingcloud.messages/-region-message-manager/disable-proximity-messaging.html |Android Docs}
+   */
+  disableProximityMessaging(): void;
+
+  /**
+   * Reports whether proximity (beacon) messaging is enabled. Android-only
+   * capability — resolves `false` on iOS.
+   * @returns {Promise<boolean>} A promise to the enabled state.
+   * @see  {@link https://salesforce-marketingcloud.github.io/MarketingCloudSDK-Android/javadocs/SFMCSdk/11.0/sdk/com.salesforce.marketingcloud.messages/-region-message-manager/is-proximity-messaging-enabled.html |Android Docs}
+   */
+  isProximityMessagingEnabled(): Promise<boolean>;
+}
+
+/**
+ * Raw shape of the iOS `lastKnownLocation` dictionary. Values are strings
+ * (mirroring the native `[String: String]` return); parse to numbers at the
+ * call site as needed. Only ever populated on iOS; Android resolves to `null`.
+ */
+export interface LastKnownLocation {
+  latitude?: string;
+  longitude?: string;
+  [key: string]: string | undefined;
 }
 
 export interface InboxMessage {
