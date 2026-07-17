@@ -23,6 +23,34 @@ Android: no additional steps — Gradle autolinking discovers the module automat
 - **iOS** — initialize in your `AppDelegate.swift` via `SFMCSdk.initializeSdk(...)`. See the [iOS SDK Integration Guide](https://developer.salesforce.com/docs/marketing/mobile-unified-sdk/guide/ios-sdk-integration.html).
 - Configure Firebase (Android) and APNs (iOS) credentials before push will deliver.
 
+### Notification display decision
+
+The SFMC push SDK lets the **host app** decide, per notification, whether an
+incoming push is displayed (allow-lists, quiet hours, per-channel prefs, a
+server flag cached locally, and so on).
+
+**This decision must be made in native code, not JavaScript.** On an app-killed
+FCM cold-start the OS boots the process straight into your `MainApplication`
+(`SFMCSdk.configure(...)`) to handle the message — the React Native JS runtime
+is not started in that path, so a JS handler cannot be consulted reliably.
+
+**Android** — register a `NotificationManager.ShouldShowNotificationListener`
+on the `PushFeatureConfig` at SDK-configuration time:
+
+```kotlin
+pushFeatureModuleConfig = PushFeatureConfig.builder()
+    // ...other push config...
+    .setShouldShowNotificationListener(
+        ExampleShouldShowNotificationListener(this@MainApplication))
+    .build()
+```
+
+See the example app's
+[`ExampleShouldShowNotificationListener.kt`](../../example/android/app/src/main/java/com/sfmcexample/ExampleShouldShowNotificationListener.kt)
+for a reference implementation that combines an app-owned "notifications
+enabled" flag (read from `SharedPreferences`) with a content rule. Replace its
+`shouldShow` logic with your own.
+
 ## Usage
 
 ```ts

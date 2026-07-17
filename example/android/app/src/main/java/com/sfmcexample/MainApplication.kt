@@ -90,6 +90,13 @@ class MainApplication : Application(), ReactApplication {
             pushFeatureModuleConfig = PushFeatureConfig.builder()
                 .setNotificationCustomizationOptions(buildNotificationOptions())
                 .setUrlHandler(SfmcUrlHandler)
+                // The host app owns the show/suppress decision for every incoming push.
+                // It MUST be made natively: on a killed-state FCM cold-start the process
+                // boots into SFMCSdk.configure(...) before the React Native JS runtime
+                // exists, so a JS handler cannot be consulted — see
+                // ExampleShouldShowNotificationListener.
+                .setShouldShowNotificationListener(
+                    ExampleShouldShowNotificationListener(this@MainApplication))
                 .build()
 
             inAppMessagingFeatureModuleConfig = InAppMessagingFeatureConfig.builder()
