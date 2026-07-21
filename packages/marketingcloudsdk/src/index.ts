@@ -37,4 +37,10 @@ export type {
   MarketingCloudSdkApi,
   MarketingCloudSdkApi as MCApi,
 } from "./types";
-export type { InboxMessage, PiCart, PiOrder, LastKnownLocation } from "./types";
+export type {
+  InboxMessage,
+  InboxResponseEvent,
+  PiCart,
+  PiOrder,
+  LastKnownLocation,
+} from "./types";

@@ -82,6 +82,10 @@ export const MarketingCloudSdkModule = {
       disableLogging: () => NativeModule.disableLogging(),
       setRegistrationCallback: () => NativeModule.setRegistrationCallback(),
       unsetRegistrationCallback: () => NativeModule.unsetRegistrationCallback(),
+      registerInboxResponseListener: () =>
+        NativeModule.registerInboxResponseListener(),
+      unregisterInboxResponseListener: () =>
+        NativeModule.unregisterInboxResponseListener(),
       enableLocation: () => NativeModule.enableLocation(),
       disableLocation: () => NativeModule.disableLocation(),
       isLocationEnabled: () => NativeModule.isLocationEnabled(),

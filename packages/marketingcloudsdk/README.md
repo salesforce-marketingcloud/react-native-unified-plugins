@@ -54,6 +54,17 @@ const sub = emitter.addListener('sfmc_mc_registration', (registration) => {
 // Cleanup
 sub.remove();
 mc.unsetRegistrationCallback();
+
+// Inbox response listener (Android only — no-op on iOS)
+// Subscribe before starting the native listener so no change is missed.
+const inboxSub = emitter.addListener('sfmc_mc_inbox_response', ({ messages }) => {
+  console.log('Inbox messages changed:', messages.length);
+});
+mc.registerInboxResponseListener();
+
+// Cleanup
+inboxSub.remove();
+mc.unregisterInboxResponseListener();
 ```
 
 ## API
@@ -92,6 +103,8 @@ mc.unsetRegistrationCallback();
 | `disableLogging()` | `void` | Disable debug logging |
 | `setRegistrationCallback()` | `void` | Start receiving registration change events |
 | `unsetRegistrationCallback()` | `void` | Stop receiving registration change events |
+| `registerInboxResponseListener()` | `void` | Start receiving `sfmc_mc_inbox_response` events when the inbox message set changes (Android only — no-op on iOS) |
+| `unregisterInboxResponseListener()` | `void` | Stop receiving inbox response events (Android only — no-op on iOS) |
 | `enableLocation()` | `void` | Enable Location (iOS: master location override; Android: geofence messaging — requires `ACCESS_FINE_LOCATION` + `ACCESS_BACKGROUND_LOCATION` runtime permissions) |
 | `disableLocation()` | `void` | Disable Location (iOS: master location override; Android: geofence messaging) |
 | `isLocationEnabled()` | `Promise<boolean>` | Check whether Location is enabled |
@@ -113,6 +126,7 @@ mc.unsetRegistrationCallback();
 | Event Name | Payload | Description |
 |------------|---------|-------------|
 | `sfmc_mc_registration` | Registration dictionary | Emitted when registration state changes |
+| `sfmc_mc_inbox_response` | `{ messages: InboxMessage[] }` | Emitted when the inbox message set changes, after `registerInboxResponseListener()` (Android only — never emitted on iOS) |
 
 ## Notes
 

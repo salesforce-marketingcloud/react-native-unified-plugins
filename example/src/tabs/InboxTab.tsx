@@ -3,6 +3,7 @@ import React, {
   useEffect,
   useCallback,
   useImperativeHandle,
+  useRef,
   forwardRef,
 } from "react";
 import {
@@ -16,10 +17,16 @@ import {
   Linking,
   Modal,
   ScrollView,
+  Platform,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { color } from "../colors";
-import type { MCApi, InboxMessage } from "@sfmc/react-native-marketingcloudsdk";
+import { MCModule } from "@sfmc/react-native-marketingcloudsdk";
+import type {
+  MCApi,
+  InboxMessage,
+  InboxResponseEvent,
+} from "@sfmc/react-native-marketingcloudsdk";
 
 type Segment = "all" | "unread" | "read" | "deleted";
 
@@ -67,6 +74,14 @@ const InboxTab = forwardRef<InboxActions, Props>(
         setLoading(false);
       }
     }, [mc, segment]);
+
+    // Keep the latest fetchAll reachable from the mount-only listener effect
+    // below, so it always reloads the current segment + counts without
+    // re-registering the native listener whenever the segment changes.
+    const fetchAllRef = useRef(fetchAll);
+    useEffect(() => {
+      fetchAllRef.current = fetchAll;
+    }, [fetchAll]);
 
     async function fetchSegment(seg: Segment): Promise<InboxMessage[]> {
       switch (seg) {
@@ -129,6 +144,27 @@ const InboxTab = forwardRef<InboxActions, Props>(
     useEffect(() => {
       onActionsReady({ markAllRead, deleteAll, refresh });
     }, [markAllRead, deleteAll, refresh]);
+
+    // Auto-refresh the list when the SDK reports the inbox message set changed,
+    // instead of relying solely on manual pull-to-refresh. Android-only: the
+    // native iOS SDK exposes no inbox-response listener, so the event never
+    // fires there — guard the subscription so iOS keeps its manual-refresh flow.
+    useEffect(() => {
+      if (Platform.OS !== "android") return;
+      const sub = MCModule.getEmitter().addListener(
+        "sfmc_mc_inbox_response",
+        (_event: InboxResponseEvent) => {
+          // The event carries the updated messages, but re-fetch through the
+          // normal path so the active segment + all four counts stay in sync.
+          fetchAllRef.current();
+        },
+      );
+      mc.registerInboxResponseListener();
+      return () => {
+        sub.remove();
+        mc.unregisterInboxResponseListener();
+      };
+    }, [mc]);
 
     function onPress(item: InboxMessage) {
       if (item.url) {

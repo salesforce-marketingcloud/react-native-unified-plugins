@@ -42,6 +42,8 @@ jest.mock("../NativeMCModule", () => ({
     disableLogging: jest.fn(),
     setRegistrationCallback: jest.fn(),
     unsetRegistrationCallback: jest.fn(),
+    registerInboxResponseListener: jest.fn(),
+    unregisterInboxResponseListener: jest.fn(),
     enableLocation: jest.fn(),
     disableLocation: jest.fn(),
     isLocationEnabled: jest.fn(),
@@ -320,6 +322,24 @@ describe("MarketingCloudSdkModule", () => {
       api.unsetRegistrationCallback();
       expect(Native.unsetRegistrationCallback).toHaveBeenCalledTimes(1);
       expect(Native.setRegistrationCallback).not.toHaveBeenCalled();
+    });
+  });
+
+  describe("inbox response listener", () => {
+    it("routes registerInboxResponseListener to the register native call only", async () => {
+      const { MarketingCloudSdkModule, Native } = loadModule();
+      const api = await MarketingCloudSdkModule.requestSdk();
+      api.registerInboxResponseListener();
+      expect(Native.registerInboxResponseListener).toHaveBeenCalledTimes(1);
+      expect(Native.unregisterInboxResponseListener).not.toHaveBeenCalled();
+    });
+
+    it("routes unregisterInboxResponseListener to the unregister native call only", async () => {
+      const { MarketingCloudSdkModule, Native } = loadModule();
+      const api = await MarketingCloudSdkModule.requestSdk();
+      api.unregisterInboxResponseListener();
+      expect(Native.unregisterInboxResponseListener).toHaveBeenCalledTimes(1);
+      expect(Native.registerInboxResponseListener).not.toHaveBeenCalled();
     });
   });
 

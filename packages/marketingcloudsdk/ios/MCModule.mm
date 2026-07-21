@@ -303,6 +303,16 @@ RCT_EXPORT_METHOD(unsetRegistrationCallback) {
     }];
 }
 
+// ── Inbox response listener ─────────────────────────────────────────────────────
+// Android-only capability. The iOS SDK does not expose an inbox response
+// listener, so these are no-op stubs kept only for TurboModule spec parity
+// (the spec is shared across platforms). No sfmc_mc_inbox_response event is
+// emitted on iOS — sfmc_mc_inbox_response is intentionally absent from
+// supportedEvents. iOS support is deferred to a follow-up.
+
+RCT_EXPORT_METHOD(registerInboxResponseListener) {}
+RCT_EXPORT_METHOD(unregisterInboxResponseListener) {}
+
 // Best-effort cleanup if JS never called unsetRegistrationCallback before bridge
 // teardown. The block uses weakSelf so ARC already releases the module, but
 // the SDK keeps invoking the dead block forever — clear it here.

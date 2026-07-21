@@ -37,6 +37,7 @@ import com.facebook.react.module.annotations.ReactModule
 import com.facebook.react.modules.core.DeviceEventManagerModule
 import com.salesforce.marketingcloud.MCLogListener
 import com.salesforce.marketingcloud.MarketingCloudSdk
+import com.salesforce.marketingcloud.messages.inbox.InboxMessage
 import com.salesforce.marketingcloud.messages.inbox.InboxMessageManager
 import com.salesforce.marketingcloud.registration.Registration
 import com.salesforce.marketingcloud.registration.RegistrationManager
@@ -53,6 +54,7 @@ class MCModule(reactContext: ReactApplicationContext) :
     }
 
     private var registrationListener: RegistrationManager.RegistrationEventListener? = null
+    private var inboxResponseListener: InboxMessageManager.InboxResponseListener? = null
 
     private fun sendEvent(name: String, params: com.facebook.react.bridge.WritableMap) {
         if (!reactApplicationContext.hasActiveReactInstance()) return
@@ -376,8 +378,60 @@ class MCModule(reactContext: ReactApplicationContext) :
         }
     }
 
+    @ReactMethod
+    override fun registerInboxResponseListener() {
+        MarketingCloudSdk.requestSdk { sdk ->
+            // JS consumes a single bridge to the inbox change stream — repeat
+            // registerInboxResponseListener() calls reuse the existing listener
+            // instead of stacking duplicates on the SDK's inbox manager. Mirrors
+            // the setRegistrationCallback() contract.
+            //
+            // WeakInboxResponseListener does not capture `this`, so the module +
+            // ReactApplicationContext can still be GC'd if invalidate() is skipped.
+            if (inboxResponseListener == null) {
+                val listener = WeakInboxResponseListener(this)
+                inboxResponseListener = listener
+                sdk.getInboxMessageManager().registerInboxResponseListener(listener)
+            }
+        }
+    }
+
+    internal fun onInboxMessagesChanged(messages: List<InboxMessage>) {
+        // The SDK invokes this listener on its own worker thread and owns the
+        // list it hands us; its lifetime past this call is undefined. Snapshot
+        // here, before hopping, so the deferred serialization can't race the SDK
+        // recycling/mutating the backing list (torn read / ConcurrentModification).
+        val snapshot = messages.toList()
+        // Hop to the Native Modules queue so WritableArray construction + bridge
+        // emission happen on a React-managed thread.
+        BridgeQueue.runOnNativeModulesQueue(reactApplicationContext) {
+            val params = Arguments.createMap()
+            params.putArray("messages", InboxUtils.messagesToArray(snapshot))
+            sendEvent("sfmc_mc_inbox_response", params)
+        }
+    }
+
+    private class WeakInboxResponseListener(
+        module: MCModule,
+    ) : InboxMessageManager.InboxResponseListener {
+        private val ref = WeakReference(module)
+        override fun onInboxMessagesChanged(messages: MutableList<InboxMessage>) {
+            ref.get()?.onInboxMessagesChanged(messages)
+        }
+    }
+
+    @ReactMethod
+    override fun unregisterInboxResponseListener() {
+        MarketingCloudSdk.requestSdk { sdk ->
+            inboxResponseListener?.let {
+                sdk.getInboxMessageManager().unregisterInboxResponseListener(it)
+            }
+            inboxResponseListener = null
+        }
+    }
+
     override fun invalidate() {
-        // Best-effort cleanup if JS never called unsetRegistrationCallback() before
+        // Best-effort cleanup if JS never called the unset/unregister methods before
         // bridge teardown. The SFMC SDK is Application-scoped and outlives the bridge,
         // so the requestSdk callback is safe to fire and forget.
         registrationListener?.let { listener ->
@@ -386,6 +440,12 @@ class MCModule(reactContext: ReactApplicationContext) :
             }
         }
         registrationListener = null
+        inboxResponseListener?.let { listener ->
+            MarketingCloudSdk.requestSdk { sdk ->
+                sdk.getInboxMessageManager().unregisterInboxResponseListener(listener)
+            }
+        }
+        inboxResponseListener = null
         super.invalidate()
     }
 
@@ -469,6 +529,8 @@ class MCModule(reactContext: ReactApplicationContext) :
 
     @ReactMethod
     override fun removeListeners(count: Double) {
-        // Required for RN event emitter parity; module emits no events.
+        // Required for RN event emitter parity. Subscription bookkeeping is
+        // driven by the setRegistrationCallback / registerInboxResponseListener
+        // methods, so there is nothing to do here.
     }
 }

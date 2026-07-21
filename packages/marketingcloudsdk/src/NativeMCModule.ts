@@ -66,6 +66,8 @@ export interface Spec extends TurboModule {
   disableLogging(): void;
   setRegistrationCallback(): void;
   unsetRegistrationCallback(): void;
+  registerInboxResponseListener(): void;
+  unregisterInboxResponseListener(): void;
   enableLocation(): void;
   disableLocation(): void;
   isLocationEnabled(): Promise<boolean>;

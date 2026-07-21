@@ -290,6 +290,26 @@ export interface MarketingCloudSdkApi {
   unsetRegistrationCallback(): void;
 
   /**
+   * Registers a listener for inbox response changes. When the SDK's inbox
+   * message set changes, an `sfmc_mc_inbox_response` event is emitted through
+   * the emitter returned by `getEmitter`; its payload is an
+   * {@link InboxResponseEvent}. Subscribe to that event to receive the updated
+   * messages.
+   *
+   * Android-only capability — no-op stub on iOS (the native iOS SDK does not
+   * expose an inbox response listener, so no event is emitted there).
+   * @see  {@link https://salesforce-marketingcloud.github.io/MarketingCloudSDK-Android/javadocs/SFMCSdk/11.0/sdk/com.salesforce.marketingcloud.messages.inbox/-inbox-message-manager/register-inbox-response-listener.html |Android Docs}
+   */
+  registerInboxResponseListener(): void;
+
+  /**
+   * Unregisters the inbox response listener, stopping `sfmc_mc_inbox_response`
+   * events. Android-only capability — no-op stub on iOS.
+   * @see  {@link https://salesforce-marketingcloud.github.io/MarketingCloudSDK-Android/javadocs/SFMCSdk/11.0/sdk/com.salesforce.marketingcloud.messages.inbox/-inbox-message-manager/unregister-inbox-response-listener.html |Android Docs}
+   */
+  unregisterInboxResponseListener(): void;
+
+  /**
    * Enables the SDK's Location capability. On iOS this flips the master
    * location override on `MarketingCloudSdk` — the enablement flag governs both
    * geofence and coordinate watching. On Android it enables geofence messaging
@@ -409,6 +429,17 @@ export interface InboxMessage {
   inboxMessage?: string;
   inboxSubtitle?: string;
   notificationMessage?: { [key: string]: any };
+}
+
+/**
+ * Payload of the `sfmc_mc_inbox_response` event emitted through the
+ * `getEmitter` event emitter after
+ * {@link MarketingCloudSdkApi.registerInboxResponseListener} is called. Carries
+ * the current set of inbox messages as reported by the native SDK. Android-only
+ * — this event is never emitted on iOS.
+ */
+export interface InboxResponseEvent {
+  messages: InboxMessage[];
 }
 
 export interface PiCart {
