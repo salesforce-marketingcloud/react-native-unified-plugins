@@ -1,0 +1,17 @@
+# SwiftFormat config for @sfmc/react-native-* packages
+# Matched to .clang-format so Swift and ObjC stay visually consistent.
+
+--indent 4
+--maxwidth 100
+--swiftversion 5.9
+
+--self remove
+--stripunusedargs closure-only
+--commas inline
+--semicolons never
+--trimwhitespace always
+--wraparguments before-first
+--wrapparameters before-first
+--wrapcollections before-first
+
+--exclude Pods,build,DerivedData,node_modules

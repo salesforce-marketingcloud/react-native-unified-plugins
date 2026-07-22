@@ -4,7 +4,7 @@
  * BSD-3-Clause
  */
 
-jest.mock('../NativeMAMModule', () => ({
+jest.mock("../NativeMAMModule", () => ({
   __esModule: true,
   default: {
     requestMamSdk: jest.fn().mockResolvedValue(undefined),
@@ -30,14 +30,14 @@ type MockedNative = {
 };
 
 const loadModule = (): {
-  MobileAppMessagingModule: typeof import('../MobileAppMessagingModule').MobileAppMessagingModule;
+  MobileAppMessagingModule: typeof import("../MobileAppMessagingModule").MobileAppMessagingModule;
   Native: MockedNative;
 } => {
-  let mod!: typeof import('../MobileAppMessagingModule');
+  let mod!: typeof import("../MobileAppMessagingModule");
   let native!: MockedNative;
   jest.isolateModules(() => {
-    mod = require('../MobileAppMessagingModule');
-    native = require('../NativeMAMModule').default;
+    mod = require("../MobileAppMessagingModule");
+    native = require("../NativeMAMModule").default;
   });
   return {
     MobileAppMessagingModule: mod.MobileAppMessagingModule,
@@ -45,15 +45,15 @@ const loadModule = (): {
   };
 };
 
-describe('MobileAppMessagingModule', () => {
-  describe('requestSdk', () => {
-    it('calls requestMamSdk on first invocation', async () => {
+describe("MobileAppMessagingModule", () => {
+  describe("requestSdk", () => {
+    it("calls requestMamSdk on first invocation", async () => {
       const { MobileAppMessagingModule, Native } = loadModule();
       await MobileAppMessagingModule.requestSdk();
       expect(Native.requestMamSdk).toHaveBeenCalledTimes(1);
     });
 
-    it('caches the api on subsequent calls', async () => {
+    it("caches the api on subsequent calls", async () => {
       const { MobileAppMessagingModule, Native } = loadModule();
       const a = await MobileAppMessagingModule.requestSdk();
       const b = await MobileAppMessagingModule.requestSdk();
@@ -62,15 +62,15 @@ describe('MobileAppMessagingModule', () => {
     });
   });
 
-  describe('api delegation', () => {
-    it('returns the device id from getDeviceId', async () => {
+  describe("api delegation", () => {
+    it("returns the device id from getDeviceId", async () => {
       const { MobileAppMessagingModule, Native } = loadModule();
-      Native.getDeviceId.mockResolvedValue('device-xyz');
+      Native.getDeviceId.mockResolvedValue("device-xyz");
       const api = await MobileAppMessagingModule.requestSdk();
-      await expect(api.getDeviceId()).resolves.toBe('device-xyz');
+      await expect(api.getDeviceId()).resolves.toBe("device-xyz");
     });
 
-    it('routes enableAnalytics to the enable native call only', async () => {
+    it("routes enableAnalytics to the enable native call only", async () => {
       const { MobileAppMessagingModule, Native } = loadModule();
       const api = await MobileAppMessagingModule.requestSdk();
       api.enableAnalytics();
@@ -78,7 +78,7 @@ describe('MobileAppMessagingModule', () => {
       expect(Native.disableAnalytics).not.toHaveBeenCalled();
     });
 
-    it('routes disableAnalytics to the disable native call only', async () => {
+    it("routes disableAnalytics to the disable native call only", async () => {
       const { MobileAppMessagingModule, Native } = loadModule();
       const api = await MobileAppMessagingModule.requestSdk();
       api.disableAnalytics();
@@ -86,7 +86,7 @@ describe('MobileAppMessagingModule', () => {
       expect(Native.enableAnalytics).not.toHaveBeenCalled();
     });
 
-    it('returns true from isAnalyticsEnabled via the native call', async () => {
+    it("returns true from isAnalyticsEnabled via the native call", async () => {
       const { MobileAppMessagingModule, Native } = loadModule();
       Native.isAnalyticsEnabled.mockResolvedValue(true);
       const api = await MobileAppMessagingModule.requestSdk();
@@ -94,7 +94,7 @@ describe('MobileAppMessagingModule', () => {
       expect(Native.isAnalyticsEnabled).toHaveBeenCalledTimes(1);
     });
 
-    it('returns false from isAnalyticsEnabled via the native call', async () => {
+    it("returns false from isAnalyticsEnabled via the native call", async () => {
       const { MobileAppMessagingModule, Native } = loadModule();
       Native.isAnalyticsEnabled.mockResolvedValue(false);
       const api = await MobileAppMessagingModule.requestSdk();
@@ -102,7 +102,7 @@ describe('MobileAppMessagingModule', () => {
       expect(Native.isAnalyticsEnabled).toHaveBeenCalledTimes(1);
     });
 
-    it('routes setRegistrationCallback to the set native call only', async () => {
+    it("routes setRegistrationCallback to the set native call only", async () => {
       const { MobileAppMessagingModule, Native } = loadModule();
       const api = await MobileAppMessagingModule.requestSdk();
       api.setRegistrationCallback();
@@ -110,7 +110,7 @@ describe('MobileAppMessagingModule', () => {
       expect(Native.unsetRegistrationCallback).not.toHaveBeenCalled();
     });
 
-    it('routes unsetRegistrationCallback to the unset native call only', async () => {
+    it("routes unsetRegistrationCallback to the unset native call only", async () => {
       const { MobileAppMessagingModule, Native } = loadModule();
       const api = await MobileAppMessagingModule.requestSdk();
       api.unsetRegistrationCallback();
@@ -119,12 +119,12 @@ describe('MobileAppMessagingModule', () => {
     });
   });
 
-  describe('cache resilience', () => {
-    it('propagates rejections from requestMamSdk without caching', async () => {
+  describe("cache resilience", () => {
+    it("propagates rejections from requestMamSdk without caching", async () => {
       const { MobileAppMessagingModule, Native } = loadModule();
-      Native.requestMamSdk.mockRejectedValueOnce(new Error('nope'));
+      Native.requestMamSdk.mockRejectedValueOnce(new Error("nope"));
       await expect(MobileAppMessagingModule.requestSdk()).rejects.toThrow(
-        'nope',
+        "nope",
       );
       Native.requestMamSdk.mockResolvedValue(undefined);
       await MobileAppMessagingModule.requestSdk();
@@ -132,18 +132,18 @@ describe('MobileAppMessagingModule', () => {
     });
   });
 
-  describe('getEmitter', () => {
-    it('returns an event emitter bound to the native module', () => {
+  describe("getEmitter", () => {
+    it("returns an event emitter bound to the native module", () => {
       const { MobileAppMessagingModule, Native } = loadModule();
       const emitter = MobileAppMessagingModule.getEmitter() as unknown as {
         nativeModule: unknown;
         addListener: unknown;
       };
-      expect(typeof emitter.addListener).toBe('function');
+      expect(typeof emitter.addListener).toBe("function");
       expect(emitter.nativeModule).toBe(Native);
     });
 
-    it('caches the emitter across calls', () => {
+    it("caches the emitter across calls", () => {
       const { MobileAppMessagingModule } = loadModule();
       expect(MobileAppMessagingModule.getEmitter()).toBe(
         MobileAppMessagingModule.getEmitter(),

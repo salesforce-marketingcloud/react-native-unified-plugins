@@ -4,7 +4,7 @@
  * BSD-3-Clause
  */
 
-jest.mock('../NativeSFMCPushModule', () => ({
+jest.mock("../NativeSFMCPushModule", () => ({
   __esModule: true,
   default: {
     requestPushSdk: jest.fn().mockResolvedValue(undefined),
@@ -26,27 +26,27 @@ type MockedNative = {
 };
 
 const loadModule = (): {
-  PushModule: typeof import('../PushModule').PushModule;
+  PushModule: typeof import("../PushModule").PushModule;
   Native: MockedNative;
 } => {
-  let mod!: typeof import('../PushModule');
+  let mod!: typeof import("../PushModule");
   let native!: MockedNative;
   jest.isolateModules(() => {
-    mod = require('../PushModule');
-    native = require('../NativeSFMCPushModule').default;
+    mod = require("../PushModule");
+    native = require("../NativeSFMCPushModule").default;
   });
   return { PushModule: mod.PushModule, Native: native };
 };
 
-describe('PushModule', () => {
-  describe('requestSdk', () => {
-    it('calls requestPushSdk on first invocation', async () => {
+describe("PushModule", () => {
+  describe("requestSdk", () => {
+    it("calls requestPushSdk on first invocation", async () => {
       const { PushModule, Native } = loadModule();
       await PushModule.requestSdk();
       expect(Native.requestPushSdk).toHaveBeenCalledTimes(1);
     });
 
-    it('caches the api on subsequent calls', async () => {
+    it("caches the api on subsequent calls", async () => {
       const { PushModule, Native } = loadModule();
       const a = await PushModule.requestSdk();
       const b = await PushModule.requestSdk();
@@ -54,18 +54,18 @@ describe('PushModule', () => {
       expect(Native.requestPushSdk).toHaveBeenCalledTimes(1);
     });
 
-    it('exposes the four wrapper methods', async () => {
+    it("exposes the four wrapper methods", async () => {
       const { PushModule } = loadModule();
       const api = await PushModule.requestSdk();
-      expect(typeof api.enablePush).toBe('function');
-      expect(typeof api.disablePush).toBe('function');
-      expect(typeof api.getPushToken).toBe('function');
-      expect(typeof api.isPushEnabled).toBe('function');
+      expect(typeof api.enablePush).toBe("function");
+      expect(typeof api.disablePush).toBe("function");
+      expect(typeof api.getPushToken).toBe("function");
+      expect(typeof api.isPushEnabled).toBe("function");
     });
   });
 
-  describe('api delegation', () => {
-    it('routes enablePush to the enable native call only', async () => {
+  describe("api delegation", () => {
+    it("routes enablePush to the enable native call only", async () => {
       const { PushModule, Native } = loadModule();
       const api = await PushModule.requestSdk();
       api.enablePush();
@@ -73,7 +73,7 @@ describe('PushModule', () => {
       expect(Native.disablePush).not.toHaveBeenCalled();
     });
 
-    it('routes disablePush to the disable native call only', async () => {
+    it("routes disablePush to the disable native call only", async () => {
       const { PushModule, Native } = loadModule();
       const api = await PushModule.requestSdk();
       api.disablePush();
@@ -81,14 +81,14 @@ describe('PushModule', () => {
       expect(Native.enablePush).not.toHaveBeenCalled();
     });
 
-    it('returns the token from getPushToken', async () => {
+    it("returns the token from getPushToken", async () => {
       const { PushModule, Native } = loadModule();
-      Native.getPushToken.mockResolvedValue('tok-123');
+      Native.getPushToken.mockResolvedValue("tok-123");
       const api = await PushModule.requestSdk();
-      await expect(api.getPushToken()).resolves.toBe('tok-123');
+      await expect(api.getPushToken()).resolves.toBe("tok-123");
     });
 
-    it('returns true from isPushEnabled via the native call', async () => {
+    it("returns true from isPushEnabled via the native call", async () => {
       const { PushModule, Native } = loadModule();
       Native.isPushEnabled.mockResolvedValue(true);
       const api = await PushModule.requestSdk();
@@ -96,7 +96,7 @@ describe('PushModule', () => {
       expect(Native.isPushEnabled).toHaveBeenCalledTimes(1);
     });
 
-    it('returns false from isPushEnabled via the native call', async () => {
+    it("returns false from isPushEnabled via the native call", async () => {
       const { PushModule, Native } = loadModule();
       Native.isPushEnabled.mockResolvedValue(false);
       const api = await PushModule.requestSdk();
@@ -105,29 +105,29 @@ describe('PushModule', () => {
     });
   });
 
-  describe('cache resilience', () => {
-    it('propagates rejections from requestPushSdk without caching', async () => {
+  describe("cache resilience", () => {
+    it("propagates rejections from requestPushSdk without caching", async () => {
       const { PushModule, Native } = loadModule();
-      Native.requestPushSdk.mockRejectedValueOnce(new Error('nope'));
-      await expect(PushModule.requestSdk()).rejects.toThrow('nope');
+      Native.requestPushSdk.mockRejectedValueOnce(new Error("nope"));
+      await expect(PushModule.requestSdk()).rejects.toThrow("nope");
       Native.requestPushSdk.mockResolvedValue(undefined);
       await PushModule.requestSdk();
       expect(Native.requestPushSdk).toHaveBeenCalledTimes(2);
     });
   });
 
-  describe('getEmitter', () => {
-    it('returns an event emitter bound to the native module', () => {
+  describe("getEmitter", () => {
+    it("returns an event emitter bound to the native module", () => {
       const { PushModule, Native } = loadModule();
       const emitter = PushModule.getEmitter() as unknown as {
         nativeModule: unknown;
         addListener: unknown;
       };
-      expect(typeof emitter.addListener).toBe('function');
+      expect(typeof emitter.addListener).toBe("function");
       expect(emitter.nativeModule).toBe(Native);
     });
 
-    it('caches the emitter', () => {
+    it("caches the emitter", () => {
       const { PushModule } = loadModule();
       expect(PushModule.getEmitter()).toBe(PushModule.getEmitter());
     });

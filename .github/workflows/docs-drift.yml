@@ -1,0 +1,77 @@
+name: Docs Drift Check
+
+on:
+  pull_request:
+    branches: [develop, master]
+
+jobs:
+  docs-drift:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out PR
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Skip if PR opts out
+        id: skip
+        env:
+          PR_TITLE: ${{ github.event.pull_request.title }}
+          PR_BODY: ${{ github.event.pull_request.body }}
+        run: |
+          if printf '%s\n%s' "$PR_TITLE" "$PR_BODY" | grep -qE '\[skip-docs\]'; then
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+            echo "PR carries [skip-docs] - bypassing docs drift check."
+          else
+            echo "skip=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      # Path-based check by design: we cannot cheaply tell a "real surface change"
+      # from a Prettier reformat, comment-only edit, or private-symbol refactor.
+      # PRs that touch `packages/*/src/*.ts` but have no user-visible effect on the
+      # public API should bypass this gate by adding `[skip-docs]` to the PR title
+      # or body. See the "Reformat-only / non-user-visible PRs" section of the
+      # Release Workflow wiki for the escape-hatch policy.
+      - name: Verify README updated when public surface changes
+        if: steps.skip.outputs.skip == 'false'
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          # Requires bash >= 4.4 (empty-array append + expansion under `set -u`).
+          # ubuntu-latest ships bash 5.x, so this is safe on GitHub-hosted runners.
+          set -euo pipefail
+
+          # Use merge-base so a back-merge of `develop` into the PR branch does not
+          # inflate the changed-file set with commits the PR did not author.
+          changed=$(git diff --name-only "$(git merge-base "$BASE_SHA" "$HEAD_SHA")" "$HEAD_SHA")
+
+          missing=()
+          for pkg_dir in packages/*/; do
+            pkg=${pkg_dir%/}
+
+            # Public surface = the *Module.ts entry points and re-exported types,
+            # NOT the generated Native<Name>Module.ts spec (which is codegen-only).
+            surface_changed=$(printf '%s\n' "$changed" \
+              | grep -E "^${pkg}/src/.+\.ts$" \
+              | grep -Ev "/Native[^/]+Module\.ts$" \
+              | grep -Ev "/__tests__/" || true)
+
+            if [ -z "$surface_changed" ]; then
+              continue
+            fi
+
+            readme_changed=$(printf '%s\n' "$changed" | grep -E "^${pkg}/README\.md$" || true)
+            if [ -z "$readme_changed" ]; then
+              missing+=("$pkg")
+              echo "::error file=${pkg}/README.md::Public source changed in ${pkg} but README.md was not updated. Files: $(printf '%s ' $surface_changed). Add [skip-docs] to the PR title/body to bypass when the change is not user-visible."
+            fi
+          done
+
+          if [ "${#missing[@]}" -gt 0 ]; then
+            echo ""
+            echo "Docs drift check failed for: ${missing[*]}"
+            exit 1
+          fi
+
+          echo "Docs drift check passed."
