@@ -12,6 +12,25 @@ The intent and goal of open sourcing this project is to increase the contributor
 
 Please take a look at the [README](README.md) for setup instructions and links to the official Marketing Cloud SDK integration guides.
 
+## Local development setup
+
+The JS toolchain is installed via `yarn install`. The Android and iOS lint/format steps (`yarn lint:native`, `yarn format:android`, `yarn format:ios`, and the `pre-commit` hook) additionally shell out to native binaries that are **not** installed by npm:
+
+| Binary | Purpose |
+|---|---|
+| `ktlint` | Kotlin lint/format for `packages/*/android/src/**/*.kt` |
+| `swiftformat` | Swift lint/format for `packages/*/ios/**/*.swift` |
+| `clang-format` | Obj-C / Obj-C++ formatting for `packages/*/ios/**/*.{h,m,mm}` |
+
+Install them once per machine:
+
+```bash
+# macOS / Linuxbrew
+brew install ktlint swiftformat clang-format
+```
+
+On Linux without Homebrew, install the equivalent packages via your distro (`apt`, `dnf`, `pacman`, or `asdf` plugins). `pre-commit` and `yarn lint:native` run a preflight check (`yarn check:native-tools`) that will print the exact install hint if any are missing.
+
 # Issues, requests & ideas
 
 Use GitHub Issues page to submit issues, enhancement requests and discuss ideas.

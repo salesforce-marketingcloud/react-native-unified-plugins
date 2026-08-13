@@ -1,6 +1,6 @@
 {
   "name": "@sfmc/react-native-iam",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "In-App Messaging for the Salesforce Marketing Cloud Unified Mobile SDK",
   "author": "Salesforce Marketing Cloud",
   "license": "BSD-3-Clause",
@@ -22,7 +22,7 @@
     }
   },
   "dependencies": {
-    "@sfmc/react-native-sfmc-core": "1.0.1"
+    "@sfmc/react-native-sfmc-core": "1.1.0"
   },
   "peerDependencies": {
     "react": "^19.0.0",

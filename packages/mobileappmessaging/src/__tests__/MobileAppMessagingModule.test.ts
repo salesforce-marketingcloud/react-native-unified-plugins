@@ -4,6 +4,8 @@
  * BSD-3-Clause
  */
 
+export {};
+
 jest.mock("../NativeMAMModule", () => ({
   __esModule: true,
   default: {

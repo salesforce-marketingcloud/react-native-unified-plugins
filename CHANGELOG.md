@@ -8,9 +8,9 @@ Packages that had no user-visible change in a given release are omitted (their
 source may still have moved for cross-cutting reasons — org rename, podspec
 relocation, autolinking config — without a version bump or republish).
 
-## Unreleased
+## MCET_264 - current
 
-### `@sfmc/react-native-marketingcloudsdk` — 2.0.0 (pending)
+### `@sfmc/react-native-marketingcloudsdk` — 1.1.0
 
 - Added `enableLocation()` / `disableLocation()` / `isLocationEnabled()` — geofence and coordinate watching master toggle (iOS `MarketingCloudSdk.setLocationEnabled`, Android `RegionMessageManager.enableGeofenceMessaging`).
 - Added `startWatchingLocation()` / `stopWatchingLocation()` / `isWatchingLocation()` for coordinate watching.
@@ -19,40 +19,43 @@ relocation, autolinking config — without a version bump or republish).
 - Added `setSignedString(token | null)` / `getSignedString()` for signed-string registration security.
 - **BREAKING:** Removed deprecated `getAttributes()` and `getContactKey()` from the MC module. Migrate to `SFMCSdkApi.getAttributes()` and `SFMCSdkApi.getProfileId()` in `@sfmc/react-native-sfmc-core`.
 
-### `@sfmc/react-native-iam` — pending
+### `@sfmc/react-native-iam` — 1.1.0
 
 - Added `setFont(name)` and `setStatusBarColor(color)` for in-app message chrome customization.
 - Added `setInAppMessageDecisionHandler(handler | null)` — defer-then-reshow model that lets the app veto messages after native `shouldShowMessage` has already fired. Handlers that throw or reject fail closed (message suppressed).
 - Fixed: "app decides display" toggle now persists across tab switches and app launches.
 - Fixed: corrected `InAppMessage` import in the Android module.
 
-### `@sfmc/react-native-push` — pending
+### `@sfmc/react-native-push` — 1.1.0
 
 - Added missing Push APIs (see package `README.md`).
 - Fixed broken push URL handling in the Android example app.
 
-### `@sfmc/react-native-mobileappmessaging` — pending
+### `@sfmc/react-native-mobileappmessaging` — 1.1.0
 
-_Internal-only changes (Jest test coverage). No user-visible surface change; no republish planned._
+- Fixed: `setRegistrationCallback()` is now idempotent — repeat calls no longer stack duplicate listeners on the native SDK's `RegistrationManager` (Android).
+- Fixed: added Android consumer ProGuard rules so R8/ProGuard-minified consumer apps no longer strip SDK classes at runtime.
 
-### `@sfmc/react-native-sfmc-core` — pending
+### `@sfmc/react-native-sfmc-core` — 1.1.0
 
-_Internal-only changes (Jest test coverage, event serializer cleanup). No user-visible surface change; no republish planned._
+- **BREAKING:** Removed unused event types (`EventManager`, `ApplicationEvent`, `IdentityEvent`, `BillingEvent`) from the `SFMCEvent` union and the native Android event serializer. Migrate to `CustomEvent`, `EngagementEvent`, or `SystemEvent`.
+- Fixed: iOS `setLogging()` no longer silently suppresses all SDK output — the default log outputter is now installed for any active log level.
+- Fixed: added Android consumer ProGuard rules so R8/ProGuard-minified consumer apps no longer strip SDK classes at runtime.
 
 ---
 
-## Release `1.0.0.262.1` — 2026-05-29
+## MCET_262.1
 
 ### `@sfmc/react-native-sfmc-core` — 1.0.1
 
 - Moved podspec out of `ios/` to package root so React Native autolinking discovers it.
 - Renamed npm org from `salesforce-mc` to `sfmc` (published under `@sfmc/react-native-sfmc-core`).
 
-_Other packages unchanged from `1.0.0.262.0` — their podspecs and org name moved in source, but no version bump or republish._
+_Other packages unchanged from `MCET_262` — their podspecs and org name moved in source, but no version bump or republish._
 
 ---
 
-## Release `1.0.0.262.0` — 2026-05-27
+## MCET_262
 
 Initial hybrid plugins 1.0.0 release. Five packages published to npm together
 under the new `@sfmc` scope, built for React Native 0.85.1 New Architecture

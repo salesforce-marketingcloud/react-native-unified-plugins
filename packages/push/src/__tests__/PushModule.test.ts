@@ -4,6 +4,8 @@
  * BSD-3-Clause
  */
 
+export {};
+
 jest.mock("../NativeSFMCPushModule", () => ({
   __esModule: true,
   default: {
