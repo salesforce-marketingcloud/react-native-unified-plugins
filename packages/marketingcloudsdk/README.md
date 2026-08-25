@@ -38,6 +38,9 @@ const unreadCount = await mc.getUnreadMessageCount();
 mc.markMessageRead('message-id');
 
 // Tags + attributes
+// The SDK auto-applies a `React` tag on first `requestSdk()` per app process for
+// integration segmentation. Call `mc.removeTag('React')` to opt out; it will not
+// be re-added within the same process.
 mc.addTag('beta-tester');
 const tags = await mc.getTags();
 

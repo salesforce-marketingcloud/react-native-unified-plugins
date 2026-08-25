@@ -43,6 +43,7 @@ import com.salesforce.marketingcloud.registration.Registration
 import com.salesforce.marketingcloud.registration.RegistrationManager
 import com.salesforce.mc.sfmccore.BridgeQueue
 import java.lang.ref.WeakReference
+import java.util.concurrent.atomic.AtomicBoolean
 
 @ReactModule(name = MCModule.NAME)
 class MCModule(reactContext: ReactApplicationContext) :
@@ -51,6 +52,11 @@ class MCModule(reactContext: ReactApplicationContext) :
     companion object {
         const val NAME = "MCModule"
         private const val TAG = "MCModule"
+
+        // Process-wide guard so the default "React" tag is applied at most once per app
+        // lifetime, regardless of how many times JS calls requestSdk. Callers can remove it
+        // via mc.removeTag('React'); we won't re-add within the same process.
+        private val reactTagAdded = AtomicBoolean(false)
     }
 
     private var registrationListener: RegistrationManager.RegistrationEventListener? = null
@@ -71,7 +77,12 @@ class MCModule(reactContext: ReactApplicationContext) :
 
     @ReactMethod
     override fun requestMcSdk(promise: Promise) {
-        MarketingCloudSdk.requestSdk { promise.resolve(null) }
+        MarketingCloudSdk.requestSdk { sdk ->
+            if (reactTagAdded.compareAndSet(false, true)) {
+                sdk.getRegistrationManager().edit().addTag("React").commit()
+            }
+            promise.resolve(null)
+        }
     }
 
     @ReactMethod

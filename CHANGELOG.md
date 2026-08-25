@@ -12,6 +12,7 @@ relocation, autolinking config — without a version bump or republish).
 
 ### `@sfmc/react-native-marketingcloudsdk` — 1.1.0
 
+- Added: SDK now applies a default `React` tag on first `requestSdk()` per app process for integration segmentation. Call `mc.removeTag('React')` to opt out; it will not be re-added within the same process.
 - Added `enableLocation()` / `disableLocation()` / `isLocationEnabled()` — geofence and coordinate watching master toggle (iOS `MarketingCloudSdk.setLocationEnabled`, Android `RegionMessageManager.enableGeofenceMessaging`).
 - Added `startWatchingLocation()` / `stopWatchingLocation()` / `isWatchingLocation()` for coordinate watching.
 - Added `getLastKnownLocation()` returning the SDK's last known coordinate, or `null` if location has never resolved.

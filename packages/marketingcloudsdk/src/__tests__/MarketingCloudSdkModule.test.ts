@@ -81,6 +81,11 @@ const stubMessage = (overrides: Partial<InboxMessage> = {}): InboxMessage =>
   ({ id: "m-1", ...overrides }) as InboxMessage;
 
 describe("MarketingCloudSdkModule", () => {
+  // The native side auto-applies a default "React" tag on first requestMcSdk
+  // (Android: AtomicBoolean in MCModule.kt; iOS: dispatch_once in MCModule.mm).
+  // Native (Kotlin/ObjC) test targets do not exist in this package, so that
+  // behavior is verified by inspection + on-device runs. The JS surface tests
+  // below only cover forwarding and the removeTag('React') opt-out contract.
   describe("requestSdk", () => {
     it("awaits requestMcSdk on first invocation", async () => {
       const { MarketingCloudSdkModule, Native } = loadModule();
@@ -94,6 +99,13 @@ describe("MarketingCloudSdkModule", () => {
       const b = await MarketingCloudSdkModule.requestSdk();
       expect(a).toBe(b);
       expect(Native.requestMcSdk).toHaveBeenCalledTimes(1);
+    });
+
+    it("forwards removeTag('React') for the documented opt-out", async () => {
+      const { MarketingCloudSdkModule, Native } = loadModule();
+      const api = await MarketingCloudSdkModule.requestSdk();
+      api.removeTag("React");
+      expect(Native.removeTag).toHaveBeenCalledWith("React");
     });
   });
 

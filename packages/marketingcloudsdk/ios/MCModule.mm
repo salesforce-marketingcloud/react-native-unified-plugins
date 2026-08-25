@@ -25,12 +25,12 @@
 // ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 // POSSIBILITY OF SUCH DAMAGE.
 
+#import <MarketingCloudSDK/MarketingCloudSDK-Swift.h>
 #import <React/RCTBridgeModule.h>
 #import <React/RCTEventEmitter.h>
-#import <ReactCommon/RCTTurboModule.h>
 #import <ReactCommon/RCTInteropTurboModule.h>
+#import <ReactCommon/RCTTurboModule.h>
 #import <SFMCSDK/SFMCSDK-Swift.h>
-#import <MarketingCloudSDK/MarketingCloudSDK-Swift.h>
 #import "InboxUtility.h"
 
 static NSString *const kEventRegistration = @"sfmc_mc_registration";
@@ -43,7 +43,7 @@ static NSString *const kEventRegistration = @"sfmc_mc_registration";
 RCT_EXPORT_MODULE(MCModule);
 
 - (NSArray<NSString *> *)supportedEvents {
-    return @[kEventRegistration];
+    return @[ kEventRegistration ];
 }
 
 - (std::shared_ptr<facebook::react::TurboModule>)getTurboModule:
@@ -52,154 +52,169 @@ RCT_EXPORT_MODULE(MCModule);
 }
 
 // RCTEventEmitter no-op stubs — required for TS spec parity even though no events are emitted.
-RCT_EXPORT_METHOD(addListener:(NSString *)eventName) {}
-RCT_EXPORT_METHOD(removeListeners:(double)count) {}
+RCT_EXPORT_METHOD(addListener : (NSString *)eventName) {}
+RCT_EXPORT_METHOD(removeListeners : (double)count) {}
 
 // ── SDK ready ───────────────────────────────────────────────────────────────────
 
-RCT_EXPORT_METHOD(requestMcSdk:(RCTPromiseResolveBlock)resolve
-                  rejecter:(RCTPromiseRejectBlock)reject) {
+RCT_EXPORT_METHOD(requestMcSdk : (RCTPromiseResolveBlock)resolve rejecter : (RCTPromiseRejectBlock)
+                      reject) {
     [SFMarketingCloudSdk requestSdk:^(id<MarketingCloudSdkInterface> _Nullable mc) {
-        resolve(nil);
+      // Process-wide guard so the default "React" tag is applied at most once per app
+      // lifetime. If a caller later removes it via mc.removeTag('React'), we won't re-add
+      // it within the same process. Skip when `mc` is nil so a later successful callback
+      // still gets the chance to apply the tag — dispatch_once consumes its flag even when
+      // the block is a no-op, so guarding here prevents "lose the tag forever" on a
+      // transient init failure.
+      if (mc != nil) {
+          static dispatch_once_t reactTagOnce;
+          dispatch_once(&reactTagOnce, ^{
+            [mc addTag:@"React"];
+          });
+      }
+      resolve(nil);
     }];
 }
 
 // ── Inbox — refresh ─────────────────────────────────────────────────────────────
 // Discovered selector: refreshMessages (BOOL return).
 
-RCT_EXPORT_METHOD(refreshInbox:(RCTPromiseResolveBlock)resolve
-                  rejecter:(RCTPromiseRejectBlock)reject) {
+RCT_EXPORT_METHOD(refreshInbox : (RCTPromiseResolveBlock)resolve rejecter : (RCTPromiseRejectBlock)
+                      reject) {
     [SFMarketingCloudSdk requestSdk:^(id<MarketingCloudSdkInterface> _Nullable mc) {
-        resolve(@([mc refreshMessages]));
+      resolve(@([mc refreshMessages]));
     }];
 }
 
 // ── Inbox — message lists ───────────────────────────────────────────────────────
 
-RCT_EXPORT_METHOD(getAllMessages:(RCTPromiseResolveBlock)resolve
-                  rejecter:(RCTPromiseRejectBlock)reject) {
+RCT_EXPORT_METHOD(getAllMessages : (RCTPromiseResolveBlock)
+                      resolve rejecter : (RCTPromiseRejectBlock)reject) {
     [SFMarketingCloudSdk requestSdk:^(id<MarketingCloudSdkInterface> _Nullable mc) {
-        resolve([InboxUtility processInboxMessages:[mc getAllMessages] ?: @[]]);
+      resolve([InboxUtility processInboxMessages:[mc getAllMessages] ?: @[]]);
     }];
 }
 
-RCT_EXPORT_METHOD(getUnreadMessages:(RCTPromiseResolveBlock)resolve
-                  rejecter:(RCTPromiseRejectBlock)reject) {
+RCT_EXPORT_METHOD(getUnreadMessages : (RCTPromiseResolveBlock)
+                      resolve rejecter : (RCTPromiseRejectBlock)reject) {
     [SFMarketingCloudSdk requestSdk:^(id<MarketingCloudSdkInterface> _Nullable mc) {
-        resolve([InboxUtility processInboxMessages:[mc getUnreadMessages] ?: @[]]);
+      resolve([InboxUtility processInboxMessages:[mc getUnreadMessages] ?: @[]]);
     }];
 }
 
-RCT_EXPORT_METHOD(getReadMessages:(RCTPromiseResolveBlock)resolve
-                  rejecter:(RCTPromiseRejectBlock)reject) {
+RCT_EXPORT_METHOD(getReadMessages : (RCTPromiseResolveBlock)
+                      resolve rejecter : (RCTPromiseRejectBlock)reject) {
     [SFMarketingCloudSdk requestSdk:^(id<MarketingCloudSdkInterface> _Nullable mc) {
-        resolve([InboxUtility processInboxMessages:[mc getReadMessages] ?: @[]]);
+      resolve([InboxUtility processInboxMessages:[mc getReadMessages] ?: @[]]);
     }];
 }
 
-RCT_EXPORT_METHOD(getDeletedMessages:(RCTPromiseResolveBlock)resolve
-                  rejecter:(RCTPromiseRejectBlock)reject) {
+RCT_EXPORT_METHOD(getDeletedMessages : (RCTPromiseResolveBlock)
+                      resolve rejecter : (RCTPromiseRejectBlock)reject) {
     [SFMarketingCloudSdk requestSdk:^(id<MarketingCloudSdkInterface> _Nullable mc) {
-        resolve([InboxUtility processInboxMessages:[mc getDeletedMessages] ?: @[]]);
+      resolve([InboxUtility processInboxMessages:[mc getDeletedMessages] ?: @[]]);
     }];
 }
 
 // ── Inbox — counts ──────────────────────────────────────────────────────────────
 
-RCT_EXPORT_METHOD(getMessageCount:(RCTPromiseResolveBlock)resolve
-                  rejecter:(RCTPromiseRejectBlock)reject) {
+RCT_EXPORT_METHOD(getMessageCount : (RCTPromiseResolveBlock)
+                      resolve rejecter : (RCTPromiseRejectBlock)reject) {
     [SFMarketingCloudSdk requestSdk:^(id<MarketingCloudSdkInterface> _Nullable mc) {
-        resolve(@([mc getAllMessagesCount]));
+      resolve(@([mc getAllMessagesCount]));
     }];
 }
 
-RCT_EXPORT_METHOD(getUnreadMessageCount:(RCTPromiseResolveBlock)resolve
-                  rejecter:(RCTPromiseRejectBlock)reject) {
+RCT_EXPORT_METHOD(getUnreadMessageCount : (RCTPromiseResolveBlock)
+                      resolve rejecter : (RCTPromiseRejectBlock)reject) {
     [SFMarketingCloudSdk requestSdk:^(id<MarketingCloudSdkInterface> _Nullable mc) {
-        resolve(@([mc getUnreadMessagesCount]));
+      resolve(@([mc getUnreadMessagesCount]));
     }];
 }
 
-RCT_EXPORT_METHOD(getReadMessageCount:(RCTPromiseResolveBlock)resolve
-                  rejecter:(RCTPromiseRejectBlock)reject) {
+RCT_EXPORT_METHOD(getReadMessageCount : (RCTPromiseResolveBlock)
+                      resolve rejecter : (RCTPromiseRejectBlock)reject) {
     [SFMarketingCloudSdk requestSdk:^(id<MarketingCloudSdkInterface> _Nullable mc) {
-        resolve(@([mc getReadMessagesCount]));
+      resolve(@([mc getReadMessagesCount]));
     }];
 }
 
-RCT_EXPORT_METHOD(getDeletedMessageCount:(RCTPromiseResolveBlock)resolve
-                  rejecter:(RCTPromiseRejectBlock)reject) {
+RCT_EXPORT_METHOD(getDeletedMessageCount : (RCTPromiseResolveBlock)
+                      resolve rejecter : (RCTPromiseRejectBlock)reject) {
     [SFMarketingCloudSdk requestSdk:^(id<MarketingCloudSdkInterface> _Nullable mc) {
-        resolve(@([mc getDeletedMessagesCount]));
+      resolve(@([mc getDeletedMessagesCount]));
     }];
 }
 
 // ── Inbox — mark operations ─────────────────────────────────────────────────────
-// Discovered selectors: markMessageWithIdReadWithMessageId: / markMessageWithIdDeletedWithMessageId:
-// (by-id variants — preferred over the dict-taking selectors).
+// Discovered selectors: markMessageWithIdReadWithMessageId: /
+// markMessageWithIdDeletedWithMessageId: (by-id variants — preferred over the dict-taking
+// selectors).
 
-RCT_EXPORT_METHOD(markMessageRead:(NSString *)messageId) {
+RCT_EXPORT_METHOD(markMessageRead : (NSString *)messageId) {
     [SFMarketingCloudSdk requestSdk:^(id<MarketingCloudSdkInterface> _Nullable mc) {
-        [mc markMessageWithIdReadWithMessageId:messageId];
+      [mc markMessageWithIdReadWithMessageId:messageId];
     }];
 }
 
-RCT_EXPORT_METHOD(markMessageDeleted:(NSString *)messageId) {
+RCT_EXPORT_METHOD(markMessageDeleted : (NSString *)messageId) {
     [SFMarketingCloudSdk requestSdk:^(id<MarketingCloudSdkInterface> _Nullable mc) {
-        [mc markMessageWithIdDeletedWithMessageId:messageId];
+      [mc markMessageWithIdDeletedWithMessageId:messageId];
     }];
 }
 
 RCT_EXPORT_METHOD(markAllMessagesRead) {
     [SFMarketingCloudSdk requestSdk:^(id<MarketingCloudSdkInterface> _Nullable mc) {
-        [mc markAllMessagesRead];
+      [mc markAllMessagesRead];
     }];
 }
 
 RCT_EXPORT_METHOD(markAllMessagesDeleted) {
     [SFMarketingCloudSdk requestSdk:^(id<MarketingCloudSdkInterface> _Nullable mc) {
-        [mc markAllMessagesDeleted];
+      [mc markAllMessagesDeleted];
     }];
 }
 
-RCT_EXPORT_METHOD(trackInboxMessageOpened:(NSDictionary *)message) {
+RCT_EXPORT_METHOD(trackInboxMessageOpened : (NSDictionary *)message) {
     [SFMarketingCloudSdk requestSdk:^(id<MarketingCloudSdkInterface> _Nullable mc) {
-        if (message) [mc trackMessageOpened:message];
+      if (message) [mc trackMessageOpened:message];
     }];
 }
 
 // ── Tags ────────────────────────────────────────────────────────────────────────
 // Discovery: addTag:, addTags:, removeTag:, tags. NO `removeTags:` plural — loop locally.
 
-RCT_EXPORT_METHOD(addTag:(NSString *)tag) {
+RCT_EXPORT_METHOD(addTag : (NSString *)tag) {
     [SFMarketingCloudSdk requestSdk:^(id<MarketingCloudSdkInterface> _Nullable mc) {
-        [mc addTag:tag];
+      [mc addTag:tag];
     }];
 }
 
-RCT_EXPORT_METHOD(addTags:(NSArray<NSString *> *)tags) {
+RCT_EXPORT_METHOD(addTags : (NSArray<NSString *> *)tags) {
     [SFMarketingCloudSdk requestSdk:^(id<MarketingCloudSdkInterface> _Nullable mc) {
-        [mc addTags:tags];
+      [mc addTags:tags];
     }];
 }
 
-RCT_EXPORT_METHOD(removeTag:(NSString *)tag) {
+RCT_EXPORT_METHOD(removeTag : (NSString *)tag) {
     [SFMarketingCloudSdk requestSdk:^(id<MarketingCloudSdkInterface> _Nullable mc) {
-        [mc removeTag:tag];
+      [mc removeTag:tag];
     }];
 }
 
 // removeTags: no plural removeTags: selector on iOS SDK — loop over removeTag:.
-RCT_EXPORT_METHOD(removeTags:(NSArray<NSString *> *)tags) {
+RCT_EXPORT_METHOD(removeTags : (NSArray<NSString *> *)tags) {
     [SFMarketingCloudSdk requestSdk:^(id<MarketingCloudSdkInterface> _Nullable mc) {
-        for (NSString *tag in tags) { [mc removeTag:tag]; }
+      for (NSString *tag in tags) {
+          [mc removeTag:tag];
+      }
     }];
 }
 
-RCT_EXPORT_METHOD(getTags:(RCTPromiseResolveBlock)resolve
-                  rejecter:(RCTPromiseRejectBlock)reject) {
+RCT_EXPORT_METHOD(getTags : (RCTPromiseResolveBlock)resolve rejecter : (RCTPromiseRejectBlock)
+                      reject) {
     [SFMarketingCloudSdk requestSdk:^(id<MarketingCloudSdkInterface> _Nullable mc) {
-        resolve([[mc tags] allObjects] ?: @[]);
+      resolve([[mc tags] allObjects] ?: @[]);
     }];
 }
 
@@ -207,20 +222,20 @@ RCT_EXPORT_METHOD(getTags:(RCTPromiseResolveBlock)resolve
 
 RCT_EXPORT_METHOD(enablePiAnalytics) {
     [SFMarketingCloudSdk requestSdk:^(id<MarketingCloudSdkInterface> _Nullable mc) {
-        [mc setPiAnalyticsEnabled:YES];
+      [mc setPiAnalyticsEnabled:YES];
     }];
 }
 
 RCT_EXPORT_METHOD(disablePiAnalytics) {
     [SFMarketingCloudSdk requestSdk:^(id<MarketingCloudSdkInterface> _Nullable mc) {
-        [mc setPiAnalyticsEnabled:NO];
+      [mc setPiAnalyticsEnabled:NO];
     }];
 }
 
-RCT_EXPORT_METHOD(isPiAnalyticsEnabled:(RCTPromiseResolveBlock)resolve
-                  rejecter:(RCTPromiseRejectBlock)reject) {
+RCT_EXPORT_METHOD(isPiAnalyticsEnabled : (RCTPromiseResolveBlock)
+                      resolve rejecter : (RCTPromiseRejectBlock)reject) {
     [SFMarketingCloudSdk requestSdk:^(id<MarketingCloudSdkInterface> _Nullable mc) {
-        resolve(@([mc isPiAnalyticsEnabled]));
+      resolve(@([mc isPiAnalyticsEnabled]));
     }];
 }
 
@@ -228,30 +243,30 @@ RCT_EXPORT_METHOD(isPiAnalyticsEnabled:(RCTPromiseResolveBlock)resolve
 
 RCT_EXPORT_METHOD(enableAnalytics) {
     [SFMarketingCloudSdk requestSdk:^(id<MarketingCloudSdkInterface> _Nullable mc) {
-        [mc setAnalyticsEnabled:YES];
+      [mc setAnalyticsEnabled:YES];
     }];
 }
 
 RCT_EXPORT_METHOD(disableAnalytics) {
     [SFMarketingCloudSdk requestSdk:^(id<MarketingCloudSdkInterface> _Nullable mc) {
-        [mc setAnalyticsEnabled:NO];
+      [mc setAnalyticsEnabled:NO];
     }];
 }
 
-RCT_EXPORT_METHOD(isAnalyticsEnabled:(RCTPromiseResolveBlock)resolve
-                  rejecter:(RCTPromiseRejectBlock)reject) {
+RCT_EXPORT_METHOD(isAnalyticsEnabled : (RCTPromiseResolveBlock)
+                      resolve rejecter : (RCTPromiseRejectBlock)reject) {
     [SFMarketingCloudSdk requestSdk:^(id<MarketingCloudSdkInterface> _Nullable mc) {
-        resolve(@([mc isAnalyticsEnabled]));
+      resolve(@([mc isAnalyticsEnabled]));
     }];
 }
 
 // ── Device ──────────────────────────────────────────────────────────────────────
 // Discovered instance methods on MarketingCloudSdkInterface: deviceIdentifier.
 
-RCT_EXPORT_METHOD(getDeviceId:(RCTPromiseResolveBlock)resolve
-                  rejecter:(RCTPromiseRejectBlock)reject) {
+RCT_EXPORT_METHOD(getDeviceId : (RCTPromiseResolveBlock)resolve rejecter : (RCTPromiseRejectBlock)
+                      reject) {
     [SFMarketingCloudSdk requestSdk:^(id<MarketingCloudSdkInterface> _Nullable mc) {
-        resolve([mc deviceIdentifier]);
+      resolve([mc deviceIdentifier]);
     }];
 }
 
@@ -262,26 +277,25 @@ RCT_EXPORT_METHOD(getDeviceId:(RCTPromiseResolveBlock)resolve
 // silently, which would make SDK-unavailable indistinguishable from a legitimate
 // `false`/`null` result.
 
-RCT_EXPORT_METHOD(setSignedString:(NSString *)signedString
-                  resolver:(RCTPromiseResolveBlock)resolve
-                  rejecter:(RCTPromiseRejectBlock)reject) {
+RCT_EXPORT_METHOD(setSignedString : (NSString *)signedString resolver : (RCTPromiseResolveBlock)
+                      resolve rejecter : (RCTPromiseRejectBlock)reject) {
     [SFMarketingCloudSdk requestSdk:^(id<MarketingCloudSdkInterface> _Nullable mc) {
-        if (!mc) {
-            reject(@"sdk_unavailable", @"MarketingCloud SDK is not initialized", nil);
-            return;
-        }
-        resolve(@([mc setSignedString:signedString]));
+      if (!mc) {
+          reject(@"sdk_unavailable", @"MarketingCloud SDK is not initialized", nil);
+          return;
+      }
+      resolve(@([mc setSignedString:signedString]));
     }];
 }
 
-RCT_EXPORT_METHOD(getSignedString:(RCTPromiseResolveBlock)resolve
-                  rejecter:(RCTPromiseRejectBlock)reject) {
+RCT_EXPORT_METHOD(getSignedString : (RCTPromiseResolveBlock)
+                      resolve rejecter : (RCTPromiseRejectBlock)reject) {
     [SFMarketingCloudSdk requestSdk:^(id<MarketingCloudSdkInterface> _Nullable mc) {
-        if (!mc) {
-            reject(@"sdk_unavailable", @"MarketingCloud SDK is not initialized", nil);
-            return;
-        }
-        resolve([mc signedString]);
+      if (!mc) {
+          reject(@"sdk_unavailable", @"MarketingCloud SDK is not initialized", nil);
+          return;
+      }
+      resolve([mc signedString]);
     }];
 }
 
@@ -291,15 +305,15 @@ RCT_EXPORT_METHOD(getSignedString:(RCTPromiseResolveBlock)resolve
 RCT_EXPORT_METHOD(setRegistrationCallback) {
     __weak __typeof(self) weakSelf = self;
     [SFMarketingCloudSdk requestSdk:^(id<MarketingCloudSdkInterface> _Nullable mc) {
-        [mc setRegistrationCallback:^(NSDictionary * _Nonnull registration) {
-            [weakSelf sendEventWithName:kEventRegistration body:registration];
-        }];
+      [mc setRegistrationCallback:^(NSDictionary *_Nonnull registration) {
+        [weakSelf sendEventWithName:kEventRegistration body:registration];
+      }];
     }];
 }
 
 RCT_EXPORT_METHOD(unsetRegistrationCallback) {
     [SFMarketingCloudSdk requestSdk:^(id<MarketingCloudSdkInterface> _Nullable mc) {
-        [mc unsetRegistrationCallback];
+      [mc unsetRegistrationCallback];
     }];
 }
 
@@ -318,20 +332,20 @@ RCT_EXPORT_METHOD(unregisterInboxResponseListener) {}
 // the SDK keeps invoking the dead block forever — clear it here.
 - (void)invalidate {
     [SFMarketingCloudSdk requestSdk:^(id<MarketingCloudSdkInterface> _Nullable mc) {
-        [mc unsetRegistrationCallback];
+      [mc unsetRegistrationCallback];
     }];
     [super invalidate];
 }
 
 RCT_EXPORT_METHOD(enableLogging) {
     [SFMarketingCloudSdk requestSdk:^(id<MarketingCloudSdkInterface> _Nullable mc) {
-        [mc setDebugLoggingEnabled:YES];
+      [mc setDebugLoggingEnabled:YES];
     }];
 }
 
 RCT_EXPORT_METHOD(disableLogging) {
     [SFMarketingCloudSdk requestSdk:^(id<MarketingCloudSdkInterface> _Nullable mc) {
-        [mc setDebugLoggingEnabled:NO];
+      [mc setDebugLoggingEnabled:NO];
     }];
 }
 
@@ -341,46 +355,46 @@ RCT_EXPORT_METHOD(disableLogging) {
 
 RCT_EXPORT_METHOD(enableLocation) {
     [SFMarketingCloudSdk requestSdk:^(id<MarketingCloudSdkInterface> _Nullable mc) {
-        [mc setLocationEnabled:YES];
+      [mc setLocationEnabled:YES];
     }];
 }
 
 RCT_EXPORT_METHOD(disableLocation) {
     [SFMarketingCloudSdk requestSdk:^(id<MarketingCloudSdkInterface> _Nullable mc) {
-        [mc setLocationEnabled:NO];
+      [mc setLocationEnabled:NO];
     }];
 }
 
-RCT_EXPORT_METHOD(isLocationEnabled:(RCTPromiseResolveBlock)resolve
-                  rejecter:(RCTPromiseRejectBlock)reject) {
+RCT_EXPORT_METHOD(isLocationEnabled : (RCTPromiseResolveBlock)
+                      resolve rejecter : (RCTPromiseRejectBlock)reject) {
     [SFMarketingCloudSdk requestSdk:^(id<MarketingCloudSdkInterface> _Nullable mc) {
-        resolve(@([mc isLocationEnabled]));
+      resolve(@([mc isLocationEnabled]));
     }];
 }
 
 RCT_EXPORT_METHOD(startWatchingLocation) {
     [SFMarketingCloudSdk requestSdk:^(id<MarketingCloudSdkInterface> _Nullable mc) {
-        [mc startWatchingLocation];
+      [mc startWatchingLocation];
     }];
 }
 
 RCT_EXPORT_METHOD(stopWatchingLocation) {
     [SFMarketingCloudSdk requestSdk:^(id<MarketingCloudSdkInterface> _Nullable mc) {
-        [mc stopWatchingLocation];
+      [mc stopWatchingLocation];
     }];
 }
 
-RCT_EXPORT_METHOD(isWatchingLocation:(RCTPromiseResolveBlock)resolve
-                  rejecter:(RCTPromiseRejectBlock)reject) {
+RCT_EXPORT_METHOD(isWatchingLocation : (RCTPromiseResolveBlock)
+                      resolve rejecter : (RCTPromiseRejectBlock)reject) {
     [SFMarketingCloudSdk requestSdk:^(id<MarketingCloudSdkInterface> _Nullable mc) {
-        resolve(@([mc watchingLocation]));
+      resolve(@([mc watchingLocation]));
     }];
 }
 
-RCT_EXPORT_METHOD(getLastKnownLocation:(RCTPromiseResolveBlock)resolve
-                  rejecter:(RCTPromiseRejectBlock)reject) {
+RCT_EXPORT_METHOD(getLastKnownLocation : (RCTPromiseResolveBlock)
+                      resolve rejecter : (RCTPromiseRejectBlock)reject) {
     [SFMarketingCloudSdk requestSdk:^(id<MarketingCloudSdkInterface> _Nullable mc) {
-        resolve([mc lastKnownLocation]);
+      resolve([mc lastKnownLocation]);
     }];
 }
 
@@ -398,8 +412,8 @@ RCT_EXPORT_METHOD(disableProximityMessaging) {
     // no-op on iOS
 }
 
-RCT_EXPORT_METHOD(isProximityMessagingEnabled:(RCTPromiseResolveBlock)resolve
-                  rejecter:(RCTPromiseRejectBlock)reject) {
+RCT_EXPORT_METHOD(isProximityMessagingEnabled : (RCTPromiseResolveBlock)
+                      resolve rejecter : (RCTPromiseRejectBlock)reject) {
     resolve(@NO);
 }
 
