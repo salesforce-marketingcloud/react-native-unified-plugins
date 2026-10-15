@@ -26,11 +26,12 @@
 // POSSIBILITY OF SUCH DAMAGE.
 
 #import <MarketingCloudSDK/MarketingCloudSDK-Swift.h>
+#import <SFMCSDK/SFMCSDK-Swift.h>
+
 #import <React/RCTBridgeModule.h>
 #import <React/RCTEventEmitter.h>
 #import <ReactCommon/RCTInteropTurboModule.h>
 #import <ReactCommon/RCTTurboModule.h>
-#import <SFMCSDK/SFMCSDK-Swift.h>
 #import "InboxUtility.h"
 
 static NSString *const kEventRegistration = @"sfmc_mc_registration";
